@@ -1,0 +1,270 @@
+/* Kelas page styles (extends shared admin UI)
+	 Depends on dashboard.css + siswa.css for base layout, modal, buttons, table utils.
+*/
+
+.kelas-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.quick-add {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 10px 0 16px;
+}
+
+.quick-label {
+	font-size: 12px;
+	opacity: 0.8;
+}
+
+.quick-chip {
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	background: rgba(255, 255, 255, 0.75);
+	color: inherit;
+	padding: 6px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+[data-theme='dark'] .quick-chip {
+	border-color: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.kelas-grid {
+	display: grid;
+	grid-template-columns: repeat(12, 1fr);
+	gap: 14px;
+}
+
+.kelas-empty {
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.85);
+	border-radius: 14px;
+	padding: 26px 18px;
+}
+
+[data-theme='dark'] .kelas-empty {
+	border-color: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.kelas-empty .empty-wrap {
+	display: grid;
+	place-items: center;
+	gap: 10px;
+	text-align: center;
+	opacity: 0.9;
+}
+
+.kelas-card {
+	grid-column: span 12;
+	position: relative;
+	border-radius: 14px;
+	padding: 14px 14px 12px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.9);
+	overflow: hidden;
+}
+
+[data-theme='dark'] .kelas-card {
+	border-color: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.kelas-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	opacity: 0.12;
+	pointer-events: none;
+	background: linear-gradient(135deg, rgba(0, 0, 0, 0.18), transparent 55%);
+}
+
+[data-theme='dark'] .kelas-card::before {
+	opacity: 0.18;
+}
+
+.kelas-card.kelas-card-blue { --kelas-accent: #2563eb; }
+.kelas-card.kelas-card-green { --kelas-accent: #16a34a; }
+.kelas-card.kelas-card-purple { --kelas-accent: #7c3aed; }
+.kelas-card.kelas-card-orange { --kelas-accent: #ea580c; }
+.kelas-card.kelas-card-teal { --kelas-accent: #0f766e; }
+.kelas-card.kelas-card-pink { --kelas-accent: #db2777; }
+
+/* optional extra colors used by PHP palette */
+.kelas-card.kelas-card-cyan { --kelas-accent: #0891b2; }
+.kelas-card.kelas-card-amber { --kelas-accent: #d97706; }
+
+.kelas-card-top {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.kelas-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	color: #fff;
+	background: var(--kelas-accent, #2563eb);
+	flex: 0 0 auto;
+}
+
+/* keep compatibility with existing HTML class names */
+.kelas-icon.kelas-icon-blue,
+.kelas-icon.kelas-icon-green,
+.kelas-icon.kelas-icon-purple,
+.kelas-icon.kelas-icon-orange,
+.kelas-icon.kelas-icon-teal,
+.kelas-icon.kelas-icon-pink,
+.kelas-icon.kelas-icon-cyan,
+.kelas-icon.kelas-icon-amber {
+	background: var(--kelas-accent, #2563eb);
+}
+
+.kelas-name {
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.2;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.btn-edit-sm,
+.btn-delete-sm {
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	background: rgba(255, 255, 255, 0.65);
+	color: inherit;
+	border-radius: 10px;
+	padding: 7px 10px;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+[data-theme='dark'] .btn-edit-sm,
+[data-theme='dark'] .btn-delete-sm {
+	border-color: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.btn-delete-sm {
+	border-color: rgba(239, 68, 68, 0.25);
+}
+
+[data-theme='dark'] .btn-delete-sm {
+	border-color: rgba(239, 68, 68, 0.35);
+}
+
+.kelas-stats {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin: 10px 0 12px;
+}
+
+.kelas-stat {
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.55);
+	border-radius: 12px;
+	padding: 10px 10px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+[data-theme='dark'] .kelas-stat {
+	border-color: rgba(255, 255, 255, 0.10);
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.kelas-stat svg { flex: 0 0 auto; opacity: 0.85; }
+.kelas-stat span { font-size: 12px; opacity: 0.9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kelas-stat strong { font-size: 14px; }
+
+.kelas-footer {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding-top: 10px;
+	border-top: 1px dashed rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='dark'] .kelas-footer {
+	border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+.kelas-date {
+	font-size: 12px;
+	opacity: 0.75;
+}
+
+.kelas-link {
+	font-size: 12px;
+	text-decoration: none;
+	color: var(--kelas-accent, #2563eb);
+	font-weight: 700;
+}
+
+.kelas-link:hover {
+	text-decoration: underline;
+}
+
+/* Modal accents */
+.btn-teal {
+	background: #0f766e;
+	border: 1px solid rgba(15, 118, 110, 0.35);
+	color: #fff;
+}
+
+.btn-teal:hover {
+	filter: brightness(0.95);
+}
+
+.modal-icon.teal {
+	background: rgba(15, 118, 110, 0.12);
+	color: #0f766e;
+}
+
+[data-theme='dark'] .modal-icon.teal {
+	background: rgba(15, 118, 110, 0.22);
+	color: #5eead4;
+}
+
+.delete-warning {
+	margin-top: 10px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	border: 1px solid rgba(239, 68, 68, 0.22);
+	background: rgba(239, 68, 68, 0.07);
+	color: inherit;
+	font-size: 12px;
+}
+
+[data-theme='dark'] .delete-warning {
+	border-color: rgba(239, 68, 68, 0.30);
+	background: rgba(239, 68, 68, 0.12);
+}
+
+@media (min-width: 640px) {
+	.kelas-card { grid-column: span 6; }
+}
+
+@media (min-width: 1024px) {
+	.kelas-card { grid-column: span 4; }
+}
