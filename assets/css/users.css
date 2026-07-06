@@ -1,0 +1,386 @@
+/* Users page styles (extends dashboard.css + siswa.css + guru.css)
+	 Only for components unique to admin/users.php.
+*/
+
+.sync-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 14px;
+	border-radius: 16px;
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, var(--surface), var(--surface-2));
+	box-shadow: var(--shadow-sm);
+	margin-bottom: 16px;
+}
+
+.sync-bar-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.btn-sync {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: 14px;
+	border: 1px solid rgba(99, 102, 241, 0.28);
+	background: rgba(99, 102, 241, 0.10);
+	color: var(--text);
+	font-weight: 900;
+	cursor: pointer;
+	transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.btn-sync:hover {
+	transform: translateY(-1px);
+	background: rgba(99, 102, 241, 0.14);
+	border-color: rgba(99, 102, 241, 0.40);
+}
+
+.users-table-header {
+	align-items: flex-start;
+}
+
+.users-table-header .table-header-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.role-tab-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.role-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 10px;
+	border-radius: 14px;
+	border: 1px solid var(--border);
+	background: rgba(17, 24, 39, 0.03);
+	color: var(--muted);
+	font-weight: 900;
+	font-size: 12px;
+	cursor: pointer;
+	transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+html[data-theme="dark"] .role-tab {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.role-tab:hover {
+	transform: translateY(-1px);
+	color: var(--text);
+}
+
+.role-tab.active {
+	background: var(--primary-soft);
+	border-color: rgba(99, 102, 241, 0.25);
+	color: var(--text);
+}
+
+.role-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgba(99, 102, 241, 0.12);
+	border: 1px solid rgba(99, 102, 241, 0.22);
+	font-weight: 900;
+}
+
+.card-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--border);
+}
+
+.count-label {
+	color: var(--muted);
+	font-weight: 800;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.student-toolbar-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	min-width: 0;
+	flex: 1;
+}
+
+.password-default-note {
+	font-size: 12px;
+	line-height: 1.55;
+	color: var(--muted);
+	font-weight: 700;
+}
+
+.btn-sync-danger {
+	border-color: rgba(239, 68, 68, 0.26);
+	background: rgba(239, 68, 68, 0.10);
+}
+
+.btn-sync-danger:hover {
+	background: rgba(239, 68, 68, 0.14);
+	border-color: rgba(239, 68, 68, 0.38);
+}
+
+.status-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	border-radius: 999px;
+	font-weight: 900;
+	font-size: 12px;
+	border: 1px solid var(--border);
+	background: rgba(17, 24, 39, 0.03);
+}
+
+html[data-theme="dark"] .status-chip {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.status-chip.status-ok {
+	border-color: rgba(34, 197, 94, 0.25);
+	background: rgba(34, 197, 94, 0.10);
+}
+
+.status-chip.status-pending {
+	border-color: rgba(245, 158, 11, 0.30);
+	background: rgba(245, 158, 11, 0.10);
+}
+
+.btn-add-account {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 9px 10px;
+	border-radius: 14px;
+	border: 1px solid rgba(99, 102, 241, 0.28);
+	background: rgba(99, 102, 241, 0.10);
+	color: var(--text);
+	font-weight: 900;
+	cursor: pointer;
+}
+
+.btn-add-account:hover {
+	background: rgba(99, 102, 241, 0.14);
+}
+
+.btn-muted {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.av-self {
+	background: linear-gradient(135deg, var(--success), #16a34a);
+}
+
+.self-label {
+	font-size: 12px;
+	font-weight: 900;
+	color: var(--muted);
+}
+
+.nisn-grey {
+	background: rgba(107, 114, 128, 0.10);
+	border-color: rgba(107, 114, 128, 0.22);
+	color: var(--muted);
+}
+
+.parent-code {
+	background: rgba(34, 197, 94, 0.10);
+	border-color: rgba(34, 197, 94, 0.20);
+	color: #15803d;
+}
+
+html[data-theme="dark"] .parent-code {
+	color: #86efac;
+}
+
+/* Modal icon variants used in users.php */
+.modal-icon.blue {
+	background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
+.modal-icon.green {
+	background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Reset button inside guru modal */
+.btn-reset-nip {
+	border: 1px solid rgba(245, 158, 11, 0.28);
+	background: rgba(245, 158, 11, 0.12);
+	color: var(--text);
+	font-weight: 900;
+}
+
+.btn-reset-nip:hover {
+	filter: brightness(0.98);
+}
+
+/* Siswa modal info box */
+.akun-info-box {
+	border: 1px solid var(--border);
+	background: rgba(17, 24, 39, 0.03);
+	border-radius: 16px;
+	padding: 12px 12px;
+}
+
+html[data-theme="dark"] .akun-info-box {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.akun-info-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 2px;
+}
+
+.akun-info-label {
+	font-size: 12px;
+	color: var(--muted);
+	font-weight: 800;
+}
+
+.akun-info-pwd {
+	font-size: 12px;
+	font-weight: 900;
+	padding: 4px 10px;
+	border-radius: 999px;
+	border: 1px solid rgba(99, 102, 241, 0.22);
+	background: rgba(99, 102, 241, 0.10);
+	white-space: nowrap;
+}
+
+.akun-info-divider {
+	height: 1px;
+	background: var(--border);
+	margin: 6px 0;
+}
+
+.credential-preview {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	flex-wrap: wrap;
+}
+
+.credential-preview-inline {
+	margin-top: 10px;
+}
+
+.credential-label {
+	font-size: 11px;
+	font-weight: 800;
+	color: var(--muted);
+}
+
+.credential-secret {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	border: 1px solid rgba(99, 102, 241, 0.22);
+	background: rgba(99, 102, 241, 0.10);
+	font-size: 12px;
+	font-weight: 900;
+	letter-spacing: 0.04em;
+}
+
+.credential-toggle,
+.password-input-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	border: 1px solid var(--border);
+	background: rgba(17, 24, 39, 0.03);
+	color: var(--text);
+	font-size: 11px;
+	font-weight: 900;
+	cursor: pointer;
+}
+
+html[data-theme="dark"] .credential-toggle,
+html[data-theme="dark"] .password-input-toggle {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.password-input-wrap {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.password-input-wrap .form-input {
+	flex: 1;
+}
+
+.reset-all-copy {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+	line-height: 1.6;
+}
+
+.reset-all-password-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(239, 68, 68, 0.26);
+	background: rgba(239, 68, 68, 0.10);
+	color: var(--text);
+	font-size: 14px;
+	font-weight: 900;
+	letter-spacing: 0.04em;
+}
+
+@media (max-width: 760px) {
+	.sync-bar {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.card-toolbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.password-input-wrap {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
