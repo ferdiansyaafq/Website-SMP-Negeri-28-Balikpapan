@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="120" viewBox="0 0 500 120">
+  <rect width="500" height="120" rx="18" fill="#ffffff"/>
+  <circle cx="70" cy="60" r="48" fill="#ffffff" stroke="#e5e7eb" stroke-width="3"/>
+  <path d="M44 58l26-16 26 16-26 16-26-16z" fill="#2563eb"/>
+  <text x="150" y="56" font-family="Segoe UI, Arial" font-size="22" font-weight="700" fill="#1f2937">KAIH</text>
+  <text x="150" y="82" font-family="Segoe UI, Arial" font-size="14" fill="#6b7280">SMP Negeri 28 Balikpapan</text>
+</svg>
