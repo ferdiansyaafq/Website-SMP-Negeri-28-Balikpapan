@@ -1,0 +1,60 @@
+/* Guru page specific styles (extends siswa.css components) */
+
+.nip-color {
+	background: rgba(59, 130, 246, 0.12);
+	border-color: rgba(59, 130, 246, 0.22);
+}
+
+.guru-av {
+	background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+.jabatan-chip {
+	display: inline-flex;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: rgba(245, 158, 11, 0.14);
+	border: 1px solid rgba(245, 158, 11, 0.24);
+	color: #92400e;
+	font-weight: 900;
+}
+
+html[data-theme="dark"] .jabatan-chip { color: #fbbf24; }
+
+.guru-alamat {
+	margin-top: 2px;
+	font-size: 12px;
+	color: var(--muted);
+	font-weight: 700;
+}
+
+.td-wali { font-weight: 800; }
+
+.hp-link {
+	color: var(--text);
+	text-decoration: none;
+	font-weight: 900;
+}
+
+.hp-link:hover { color: var(--primary); text-decoration: underline; }
+
+.input-hp-wrap {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.hp-prefix {
+	display: inline-flex;
+	align-items: center;
+	padding: 11px 10px;
+	border-radius: 14px;
+	background: rgba(17, 24, 39, 0.04);
+	border: 1px solid var(--border);
+	color: var(--muted);
+	font-weight: 900;
+}
+
+html[data-theme="dark"] .hp-prefix { background: rgba(255, 255, 255, 0.05); }
+
+.input-hp { flex: 1; }
