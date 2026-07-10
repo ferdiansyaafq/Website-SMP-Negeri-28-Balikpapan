@@ -5,7 +5,6 @@ require_once '../includes/admin_auth.php';
 requireAdminLogin();
 require_once '../config/database.php';
 
-// ── Image helper ─────────────────────────────────────────────────────────────
 function cpPickImage(array $candidates, string $fallback): string
 {
     foreach ($candidates as $path) {
