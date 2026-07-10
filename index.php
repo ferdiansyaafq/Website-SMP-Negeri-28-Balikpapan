@@ -872,7 +872,7 @@ $ekskulData = [
             <a href="informasi.php">Informasi</a>
             <a href="fitur.php">Fitur</a>
             <a href="panduan.php">Panduan</a>
-            <a href="kontak.php">Kontak</a>
+            <a href="lainnya.php">Lainnya</a>
         </div>
     </div>
 
