@@ -76,6 +76,7 @@ if (empty($slideshowPhotos)) {
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 4px solid #0284c7;
         }
 
         .header-content {
@@ -264,52 +265,58 @@ if (empty($slideshowPhotos)) {
             display: block;
         }
 
-        /* ═══════════════════════════════════════════
-           MAIN CONTENT
-        ═══════════════════════════════════════════ */
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 40px;
-        }
+       /* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 40px;
+}
 
-        .hero-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        }
+.hero-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    background: transparent; /* Hapus background putih */
+    padding: 40px 0;
+    border-radius: 0;
+    box-shadow: none; /* Hapus shadow */
+}
 
-        .text-content h2 {
-            font-size: 38px;
-            color: #1e293b;
-            margin-bottom: 15px;
-            line-height: 1.2;
-            font-weight: 800;
-        }
+.text-content h2 {
+    font-size: 42px;
+    color: #1a1a1a; /* Hitam pekat untuk "SMP Negeri 28" */
+    margin-bottom: 20px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
 
-        .text-content h2 span {
-            color: #0284c7;
-        }
+.text-content h2 span {
+    color: #1e6fbf; /* Biru untuk "Balikpapan" */
+    display: block; /* "Balikpapan" pindah ke baris baru */
+}
 
-        .tagline {
-            font-size: 17px;
-            color: #0284c7;
-            font-weight: 600;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
+.tagline {
+    font-size: 18px;
+    color: #1e6fbf; /* Biru */
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 28px;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+}
 
-        .description {
-            font-size: 15px;
-            color: #475569;
-            line-height: 1.9;
-            margin-bottom: 15px;
-        }
+.description {
+    font-size: 15.5px;
+    color: #4a7ba8; /* Biru keabu-abuan terang */
+    line-height: 2;
+    margin-bottom: 18px;
+    text-align: justify; /* Rata kanan-kiri */
+    font-weight: 400;
+}
 
         /* ═══════════════════════════════════════════
            IMAGE CAROUSEL
@@ -526,17 +533,34 @@ if (empty($slideshowPhotos)) {
     <div class="container">
         <div class="hero-section">
             <div class="text-content">
-                <h2>SMP Negeri 28 <span>Balikpapan</span></h2>
-                <p class="tagline">"Cahaya Pemandu" bagi karakter siswa di pesisir Manggar.</p>
-                <p class="description">
-                    Sistem rapor digital modern yang menjadi mercusuar pendidikan, membimbing setiap siswa menuju prestasi terbaik. 
-                    KAIH (Karakter Aktivitas Ibadah Harian) hadir sebagai solusi monitoring perkembangan siswa secara komprehensif dan real-time.
-                </p>
-                <p class="description">
-                    Dengan teknologi digital terkini, kami memfasilitasi kolaborasi antara guru, siswa, dan orang tua dalam memantau dan 
-                    mengembangkan karakter serta prestasi akademik siswa setiap harinya.
-                </p>
-            </div>
+    <h2>SMP Negeri 28 <span>Balikpapan</span></h2>
+    <p class="tagline">"Cahaya Pemandu" bagi karakter siswa di pesisir Manggar.</p>
+    <p class="description">
+        Sistem rapor digital modern yang menjadi mercusuar pendidikan, membimbing setiap siswa menuju prestasi terbaik. KAIH (Karakter Aktivitas Ibadah Harian) hadir sebagai solusi monitoring perkembangan siswa secara komprehensif dan real-time.
+    </p>
+    <p class="description">
+        Dengan teknologi digital terkini, kami memfasilitasi kolaborasi antara guru, siswa, dan orang tua dalam memantau dan mengembangkan karakter serta prestasi akademik siswa setiap harinya.
+    </p>
+    <!-- Fitur Grid -->
+<div class="features-grid">
+    <div class="feature-item">
+        <span class="feature-icon">📋</span>
+        <span class="feature-text">Rapor Digital Terintegrasi</span>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <span class="feature-text">Monitoring Aktivitas Harian</span>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">📊</span>
+        <span class="feature-text">Laporan Perkembangan Siswa</span>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">💡</span>
+        <span class="feature-text">Kolaborasi Guru & Orang Tua</span>
+    </div>
+</div>
+</div>
 
             <div class="image-section">
                 <div class="carousel">
@@ -609,12 +633,49 @@ if (empty($slideshowPhotos)) {
 
             <!-- Copyright -->
             <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 30px; text-align: center; opacity: 0.8; font-size: 14px;">
-                <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan. All rights reserved.</p>
+                <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan.</p>
             </div>
         </div>
     </footer>
 
     <style>
+        /* ═══════════════════════════════════════════
+   FITUR GRID
+   ═══════════════════════════════════════════ */
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.feature-item {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+}
+
+.feature-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.feature-text {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
         footer a:hover {
             opacity: 1;
             transform: translateY(-3px);
@@ -625,19 +686,6 @@ if (empty($slideshowPhotos)) {
             box-shadow: 0 8px 30px rgba(37,211,102,0.6);
         }
 
-        @media (max-width: 768px) {
-            footer {
-                padding: 40px 0 20px;
-            }
-            
-            footer > div > div > div > div {
-                text-align: center;
-            }
-            
-            footer > div > div > div > div > div {
-                justify-content: center;
-            }
-        }
     </style>
 
     <script>
