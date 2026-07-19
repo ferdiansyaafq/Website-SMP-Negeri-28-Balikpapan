@@ -25,7 +25,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
-<head>
+<head> <title>SMP Negeri 28 Balikpapan</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="assets/img/logo-sekolah.png">
@@ -399,7 +399,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             Lainnya <span class="arrow">▾</span>
         </button>
         <div class="mobile-submenu" id="submenu-lainnya">
-            <a href="lainnya.php#login">Login</a>
+            <a href="login.php">Login</a>
             <a href="lainnya.php#faq">FAQ</a>
             <a href="lainnya.php#kontak">Kontak</a>
         </div>
@@ -449,7 +449,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
                     Lainnya <span class="arrow">▾</span>
                 </a>
                 <div class="dropdown-menu">
-                    <a href="lainnya.php#login">Login</a>
+                    <a href="login.php">Login</a>
                     <a href="lainnya.php#faq">FAQ</a>
                     <a href="lainnya.php#kontak">Kontak</a>
                 </div>
