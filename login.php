@@ -27,13 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header('Location: aplikasi/admin/index.php');
                         break;
                     case 'guru':
-                        header('Location: guru-dashboard.php');
+                        header('Location: aplikasi/guru/index.php');
                         break;
                     case 'siswa':
-                        header('Location: siswa-dashboard.php');
+                        header('Location: aplikasi/siswa/index.php');
                         break;
                     case 'orang_tua':
-                        header('Location: ortu-dashboard.php');
+                        header('Location: aplikasi/ortu/index.php');
                         break;
                     default:
                         header('Location: index.php');

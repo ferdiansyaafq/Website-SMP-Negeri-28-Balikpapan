@@ -1,7 +1,6 @@
-CREATE DATABASE IF NOT EXISTS `kaih` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOT EXISTS `kaih` 
 USE `kaih`;
 
--- Dumping structure for table kaih.cache_locks
 CREATE TABLE IF NOT EXISTS `cache_locks` (
   `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `owner` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -9,9 +8,6 @@ CREATE TABLE IF NOT EXISTS `cache_locks` (
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table kaih.cache_locks: ~0 rows (approximately)
-
--- Dumping structure for table kaih.guru
 CREATE TABLE IF NOT EXISTS `guru` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nip` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -66,8 +62,41 @@ CREATE TABLE IF NOT EXISTS `laporan` (
   CONSTRAINT `laporan_siswa_id_foreign` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table kaih.laporan: ~0 rows (approximately)
-
+-- Buat tabel laporan_harian
+CREATE TABLE IF NOT EXISTS `laporan_harian` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `siswa_id` INT NOT NULL,
+    `tanggal` DATE NOT NULL,
+    `bangun` TINYINT(1) NOT NULL DEFAULT 0,
+    `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
+    `ibadah_catatan` VARCHAR(255) NULL,
+    `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
+    `olahraga_jenis` VARCHAR(50) NULL,
+    `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
+    `sarapan_menu` VARCHAR(50) NULL,
+    `membaca` TINYINT(1) NOT NULL DEFAULT 0,
+    `membaca_judul` VARCHAR(255) NULL,
+    `membaca_menit` INT NULL,
+    `membantu` TINYINT(1) NOT NULL DEFAULT 0,
+    `membantu_jenis` VARCHAR(50) NULL,
+    `menabung` TINYINT(1) NOT NULL DEFAULT 0,
+    `menabung_nominal` INT NULL,
+    `orang_tua_validated_at` DATETIME NULL,
+    `guru_validated_at` DATETIME NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
+    INDEX `idx_tanggal` (`tanggal`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Tabel absensi
+CREATE TABLE IF NOT EXISTS `absensi` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `siswa_id` INT NOT NULL,
+    `tanggal` DATE NOT NULL,
+    `status` ENUM('hadir','izin','sakit','alpha') DEFAULT 'hadir',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- Dumping structure for table kaih.migrations
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -76,9 +105,6 @@ CREATE TABLE IF NOT EXISTS `migrations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table kaih.migrations: ~0 rows (approximately)
-
--- Dumping structure for table kaih.siswa
 CREATE TABLE IF NOT EXISTS `siswa` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nisn` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
