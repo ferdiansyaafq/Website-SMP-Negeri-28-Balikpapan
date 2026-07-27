@@ -105,8 +105,14 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             <a href="kelas.php" class="<?php echo ($current_page == 'kelas.php') ? 'active' : ''; ?>">
                 <span class="icon">🏫</span> Kelola Kelas
             </a>
+            <a href="users.php" class="<?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
+                <span class="icon">📋</span> Manajemen Akun
+            </a>
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
-                <span class="icon">📄</span> Laporan
+                <span class="icon">📄</span> Laporan Siswa
+            </a>
+            <a href="laporan-guru.php" class="<?php echo ($current_page == 'laporan-guru.php') ? 'active' : ''; ?>">
+                <span class="icon">📄</span> Laporan Guru
             </a>
 
         <?php elseif ($role === 'guru'): ?>
