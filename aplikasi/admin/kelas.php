@@ -9,209 +9,261 @@ if (!isset($_SESSION['user_id']) && (string)($_SESSION['portal_role'] ?? '') !==
     exit;
 }
 
-$flash = '';
-$flashType = 'success';
+// Tangkap pencarian jika ada
+$search = $_GET['search'] ?? '';
 
-// Proses CRUD (Tambah, Edit, Hapus Kelas)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    
-    if ($action === 'add') {
-        $nama_kelas = trim($_POST['nama_kelas'] ?? '');
-        if ($nama_kelas !== '') {
-            try {
-                $stmt = $pdo->prepare("INSERT INTO kaih_kelas (nama_kelas) VALUES (?)");
-                $stmt->execute([$nama_kelas]);
-                $flash = "Kelas berhasil ditambahkan!";
-            } catch (Exception $e) {
-                $flash = "Gagal menambah kelas (Nama kelas mungkin sudah ada).";
-                $flashType = "error";
-            }
-        } else {
-            $flash = "Nama kelas wajib diisi!";
-            $flashType = "error";
-        }
+// --- Query Mengambil Data Kelas beserta Wali Kelasnya ---
+$query = "
+    SELECT 
+        k.id, 
+        k.nama_kelas, 
+        (SELECT COUNT(*) FROM siswa s WHERE s.kelas = k.nama_kelas) AS jumlah_siswa,
+        (SELECT nama_guru FROM guru g WHERE g.kelas = k.nama_kelas LIMIT 1) AS nama_wali
+    FROM kaih_kelas k
+";
 
-    } elseif ($action === 'edit') {
-        $id = (int)($_POST['id'] ?? 0);
-        $nama_kelas = trim($_POST['nama_kelas'] ?? '');
-        $nama_kelas_lama = trim($_POST['nama_kelas_lama'] ?? '');
-
-        if ($id > 0 && $nama_kelas !== '') {
-            try {
-                $pdo->beginTransaction();
-                
-                // 1. Update nama kelas di master
-                $stmt = $pdo->prepare("UPDATE kaih_kelas SET nama_kelas = ? WHERE id = ?");
-                $stmt->execute([$nama_kelas, $id]);
-                
-                // 2. Cascade: update nama kelas pada semua siswa yang memakai kelas lama
-                if ($nama_kelas !== $nama_kelas_lama) {
-                    $stmtSiswa = $pdo->prepare("UPDATE siswa SET kelas = ?, updated_at = NOW() WHERE kelas = ?");
-                    $stmtSiswa->execute([$nama_kelas, $nama_kelas_lama]);
-                }
-
-                $pdo->commit();
-                $flash = "Data kelas berhasil diubah!";
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                $flash = "Gagal mengubah kelas.";
-                $flashType = "error";
-            }
-        } else {
-            $flash = "Nama kelas wajib diisi!";
-            $flashType = "error";
-        }
-
-    } elseif ($action === 'delete') {
-        $id = (int)($_POST['id'] ?? 0);
-        if ($id > 0) {
-            try {
-                $stmt = $pdo->prepare("DELETE FROM kaih_kelas WHERE id = ?");
-                $stmt->execute([$id]);
-                $flash = "Kelas berhasil dihapus!";
-            } catch (Exception $e) {
-                $flash = "Gagal menghapus kelas. Pastikan tidak ada data terkait.";
-                $flashType = "error";
-            }
-        }
-    }
+if (!empty($search)) {
+    $query .= " WHERE k.nama_kelas LIKE :search";
 }
 
-// Fitur Pencarian & Ambil data kelas beserta hitungan siswa
-$search = trim($_GET['q'] ?? '');
-$query = "SELECT k.id, k.nama_kelas, COUNT(s.id) as jumlah_siswa 
-          FROM kaih_kelas k 
-          LEFT JOIN siswa s ON k.nama_kelas = s.kelas ";
-$params = [];
+$query .= " ORDER BY k.nama_kelas ASC";
 
-if ($search !== '') {
-    $query .= " WHERE k.nama_kelas LIKE ? ";
-    $params[] = "%$search%";
+$stmt = $pdo->prepare($query);
+if (!empty($search)) {
+    $stmt->bindValue(':search', '%' . $search . '%');
 }
-$query .= " GROUP BY k.id, k.nama_kelas ORDER BY k.nama_kelas ASC";
+$stmt->execute();
+$kelas_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmtKelas = $pdo->prepare($query);
-$stmtKelas->execute($params);
-$daftar_kelas = $stmtKelas->fetchAll(PDO::FETCH_ASSOC);
-
-// Header UI
+// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 
-<div class="card" style="padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin: 20px;">
-    <?php if ($flash !== ''): ?>
-        <div style="padding: 10px 15px; margin-bottom: 15px; border-radius: 8px; font-size: 14px; font-weight: 600; background: <?php echo $flashType === 'error' ? '#fee2e2; color: #991b1b;' : '#dcfce7; color: #166534;'; ?>">
-            <?php echo htmlspecialchars($flash); ?>
-        </div>
-    <?php endif; ?>
+<style>
+    body { background-color: #f8fafc; }
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-        <h3 style="margin: 0;">🏫 Data Kelas</h3>
+    .kelas-container {
+        padding: 24px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    /* Header Section - Menyamping ujung ke ujung */
+    .kelas-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        width: 100%;
+    }
+
+    .kelas-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .search-box {
+        display: flex;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .search-box input {
+        padding: 8px 12px;
+        border: none;
+        outline: none;
+        width: 220px;
+    }
+
+    .search-box button {
+        background: #64748b;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+    }
+
+    .btn-tambah {
+        background: #0ea5e9;
+        color: white;
+        text-decoration: none;
+        padding: 9px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    /* Grid Layout untuk Card */
+    .kelas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    /* Desain Card */
+    .kelas-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .kelas-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        border-color: #bae6fd;
+    }
+
+    .kelas-card h3 {
+        margin: 0 0 15px 0;
+        font-size: 24px;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .wali-kelas {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: #f8fafc;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .badge-siswa {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e0f2fe;
+        color: #0284c7;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
+
+    .badge-siswa strong {
+        margin-left: 4px;
+        font-weight: 700;
+    }
+
+    /* Tombol Aksi */
+    .card-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .btn-edit, .btn-hapus {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative; 
+        z-index: 2; 
+    }
+
+    .btn-edit { background: #fef08a; color: #854d0e; }
+    .btn-edit:hover { background: #fde047; }
+
+    .btn-hapus { background: #fecdd3; color: #9f1239; }
+    .btn-hapus:hover { background: #fda4af; }
+</style>
+
+<div class="kelas-container">
+    
+    <!-- Header: Judul & Aksi Menyamping -->
+    <div class="kelas-header">
+        <h2>🏫 Data Kelas</h2>
         
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <!-- Form Pencarian -->
-            <form method="GET" action="" style="display: flex; gap: 5px;">
-                <input type="text" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari Kelas..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none;">
-                <button type="submit" style="padding: 8px 12px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cari</button>
+        <div class="header-actions">
+            <form method="GET" action="" class="search-box">
+                <input type="text" name="search" placeholder="Cari Kelas..." value="<?php echo htmlspecialchars($search); ?>">
+                <button type="submit">Cari</button>
             </form>
-
-            <button onclick="openModalTambah()" style="padding: 8px 16px; background: #0284c7; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                + Tambah Kelas
-            </button>
+            <a href="tambah_kelas.php" class="btn-tambah">+ Tambah Kelas</a>
         </div>
     </div>
 
-    <!-- Tampilan Card Grid Kelas -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <?php if (empty($daftar_kelas)): ?>
-            <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: #94a3b8;">
-                Tidak ada data kelas ditemukan.
-            </div>
-        <?php else: ?>
-            <?php foreach ($daftar_kelas as $k): ?>
-                <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; border: 1px solid #e0f2fe; text-align: center; display: flex; flex-direction: column; justify-content: center; position: relative;">
+    <!-- Grid Layout Kelas -->
+    <div class="kelas-grid">
+        <?php if (count($kelas_data) > 0): ?>
+            <?php foreach ($kelas_data as $row): ?>
+                
+                <!-- Card Utama: Menggunakan data-href sebagai penyimpan link -->
+                <div class="kelas-card" data-href="siswa.php?q=<?php echo urlencode($row['nama_kelas']); ?>">
                     
-                    <div style="font-size: 18px; font-weight: 700; color: #0284c7; margin-bottom: 5px;">
-                        Kelas <?php echo htmlspecialchars($k['nama_kelas']); ?>
-                    </div>
-                    <div style="color: #64748b; font-size: 14px; margin-bottom: 15px;">
-                        <?php echo (int)$k['jumlah_siswa']; ?> Siswa
+                    <h3>Kelas <?php echo htmlspecialchars($row['nama_kelas']); ?></h3>
+                    
+                    <div class="wali-kelas">
+                        👤 <?php echo !empty($row['nama_wali']) ? htmlspecialchars($row['nama_wali']) : 'Belum Ada Wali Kelas'; ?>
                     </div>
                     
-                    <!-- Grup Tombol Aksi -->
-                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: auto;">
-                        <button type="button" onclick="openModalEdit(<?php echo htmlspecialchars(json_encode([
-                            'id' => $k['id'],
-                            'nama_kelas' => $k['nama_kelas']
-                        ])); ?>)" style="padding: 4px 10px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                            Edit
-                        </button>
+                    <div class="badge-siswa" title="Lihat daftar siswa kelas <?php echo htmlspecialchars($row['nama_kelas']); ?>">
+                        Jumlah: <strong><?php echo $row['jumlah_siswa']; ?> Siswa</strong>
+                    </div>
 
-                        <form method="POST" action="" onsubmit="return confirm('Yakin ingin menghapus kelas ini? Pastikan tidak ada siswa yang masih terdaftar di kelas ini.');" style="margin: 0;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>">
-                            <button type="submit" style="padding: 4px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                                Hapus
-                            </button>
-                        </form>
+                    <div class="card-actions">
+                        <a href="edit_kelas.php?id=<?php echo $row['id']; ?>" class="btn-edit">Edit</a>
+                        <a href="hapus_kelas.php?id=<?php echo $row['id']; ?>" class="btn-hapus" onclick="return confirm('Yakin ingin menghapus kelas ini?');">Hapus</a>
                     </div>
                 </div>
+
             <?php endforeach; ?>
+        <?php else: ?>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b; background: #fff; border-radius: 12px;">
+                Belum ada data kelas yang ditambahkan atau tidak ada hasil pencarian.
+            </div>
         <?php endif; ?>
     </div>
+
 </div>
 
-<!-- Modal Form Tambah Kelas -->
-<div id="modalTambah" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #1e293b;">Tambah Kelas Baru</h3>
-        
-        <form method="POST" action="">
-            <input type="hidden" name="action" value="add">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Nama Kelas</label>
-                <input type="text" name="nama_kelas" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" placeholder="Contoh: 7A, 8B, 9C">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="submit" style="flex: 1; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Simpan</button>
-                <button type="button" onclick="closeModalTambah()" style="flex: 1; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Batal</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Form Edit Kelas -->
-<div id="modalEdit" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #1e293b;">Edit Data Kelas</h3>
-        
-        <form method="POST" action="">
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="id" id="edit_id">
-            <input type="hidden" name="nama_kelas_lama" id="edit_nama_kelas_lama">
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Nama Kelas</label>
-                <input type="text" name="nama_kelas" id="edit_nama_kelas" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="submit" style="flex: 1; padding: 10px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Update</button>
-                <button type="button" onclick="closeModalEdit()" style="flex: 1; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Batal</button>
-            </div>
-        </form>
-    </div>
-</div>
-
+<!-- SCRIPT UNTUK MENGATUR KLIK CARD -->
 <script>
-    function openModalTambah() { document.getElementById('modalTambah').style.display = 'flex'; }
-    function closeModalTambah() { document.getElementById('modalTambah').style.display = 'none'; }
-
-    function openModalEdit(data) {
-        document.getElementById('edit_id').value = data.id;
-        document.getElementById('edit_nama_kelas_lama').value = data.nama_kelas;
-        document.getElementById('edit_nama_kelas').value = data.nama_kelas;
-        document.getElementById('modalEdit').style.display = 'flex';
-    }
-    function closeModalEdit() { document.getElementById('modalEdit').style.display = 'none'; }
+    document.querySelectorAll('.kelas-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Cek apakah elemen yang diklik adalah link (tag <a>) atau berada di dalam tag <a>
+            if (!e.target.closest('a')) {
+                window.location.href = this.getAttribute('data-href');
+            }
+        });
+    });
 </script>

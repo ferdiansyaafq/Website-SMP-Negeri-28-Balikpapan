@@ -289,7 +289,12 @@ $stmtD->close();
 // Stats
 $totalGuru = $conn->query("SELECT COUNT(*) as c FROM guru")->fetch_assoc()['c'];
 
-$kelasOptionResult = $conn->query('SELECT id, nama_kelas FROM kaih_kelas ORDER BY nama_kelas');
+$kelasOptionResult = $conn->query("SELECT k.id, k.nama_kelas,
+    GROUP_CONCAT(DISTINCT g.nama_guru ORDER BY g.nama_guru SEPARATOR ', ') AS nama_wali
+    FROM kaih_kelas k
+    LEFT JOIN guru g ON TRIM(REPLACE(LOWER(g.kelas), 'kelas ', '')) = TRIM(REPLACE(LOWER(k.nama_kelas), 'kelas ', ''))
+    GROUP BY k.id, k.nama_kelas
+    ORDER BY k.nama_kelas");
 $kelasOptions = $kelasOptionResult ? $kelasOptionResult->fetch_all(MYSQLI_ASSOC) : [];
 
 $conn->close();
@@ -600,7 +605,7 @@ $adminName = htmlspecialchars($_SESSION['admin_username']);
             <select name="kelas_id" id="fieldKelasId" class="form-select">
               <option value="">— Pilih Kelas —</option>
               <?php foreach ($kelasOptions as $k): ?>
-              <option value="<?= (int) $k['id'] ?>" data-nama="<?= htmlspecialchars($k['nama_kelas'], ENT_QUOTES) ?>"><?= htmlspecialchars($k['nama_kelas']) ?></option>
+              <option value="<?= (int) $k['id'] ?>" data-nama="<?= htmlspecialchars($k['nama_kelas'], ENT_QUOTES) ?>" data-wali="<?= htmlspecialchars((string) ($k['nama_wali'] ?? ''), ENT_QUOTES) ?>"><?= htmlspecialchars($k['nama_kelas']) ?></option>
               <?php endforeach; ?>
             </select>
             <span class="form-hint-ok" id="kelasHint">Kosongkan jika bukan wali kelas</span>

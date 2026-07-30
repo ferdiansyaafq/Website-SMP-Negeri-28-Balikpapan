@@ -47,11 +47,25 @@
     if (!fieldKelasId || !fieldKelas) return;
     const opt = fieldKelasId.options[fieldKelasId.selectedIndex];
     const nama = opt && opt.getAttribute ? (opt.getAttribute('data-nama') || '') : '';
+    const wali = opt && opt.getAttribute ? (opt.getAttribute('data-wali') || '') : '';
     fieldKelas.value = String(nama || '').trim();
 
     if (kelasHint) {
-      kelasHint.textContent = fieldKelas.value ? 'Terhubung ke data kelas' : 'Kosongkan jika bukan wali kelas';
-      kelasHint.classList.toggle('form-hint-ok', !!fieldKelas.value);
+      if (fieldKelas.value) {
+        if (wali.trim()) {
+           kelasHint.innerHTML = 'Wali kelas saat ini: <strong>' + wali + '</strong>';
+           kelasHint.classList.remove('form-hint-ok');
+           kelasHint.style.color = '#0284c7';
+        } else {
+           kelasHint.innerHTML = 'Kelas ini belum memiliki wali kelas';
+           kelasHint.classList.add('form-hint-ok');
+           kelasHint.style.color = '';
+        }
+      } else {
+        kelasHint.textContent = 'Kosongkan jika bukan wali kelas';
+        kelasHint.classList.remove('form-hint-ok');
+        kelasHint.style.color = '';
+      }
     }
   }
 
