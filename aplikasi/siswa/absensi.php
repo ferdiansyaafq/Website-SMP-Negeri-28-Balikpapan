@@ -1,6 +1,7 @@
 <?php
 // aplikasi/siswa/absensi.php
 require_once '../includes/header-kaih.php';
+require_once '../../config/database.php';
 
 $message = '';
 $message_type = '';

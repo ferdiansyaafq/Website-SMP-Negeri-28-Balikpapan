@@ -9,207 +9,221 @@ if (!isset($_SESSION['user_id']) && (string)($_SESSION['portal_role'] ?? '') !==
     exit;
 }
 
-// --- Query untuk mengambil total data ---
-// Catatan: Sesuaikan nama tabel (siswa, guru, kaih_kelas) jika di databasemu berbeda
+$tanggal_hari_ini = date('Y-m-d');
 
-// 1. Hitung Total Siswa
-$stmtSiswa = $pdo->query("SELECT COUNT(*) FROM siswa");
-$total_siswa = $stmtSiswa->fetchColumn();
+// =======================================================
+// 1. STATISTIK GLOBAL HARI INI
+// =======================================================
+$total_siswa = (int)$pdo->query("SELECT COUNT(*) FROM siswa")->fetchColumn();
 
-// 2. Hitung Total Guru 
-$stmtGuru = $pdo->query("SELECT COUNT(*) FROM guru");
-$total_guru = $stmtGuru->fetchColumn();
+$stmtMasuk = $pdo->prepare("SELECT COUNT(*) FROM laporan_harian WHERE tanggal = ?");
+$stmtMasuk->execute([$tanggal_hari_ini]);
+$laporan_hari_ini = (int)$stmtMasuk->fetchColumn();
 
-// 3. Hitung Total Kelas 
-$stmtKelas = $pdo->query("SELECT COUNT(*) FROM kaih_kelas");
-$total_kelas = $stmtKelas->fetchColumn();
+// Mencegah minus jika ada data anomali
+$belum_lapor = max(0, $total_siswa - $laporan_hari_ini);
 
-// 4. Hitung Total Laporan (Sementara diset 0, sesuaikan querynya nanti kalau tabel laporan sudah siap)
-// $stmtLaporan = $pdo->query("SELECT COUNT(*) FROM laporan");
-// $total_laporan = $stmtLaporan->fetchColumn();
-$total_laporan = 0; 
+$stmtValid = $pdo->prepare("SELECT COUNT(*) FROM laporan_harian WHERE tanggal = ? AND (orang_tua_validated_at IS NOT NULL OR guru_validated_at IS NOT NULL)");
+$stmtValid->execute([$tanggal_hari_ini]);
+$tervalidasi_hari_ini = (int)$stmtValid->fetchColumn();
+
+// =======================================================
+// 2. DATA REKAP KEHADIRAN KAIH PER KELAS (HARI INI)
+// =======================================================
+$stmtRekap = $pdo->prepare("
+    SELECT 
+        k.nama_kelas,
+        (SELECT COUNT(*) FROM siswa s WHERE s.kelas = k.nama_kelas) AS total_siswa,
+        (SELECT COUNT(*) FROM laporan_harian lh JOIN siswa s ON lh.siswa_id = s.id WHERE s.kelas = k.nama_kelas AND lh.tanggal = ?) AS sudah_lapor,
+        (SELECT COUNT(*) FROM laporan_harian lh JOIN siswa s ON lh.siswa_id = s.id WHERE s.kelas = k.nama_kelas AND lh.tanggal = ? AND (lh.orang_tua_validated_at IS NOT NULL OR lh.guru_validated_at IS NOT NULL)) AS tervalidasi
+    FROM kaih_kelas k
+    ORDER BY k.nama_kelas ASC
+");
+$stmtRekap->execute([$tanggal_hari_ini, $tanggal_hari_ini]);
+$rekap_kelas = $stmtRekap->fetchAll(PDO::FETCH_ASSOC);
+
+// =======================================================
+// 3. AKTIVITAS TERBARU (LIVE FEED)
+// =======================================================
+$stmtAktivitas = $pdo->prepare("
+    SELECT s.nama_siswa, s.kelas, lh.created_at, 
+           (lh.bangun + lh.ibadah + lh.olahraga + lh.sarapan + lh.membaca + lh.membantu + lh.menabung) as skor,
+           lh.orang_tua_validated_at, lh.guru_validated_at
+    FROM laporan_harian lh
+    JOIN siswa s ON lh.siswa_id = s.id
+    WHERE lh.tanggal = ?
+    ORDER BY lh.created_at DESC LIMIT 6
+");
+$stmtAktivitas->execute([$tanggal_hari_ini]);
+$aktivitas_terbaru = $stmtAktivitas->fetchAll(PDO::FETCH_ASSOC);
 
 // Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 
-<!-- Styling Khusus Dashboard -->
 <style>
-    /* Ubah warna background halaman agar card putih lebih menonjol */
-    body {
-        background-color: #f8fafc; 
-    }
-
-    .dashboard-container {
-        padding: 24px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
+    body { background-color: #f8fafc; }
+    .dashboard-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+    
     /* Grid Layout untuk Card Statistik */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr); /* Kuncinya di sini: Paksa jadi 4 kolom menyamping */
-        gap: 20px;
-        margin-bottom: 30px;
-        width: 100%; /* Memaksa grid memenuhi lebar layar */
-    }
-
-    /* Tambahan agar tetap responsif dan tidak gepeng kalau dibuka di layar kecil/HP */
-    @media (max-width: 1024px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr); /* Berubah jadi 2 kolom di layar sedang */
-        }
-    }
-
-    @media (max-width: 640px) {
-        .stats-grid {
-            grid-template-columns: 1fr; /* Berubah jadi numpuk ke bawah hanya di layar HP */
-        }
-    }
-
-    /* Desain Card Utama */
-    .stat-card {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        display: flex;
-        align-items: center;
-        border-left: 5px solid; /* Garis aksen warna tetap dipertahankan di kiri */
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Warna Aksen Tiap Card */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; width: 100%; }
+    .stat-card { background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; border-left: 5px solid; transition: transform 0.2s ease; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    
+    /* Warna Custom Tiap Card */
     .card-siswa { border-left-color: #0ea5e9; }
-    .card-guru { border-left-color: #10b981; }
-    .card-kelas { border-left-color: #f59e0b; }
-    .card-laporan { border-left-color: #8b5cf6; }
-
-    /* Desain Lingkaran Icon */
-    .stat-icon {
-        width: 54px;
-        height: 54px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-right: 16px;
-        flex-shrink: 0;
-    }
-
+    .card-sudah { border-left-color: #10b981; }
+    .card-belum { border-left-color: #ef4444; }
+    .card-valid { border-left-color: #8b5cf6; }
+    
+    .stat-icon { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 16px; flex-shrink: 0; }
     .card-siswa .stat-icon { background: #e0f2fe; color: #0ea5e9; }
-    .card-guru .stat-icon { background: #d1fae5; color: #10b981; }
-    .card-kelas .stat-icon { background: #fef3c7; color: #f59e0b; }
-    .card-laporan .stat-icon { background: #ede9fe; color: #8b5cf6; }
-
-    /* Desain Teks Angka & Label */
-    .stat-details h3 {
-        margin: 0;
-        font-size: 32px;
-        font-weight: 800;
-        color: #1e293b;
-        line-height: 1;
+    .card-sudah .stat-icon { background: #dcfce7; color: #10b981; }
+    .card-belum .stat-icon { background: #fee2e2; color: #ef4444; }
+    .card-valid .stat-icon { background: #ede9fe; color: #8b5cf6; }
+    
+    .stat-details h3 { margin: 0; font-size: 32px; font-weight: 800; color: #1e293b; line-height: 1; }
+    .stat-details p { margin: 6px 0 0 0; font-size: 13px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Grid Bawah: Tabel & Live Feed */
+    .grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .activity-section { background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .activity-header { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; text-transform: uppercase; }
+    
+    /* Tabel Rekap Modern */
+    .table-modern { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table-modern th { background: #f8fafc; padding: 12px; text-align: left; color: #475569; border-bottom: 2px solid #e2e8f0; font-weight: 800; }
+    .table-modern td { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 600;}
+    .badge-rekap { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    
+    /* List Live Feed */
+    .list-group { list-style: none; padding: 0; margin: 0; }
+    .list-group-item { padding: 12px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .list-group-item:last-child { border-bottom: none; padding-bottom: 0;}
+    
+    @media (max-width: 1024px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .grid-layout { grid-template-columns: 1fr; }
     }
-
-    .stat-details p {
-        margin: 6px 0 0 0;
-        font-size: 14px;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Box Section Aktivitas Terbaru */
-    .activity-section {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-
-    .activity-header {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 12px;
-    }
-
-    .activity-empty {
-        color: #94a3b8;
-        font-style: italic;
-        text-align: center;
-        padding: 40px 0;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 1px dashed #cbd5e1;
+    @media (max-width: 640px) {
+        .stats-grid { grid-template-columns: 1fr; }
     }
 </style>
 
 <div class="dashboard-container">
     
-    <!-- Bagian Kartu Statistik -->
+    <!-- Bagian Kartu Statistik Utama -->
     <div class="stats-grid">
-        
-        <!-- Card Total Siswa -->
         <div class="stat-card card-siswa">
             <div class="stat-icon">🎓</div>
             <div class="stat-details">
-                <h3><?php echo htmlspecialchars($total_siswa); ?></h3>
+                <h3><?= $total_siswa ?></h3>
                 <p>Total Siswa</p>
             </div>
         </div>
-
-        <!-- Card Total Guru -->
-        <div class="stat-card card-guru">
-            <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-card card-sudah">
+            <div class="stat-icon">✔️</div>
             <div class="stat-details">
-                <h3><?php echo htmlspecialchars($total_guru); ?></h3>
-                <p>Total Guru</p>
+                <h3><?= $laporan_hari_ini ?></h3>
+                <p>Sudah Lapor Hari Ini</p>
             </div>
         </div>
-
-        <!-- Card Total Kelas -->
-        <div class="stat-card card-kelas">
-            <div class="stat-icon">🏫</div>
+        <div class="stat-card card-belum">
+            <div class="stat-icon">❌</div>
             <div class="stat-details">
-                <h3><?php echo htmlspecialchars($total_kelas); ?></h3>
-                <p>Total Kelas</p>
+                <h3><?= $belum_lapor ?></h3>
+                <p>Belum Lapor</p>
             </div>
         </div>
-
-        <!-- Card Total Laporan -->
-        <div class="stat-card card-laporan">
-            <div class="stat-icon">📑</div>
+        <div class="stat-card card-valid">
+            <div class="stat-icon">⭐</div>
             <div class="stat-details">
-                <h3><?php echo htmlspecialchars($total_laporan); ?></h3>
-                <p>Total Laporan</p>
+                <h3><?= $tervalidasi_hari_ini ?></h3>
+                <p>Tervalidasi Hari Ini</p>
             </div>
         </div>
-
     </div>
 
-    <!-- Bagian Aktivitas Terbaru -->
-    <div class="activity-section">
-        <div class="activity-header">
-            📋 <span>Aktivitas Terbaru</span>
-        </div>
+    <!-- Bagian Detail Bawah -->
+    <div class="grid-layout">
         
-        <div class="activity-empty">
-            Belum ada aktivitas terbaru hari ini.
+        <!-- Tabel Rekap Kelas Hari Ini -->
+        <div class="activity-section" style="overflow-x: auto;">
+            <div class="activity-header">📊 Rekap Kelas Hari Ini (<?= date('d M Y') ?>)</div>
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th>Kelas</th>
+                        <th style="text-align:center;">Total Siswa</th>
+                        <th style="text-align:center;">Sudah Lapor</th>
+                        <th style="text-align:center;">Belum Lapor</th>
+                        <th style="text-align:center;">Tervalidasi</th>
+                        <th style="text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if(empty($rekap_kelas)): ?>
+                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Data kelas belum tersedia.</td></tr>
+                    <?php else: foreach($rekap_kelas as $rk): 
+                        $blm = max(0, $rk['total_siswa'] - $rk['sudah_lapor']);
+                    ?>
+                    <tr>
+                        <td style="color:#0284c7; font-weight:800; font-size:15px;"><?= htmlspecialchars($rk['nama_kelas']) ?></td>
+                        <td style="text-align:center;"><?= $rk['total_siswa'] ?></td>
+                        <td style="text-align:center;">
+                            <span class="badge-rekap" style="background:#dcfce7; color:#15803d;"><?= $rk['sudah_lapor'] ?></span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="badge-rekap" style="background:#fee2e2; color:#b91c1c;"><?= $blm ?></span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="badge-rekap" style="background:#ede9fe; color:#6d28d9;"><?= $rk['tervalidasi'] ?></span>
+                        </td>
+                        <td style="text-align:center;">
+                            <!-- Tombol Detail yang mengarah ke laporan.php dengan filter otomatis -->
+                            <a href="laporan.php?tab=kelas&kelas=<?= urlencode($rk['nama_kelas']) ?>&tanggal=<?= $tanggal_hari_ini ?>" 
+                               style="padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block; transition: 0.2s;"
+                               onmouseover="this.style.background='#0284c7'" 
+                               onmouseout="this.style.background='#0ea5e9'">
+                                Detail ➡️
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; endif; ?>
+                </tbody>
+            </table>
         </div>
-    </div>
 
+        <!-- Live Feed Aktivitas -->
+        <div class="activity-section">
+            <div class="activity-header">⚡ Aktivitas Terbaru</div>
+            
+            <?php if (empty($aktivitas_terbaru)): ?>
+                <div style="text-align:center; padding: 40px 0; color:#94a3b8; font-style:italic;">
+                    Belum ada siswa yang mengisi laporan hari ini.
+                </div>
+            <?php else: ?>
+                <ul class="list-group">
+                    <?php foreach ($aktivitas_terbaru as $akt): 
+                        $time = date('H:i', strtotime($akt['created_at']));
+                        $is_val = !empty($akt['orang_tua_validated_at']) || !empty($akt['guru_validated_at']);
+                    ?>
+                    <li class="list-group-item">
+                        <div>
+                            <div style="font-weight: 800; color: #1e293b;"><?= htmlspecialchars($akt['nama_siswa']) ?></div>
+                            <div style="font-size: 12px; color: #64748b; margin-top:3px;">
+                                <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold;">Kelas <?= htmlspecialchars($akt['kelas']) ?></span> • <?= $akt['skor'] ?>/7 Kegiatan
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 11px; color: #94a3b8; font-weight:bold; margin-bottom: 4px;"><?= $time ?> WITA</div>
+                            <?= $is_val ? '<span class="badge-rekap" style="background:#dcfce7; color:#15803d; font-size:10px;">✔️ Val</span>' : '<span class="badge-rekap" style="background:#fef3c7; color:#d97706; font-size:10px;">⏳ Wait</span>' ?>
+                        </div>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
+    </div>
 </div>

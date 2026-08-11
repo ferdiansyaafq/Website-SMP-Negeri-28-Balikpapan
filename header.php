@@ -401,7 +401,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
         <div class="mobile-submenu" id="submenu-lainnya">
             <a href="login.php">Login</a>
             <a href="lainnya.php#faq">FAQ</a>
-            <a href="lainnya.php#kontak">Kontak</a>
+            <a href="lainnya.php#Survei-Pelayanan">Survei Pelayanan</a>
         </div>
     </div>
 </div>
@@ -451,7 +451,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
                 <div class="dropdown-menu">
                     <a href="login.php">Login</a>
                     <a href="lainnya.php#faq">FAQ</a>
-                    <a href="lainnya.php#kontak">Kontak</a>
+                    <a href="proses_survei.php#Survey-Pelayanan">Survei Pelayanan</a>
                 </div>
             </div>
         </nav>

@@ -1,6 +1,7 @@
 <?php
 // aplikasi/siswa/index.php
 require_once '../includes/header-kaih.php';
+require_once '../../config/database.php';
 
 // Ambil statistik dari database
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
