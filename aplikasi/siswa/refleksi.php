@@ -211,8 +211,8 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
     }
 
     .form-group textarea {
@@ -233,7 +233,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
     .btn-simpan {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        background: linear-gradient(135deg, #0284c7, #0369a1);
         color: white;
         border: none;
         border-radius: 14px;
@@ -242,13 +242,13 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
         cursor: pointer;
         transition: all 0.3s;
         margin-top: 8px;
-        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+        box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
         font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     .btn-simpan:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 8px 32px rgba(2, 132, 199, 0.4);
     }
 
     .btn-simpan:active {
@@ -283,7 +283,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
         border-radius: 12px;
         padding: 16px 18px;
         margin-bottom: 12px;
-        border-left: 4px solid #8b5cf6;
+        border-left: 4px solid #0284c7;
     }
 
     .riwayat-item .date {
@@ -322,8 +322,8 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
-        background: #ede9fe;
-        color: #7c3aed;
+        background: #e0f2fe;
+        color: #0284c7;
     }
 
     @media (max-width: 600px) {
@@ -370,7 +370,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
 <div class="refleksi-container">
 
     <!-- Header -->
-    <div class="refleksi-card" style="text-align: center; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+    <div class="refleksi-card" style="text-align: center; background: linear-gradient(135deg, #0284c7, #0369a1); color: white;">
         <h3 style="color: white; justify-content: center;">📝 Refleksi Pembelajaran</h3>
         <div style="font-size: 14px; opacity: 0.9;">
             <?php echo htmlspecialchars($nama_siswa); ?> - <?php echo htmlspecialchars($kelas); ?>
@@ -484,7 +484,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
                     <div class="date">
                         <?php echo formatTanggalIndo($row['tanggal']); ?> 
                         <span class="badge-semester"><?php echo $row['semester'] ?? 'Ganjil'; ?></span>
-                        <span class="badge-semester" style="background: #e0e7ff; color: #4338ca;"><?php echo $row['tahun_ajaran'] ?? ''; ?></span>
+                        <span class="badge-semester" style="background: #dbeafe; color: #1d4ed8;"><?php echo $row['tahun_ajaran'] ?? ''; ?></span>
                     </div>
                     <div class="content">
                         <?php if (!empty($row['pelajaran_favorit'])): ?>

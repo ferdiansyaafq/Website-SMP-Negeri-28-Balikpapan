@@ -367,9 +367,7 @@ if ($siswa_id > 0) {
             <h3>Refleksi</h3>
             <p>Tulis pembelajaran &amp; pengalamanmu</p>
             <span class="btn-action">Tulis Refleksi</span>
-            <span class="badge-count">📊 <?php echo $total_refleksi; ?> refleksi</span>
         </a>
-
     </div>
 
 </div>

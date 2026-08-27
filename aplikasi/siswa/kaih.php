@@ -1,8 +1,6 @@
 <?php
 // aplikasi/siswa/kaih.php
-session_start();
 require_once '../includes/header-kaih.php';
-require_once '../../config/database.php';
 
 $message = '';
 $message_type = '';
@@ -35,14 +33,14 @@ function ensureLaporanHarianTable($pdo) {
             `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
             `ibadah_catatan` VARCHAR(255) NULL,
             `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
-            `olahraga_jenis` VARCHAR(255) NULL,
+            `olahraga_jenis` VARCHAR(50) NULL,
             `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
-            `sarapan_menu` VARCHAR(255) NULL,
+            `sarapan_menu` VARCHAR(50) NULL,
             `membaca` TINYINT(1) NOT NULL DEFAULT 0,
             `membaca_judul` VARCHAR(255) NULL,
             `membaca_menit` INT NULL,
             `membantu` TINYINT(1) NOT NULL DEFAULT 0,
-            `membantu_jenis` VARCHAR(255) NULL,
+            `membantu_jenis` VARCHAR(50) NULL,
             `menabung` TINYINT(1) NOT NULL DEFAULT 0,
             `menabung_keterangan` VARCHAR(255) NULL,
             `orang_tua_validated_at` DATETIME NULL,
@@ -52,12 +50,6 @@ function ensureLaporanHarianTable($pdo) {
             UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
             INDEX `idx_tanggal` (`tanggal`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-        // Cek dan tambahkan kolom bangun_catatan jika belum ada
-        $checkCol = $pdo->query("SHOW COLUMNS FROM `laporan_harian` LIKE 'bangun_catatan'");
-        if ($checkCol->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `laporan_harian` ADD `bangun_catatan` VARCHAR(255) NULL AFTER `bangun`");
-        }
         return true;
     } catch (PDOException $e) {
         return false;
@@ -154,31 +146,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
 
 // Ambil data hari ini
 $data_hari_ini = null;
-$is_validated = false;
-
 if ($siswa_id > 0) {
     try {
         $stmt = $pdo->prepare("SELECT * FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
-        $stmt->execute([$siswa_id, $tanggal_hari_ini]);
+        $stmt->execute([$siswa_id, date('Y-m-d')]);
         $data_hari_ini = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 }
 
 $total_terisi = 0;
 if ($data_hari_ini) {
-    $total_terisi = ($data_hari_ini['bangun'] ?? 0) + ($data_hari_ini['ibadah'] ?? 0) + ($data_hari_ini['olahraga'] ?? 0) + ($data_hari_ini['sarapan'] ?? 0) + ($data_hari_ini['membaca'] ?? 0) + ($data_hari_ini['membantu'] ?? 0) + ($data_hari_ini['menabung'] ?? 0);
-}
-
-// ============================================================
-// QUERY AMBIL RIWAYAT KAIH SISWA (30 HARI TERAKHIR)
-// ============================================================
-$riwayat_kaih = [];
-if ($siswa_id > 0) {
-    try {
-        $stmtR = $pdo->prepare("SELECT * FROM laporan_harian WHERE siswa_id = ? ORDER BY tanggal DESC LIMIT 30");
-        $stmtR->execute([$siswa_id]);
-        $riwayat_kaih = $stmtR->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {}
+    $total_terisi = 
+        ($data_hari_ini['bangun'] ?? 0) +
+        ($data_hari_ini['ibadah'] ?? 0) +
+        ($data_hari_ini['olahraga'] ?? 0) +
+        ($data_hari_ini['sarapan'] ?? 0) +
+        ($data_hari_ini['membaca'] ?? 0) +
+        ($data_hari_ini['membantu'] ?? 0) +
+        ($data_hari_ini['menabung'] ?? 0);
 }
 
 $today = date('Y-m-d');
@@ -218,7 +203,7 @@ if ($total_terisi >= 7) {
     }
 
     .kaih-header {
-        background: linear-gradient(135deg, #f97316, #ea580c, #fb923c);
+        background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8);
         border-radius: 24px;
         padding: 30px 24px 24px;
         margin-bottom: 20px;
@@ -226,7 +211,7 @@ if ($total_terisi >= 7) {
         color: white;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(249, 115, 22, 0.3);
+        box-shadow: 0 8px 32px rgba(2, 132, 199, 0.3);
     }
     .kaih-header::before {
         content: '';
@@ -300,7 +285,7 @@ if ($total_terisi >= 7) {
     .progress-card .number {
         font-size: 52px;
         font-weight: 800;
-        background: linear-gradient(135deg, #f97316, #ea580c, #fb923c);
+        background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -322,7 +307,7 @@ if ($total_terisi >= 7) {
     }
     .progress-bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, #fb923c, #f97316, #ea580c);
+        background: linear-gradient(90deg, #38bdf8, #0284c7, #0369a1);
         border-radius: 10px;
         transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         width: 0%;
@@ -340,8 +325,8 @@ if ($total_terisi >= 7) {
         color: #16a34a;
     }
     .progress-card .status-text.pending {
-        background: #ffedd5;
-        color: #9a3412;
+        background: #e0f2fe;
+        color: #075985;
     }
     .progress-card .status-text.empty {
         background: #f1f5f9;
@@ -368,8 +353,8 @@ if ($total_terisi >= 7) {
         box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     }
     .habit-item:hover {
-        border-color: #fed7aa;
-        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.08);
+        border-color: #bae6fd;
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.08);
     }
 
     /* HEADER: Judul di kiri, Opsi di kanan */
@@ -409,7 +394,7 @@ if ($total_terisi >= 7) {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #ffedd5;
+        background: #e0f2fe;
         border-radius: 10px;
         flex-shrink: 0;
     }
@@ -438,7 +423,7 @@ if ($total_terisi >= 7) {
         font-family: 'Poppins', sans-serif;
     }
     .habit-item .options label:hover {
-        background: #ffedd5;
+        background: #e0f2fe;
         transform: scale(1.02);
     }
     .habit-item .options label input[type="radio"] {
@@ -487,15 +472,15 @@ if ($total_terisi >= 7) {
     }
     .habit-item .keterangan-wrapper textarea:focus {
         outline: none;
-        border-color: #f97316;
-        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
         background: white;
     }
 
     .btn-simpan {
         width: 100%;
         padding: 16px;
-        background: linear-gradient(135deg, #f97316, #ea580c);
+        background: linear-gradient(135deg, #0284c7, #0369a1);
         color: white;
         border: none;
         border-radius: 16px;
@@ -504,28 +489,28 @@ if ($total_terisi >= 7) {
         cursor: pointer;
         transition: all 0.3s ease;
         margin-top: 8px;
-        box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+        box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
         font-family: 'Poppins', sans-serif;
         letter-spacing: -0.3px;
     }
     .btn-simpan:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 32px rgba(249, 115, 22, 0.4);
+        box-shadow: 0 8px 32px rgba(2, 132, 199, 0.4);
     }
 
     .tips-box {
         margin-top: 16px;
         padding: 14px 18px;
-        background: linear-gradient(135deg, #ffedd5, #fed7aa);
+        background: linear-gradient(135deg, #e0f2fe, #bae6fd);
         border-radius: 16px;
-        border: 1px dashed #fb923c;
+        border: 1px dashed #38bdf8;
         text-align: center;
-        color: #9a3412;
+        color: #075985;
         font-size: 13px;
         font-weight: 500;
     }
     .tips-box strong {
-        color: #f97316;
+        color: #0284c7;
     }
     .tips-box .sparkle {
         font-size: 18px;
@@ -634,7 +619,6 @@ if ($total_terisi >= 7) {
         </div>
     </div>
 
-    <!-- FORM PENGISIAN DENGAN DESKRIPSI -->
     <form method="POST" action="">
         <input type="hidden" name="simpan_kaih" value="1">
 
@@ -803,7 +787,6 @@ if ($total_terisi >= 7) {
                 <textarea name="menabung_keterangan" placeholder="Contoh: Hari ini saya menabung Rp5.000 dari uang saku, rencana mau ditabung untuk membeli buku..."><?php echo $data_hari_ini['menabung_keterangan'] ?? ''; ?></textarea>
             </div>
         </div>
-        <?php endforeach; ?>
 
         <button type="submit" class="btn-simpan">
             💾 <?php echo ($data_hari_ini) ? 'Update KAIH Hari Ini' : 'Simpan KAIH Hari Ini'; ?>
