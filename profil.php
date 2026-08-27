@@ -33,6 +33,15 @@ $teachers = [
     ['name' => 'Nurhabibah', 'position' => 'Guru TIK', 'initials' => 'NH'],
     ['name' => 'Ana', 'position' => 'Guru PAK', 'initials' => 'AN'],
 ];
+
+$ekskulData = [
+    ['nama' => 'Pramuka', 'gambar' => 'assets/img/', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
+    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Futsal', 'gambar' => 'assets/img/', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
+    ['nama' => 'PMR', 'gambar' => 'assets/img/', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
+    ['nama' => 'Memanah', 'gambar' => 'assets/img/', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
+];
 ?>
 
 <style>
@@ -390,57 +399,89 @@ $teachers = [
     margin-top: 20px;
 }
 
+#ekskul {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: white;
+}
+
+#ekskul .section-title {
+    color: white;
+}
+
+#ekskul .text-content {
+    color: rgba(255,255,255,0.9);
+}
+
 .ekskul-card {
-    background: white;
-    border: 2px solid #e0f2fe;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 15px;
-    padding: 20px;
+    overflow: hidden;
     transition: all 0.3s;
-    text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 .ekskul-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(2,132,199,0.15);
-    border-color: #0284c7;
+    background: rgba(255,255,255,0.2);
 }
 
-.ekskul-card .icon {
-    font-size: 36px;
-    margin-bottom: 12px;
+.ekskul-image {
+    height: 160px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.05);
 }
 
-.ekskul-card h3 {
-    color: #1e293b;
+.ekskul-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+
+.ekskul-card:hover .ekskul-image img {
+    transform: scale(1.05);
+}
+
+.ekskul-body {
+    padding: 18px 20px 20px;
+    text-align: center;
+    color: white;
+}
+
+.ekskul-body h3 {
+    color: white;
     font-size: 17px;
     margin-bottom: 8px;
     font-weight: 700;
 }
 
-.ekskul-card .desc {
-    color: #64748b;
+.ekskul-body .desc {
+    color: rgba(255,255,255,0.9);
     font-size: 13px;
     line-height: 1.6;
     margin-bottom: 12px;
     text-align: justify;
 }
 
-.ekskul-card .meta {
+.ekskul-body .meta {
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-size: 12px;
-    color: #475569;
+    color: rgba(255,255,255,0.9);
+    text-align: left;
 }
 
-.ekskul-card .meta span {
+.ekskul-body .meta span {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.ekskul-card .meta .label {
-    color: #0284c7;
+.ekskul-body .meta .label {
+    color: white;
     font-weight: 600;
     min-width: 65px;
 }
@@ -981,66 +1022,22 @@ $teachers = [
         <p class="text-content">Kegiatan ekstrakurikuler di SMP Negeri 28 Balikpapan diselenggarakan sebagai bagian dari pembentukan karakter dan pengembangan potensi peserta didik secara menyeluruh. Berdasarkan minat dan bakat, difasilitasi oleh guru atau yang kompeten.</p>
         
         <div class="ekskul-grid">
+            <?php foreach ($ekskulData as $item): ?>
             <div class="ekskul-card">
-                <div class="icon">⚜️</div>
-                <h3>Pramuka</h3>
-                <p class="desc">Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Jumat</span>
-                    <span><span class="label">⏰ Waktu:</span> 14.00 - 16.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Lapangan Utama</span>
+                <div class="ekskul-image">
+                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" alt="Kegiatan <?php echo htmlspecialchars($item['nama']); ?>">
+                </div>
+                <div class="ekskul-body">
+                    <h3><?php echo htmlspecialchars($item['nama']); ?></h3>
+                    <p class="desc"><?php echo htmlspecialchars($item['deskripsi']); ?></p>
+                    <div class="meta">
+                        <span><span class="label">📅 Hari:</span> <?php echo htmlspecialchars($item['hari']); ?></span>
+                        <span><span class="label">⏰ Waktu:</span> <?php echo htmlspecialchars($item['waktu']); ?></span>
+                        <span><span class="label">📍 Lokasi:</span> <?php echo htmlspecialchars($item['lokasi']); ?></span>
+                    </div>
                 </div>
             </div>
-            <div class="ekskul-card">
-                <div class="icon">🥋</div>
-                <h3>Pencak Silat</h3>
-                <p class="desc">Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Selasa</span>
-                    <span><span class="label">⏰ Waktu:</span> 15.30 - 17.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Lapangan Sekolah</span>
-                </div>
-            </div>
-            <div class="ekskul-card">
-                <div class="icon">⚽</div>
-                <h3>Futsal</h3>
-                <p class="desc">Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Rabu</span>
-                    <span><span class="label">⏰ Waktu:</span> 15.30 - 17.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Lapangan Futsal</span>
-                </div>
-            </div>
-            <div class="ekskul-card">
-                <div class="icon">🏥</div>
-                <h3>PMR</h3>
-                <p class="desc">Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Kamis</span>
-                    <span><span class="label">⏰ Waktu:</span> 15.30 - 17.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Ruang UKS</span>
-                </div>
-            </div>
-            <div class="ekskul-card">
-                <div class="icon">🏹</div>
-                <h3>Memanah</h3>
-                <p class="desc">Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Senin</span>
-                    <span><span class="label">⏰ Waktu:</span> 15.30 - 17.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Lapangan Sekolah</span>
-                </div>
-            </div>
-            <div class="ekskul-card">
-                <div class="icon">🌱</div>
-                <h3>Kader Lingkungan</h3>
-                <p class="desc">Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.</p>
-                <div class="meta">
-                    <span><span class="label">📅 Hari:</span> Sabtu</span>
-                    <span><span class="label">⏰ Waktu:</span> 08.00 - 10.00</span>
-                    <span><span class="label">📍 Lokasi:</span> Taman Sekolah</span>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
             </div> 
             
