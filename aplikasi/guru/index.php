@@ -1,6 +1,8 @@
 <?php
 // aplikasi/guru/index.php
 require_once '../includes/header-kaih.php';
+require_once '../../config/database.php';
+
 
 // Ambil data statistik dari database
 $guru_id = $_SESSION['guru_id'] ?? 0;

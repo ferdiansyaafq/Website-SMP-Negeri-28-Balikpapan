@@ -1,7 +1,40 @@
 <?php
 // aplikasi/admin/laporan.php
-require_once '../includes/header-kaih.php'; // Header tetap
-require_once '../../config/database.php';   // Path sudah disesuaikan, memanggil $pdo
+session_start();
+
+// Cek hak akses admin
+if (!isset($_SESSION['user_id']) && (string)($_SESSION['portal_role'] ?? '') !== 'admin') {
+    header('Location: ../../login.php');
+    exit;
+}
+
+require_once '../../config/database.php';   // Panggil database LEBIH DULU untuk eksekusi logika
+
+/* ============================================================
+   LOGIKA AKSI ADMIN (BATAL / SETUJU VALIDASI PAKSA)
+   ============================================================ */
+if (isset($_GET['aksi_admin']) && isset($_GET['laporan_id'])) {
+    $aksi_admin = $_GET['aksi_admin'];
+    $laporan_id = (int)$_GET['laporan_id'];
+    
+    // Susun URL kembali supaya filter tidak hilang setelah aksi diklik
+    $back_url = "?tab=kelas&guru_id=" . urlencode($_GET['guru_id'] ?? '') . "&kelas=" . urlencode($_GET['kelas'] ?? '') . "&tanggal=" . urlencode($_GET['tanggal'] ?? '');
+    
+    try {
+        if ($aksi_admin === 'batal') {
+            $pdo->prepare("UPDATE laporan_harian SET guru_validated_at = NULL, orang_tua_validated_at = NULL WHERE id = ?")->execute([$laporan_id]);
+        } elseif ($aksi_admin === 'setuju') {
+            $pdo->prepare("UPDATE laporan_harian SET guru_validated_at = NOW(), orang_tua_validated_at = NOW() WHERE id = ?")->execute([$laporan_id]);
+        }
+        header("Location: laporan.php" . $back_url);
+        exit;
+    } catch (PDOException $e) {
+        echo "<script>alert('Error Aksi Admin: " . $e->getMessage() . "');</script>";
+    }
+}
+
+// Baru Load Header UI setelah semua logika redirect selesai
+require_once '../includes/header-kaih.php'; 
 
 /* ============================================================
    LOGIKA BACKEND (VERSI PDO)
@@ -10,11 +43,14 @@ $tab = ($_GET['tab'] ?? 'kelas') === 'siswa' ? 'siswa' : 'kelas';
 $filterGuruId   = (int)($_GET['guru_id'] ?? 0);
 $filterKelas    = trim((string)($_GET['kelas'] ?? ''));
 $filterTanggal  = trim((string)($_GET['tanggal'] ?? date('Y-m-d')));
+
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $filterTanggal)) {
     $filterTanggal = date('Y-m-d');
 }
+
 $filterSiswaId  = (int)($_GET['siswa_id'] ?? 0);
 $filterBulan    = trim((string)($_GET['bulan'] ?? date('Y-m')));
+
 if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
     $filterBulan = date('Y-m');
 }
@@ -24,7 +60,8 @@ $allGuru = $pdo->query("SELECT id, nama_guru, kelas AS wali_kelas FROM guru ORDE
 $allKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 $allSiswa = $pdo->query("SELECT id, nama_siswa, kelas FROM siswa ORDER BY kelas ASC, nama_siswa ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-$guruWaliKelas = ''; $guruNama = '';
+$guruWaliKelas = '';
+$guruNama = '';
 if ($filterGuruId > 0) {
     $stmtG = $pdo->prepare("SELECT nama_guru, kelas FROM guru WHERE id = ? LIMIT 1");
     $stmtG->execute([$filterGuruId]);
@@ -36,9 +73,11 @@ if ($filterGuruId > 0) {
     }
 }
 
-// Data Tab Kelas
+// Variabel Data Tab Kelas & Grafik
 $kelasData = [];
 $statTotal = $statTerkirim = $statBelum = $statValid = 0;
+$statBangun = $statIbadah = $statOlahraga = $statSarapan = $statMembaca = $statMembantu = $statMenabung = 0;
+
 if ($tab === 'kelas' && $filterKelas !== '') {
     $stmt = $pdo->prepare(
         'SELECT s.id AS siswa_id, s.nisn, s.nama_siswa, s.kelas,
@@ -56,13 +95,31 @@ if ($tab === 'kelas' && $filterKelas !== '') {
     $statTotal = count($kelasData);
     foreach ($kelasData as $it) {
         $sent = !empty($it['laporan_id']);
-        if ($sent) $statTerkirim++; else $statBelum++;
-        if ($sent && (!empty($it['orang_tua_validated_at']) || !empty($it['guru_validated_at']))) $statValid++;
+        if ($sent) {
+            $statTerkirim++;
+            // Hitung kalkulasi untuk Grafik
+            if ($it['bangun']) $statBangun++;
+            if ($it['ibadah']) $statIbadah++;
+            if ($it['olahraga']) $statOlahraga++;
+            if ($it['sarapan']) $statSarapan++;
+            if ($it['membaca']) $statMembaca++;
+            if ($it['membantu']) $statMembantu++;
+            if ($it['menabung']) $statMenabung++;
+        } else {
+            $statBelum++;
+        }
+        
+        if ($sent && (!empty($it['orang_tua_validated_at']) || !empty($it['guru_validated_at']))) {
+            $statValid++;
+        }
     }
 }
 
 // Data Tab Siswa
-$siswaInfo = null; $siswaLaporan = []; $statSiswaTotal = $statSiswaDays = 0;
+$siswaInfo = null;
+$siswaLaporan = [];
+$statSiswaTotal = $statSiswaDays = 0;
+
 if ($tab === 'siswa' && $filterSiswaId > 0) {
     $stmtS = $pdo->prepare("SELECT id, nisn, nama_siswa, kelas FROM siswa WHERE id = ? LIMIT 1");
     $stmtS->execute([$filterSiswaId]);
@@ -92,19 +149,24 @@ if ($tab === 'siswa' && $filterSiswaId > 0) {
 // Helper Data & Fungsi UI
 $guruKelasMapJson = json_encode(array_column($allGuru, 'wali_kelas', 'id'), JSON_UNESCAPED_UNICODE);
 $bulanNames = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+
 function fmtDate(string $ymd): string {
     $d = DateTimeImmutable::createFromFormat('Y-m-d', $ymd);
     global $bulanNames;
     return $d ? (int)$d->format('j') . ' ' . ($bulanNames[(int)$d->format('n')] ?? $d->format('m')) . ' ' . $d->format('Y') : $ymd;
 }
+
 function iconCheck(bool $status) {
-    return $status ? '<span style="color:#10b981; font-weight:bold;">✓</span>' : '<span style="color:#cbd5e1;">-</span>';
+    return $status ? '<span style="color:#10b981; font-weight:bold;">✔️</span>' : '<span style="color:#cbd5e1;">-</span>';
 }
 ?>
 
 <!-- ============================================================
      USER INTERFACE (UI) MODERN
      ============================================================ -->
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
     .modern-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
@@ -142,22 +204,23 @@ function iconCheck(bool $status) {
 <div class="content-area" style="padding: 20px;">
     
     <div style="margin-bottom: 20px;">
-        <h2 style="margin:0; color:#1e293b;">Laporan Aktivitas Siswa</h2>
-        <p style="margin:5px 0 0; color:#64748b;">Pantau kegiatan harian, cek 7 indikator, dan status validasi.</p>
+        <h2 style="margin:0; color:#1e293b;">Laporan Aktivitas Siswa & Monitoring Admin</h2>
+        <p style="margin:5px 0 0; color:#64748b;">Pantau kegiatan harian, cek 7 indikator, dan lihat grafik kinerja kelas.</p>
     </div>
 
     <!-- TABS -->
     <div class="nav-tabs">
-        <a href="?tab=kelas<?= $filterKelas ? '&kelas='.urlencode($filterKelas) : '' ?>&tanggal=<?= urlencode($filterTanggal) ?>" 
-           class="nav-tab <?= $tab === 'kelas' ? 'active' : '' ?>">Laporan per Kelas</a>
-        <a href="?tab=siswa<?= $filterKelas ? '&kelas='.urlencode($filterKelas) : '' ?><?= $filterSiswaId ? '&siswa_id='.$filterSiswaId : '' ?>&bulan=<?= urlencode($filterBulan) ?>" 
-           class="nav-tab <?= $tab === 'siswa' ? 'active' : '' ?>">Detail per Siswa</a>
+        <a href="?tab=kelas<?= $filterKelas ? '&kelas='.urlencode($filterKelas) : '' ?>&tanggal=<?= urlencode($filterTanggal) ?>"
+            class="nav-tab <?= $tab === 'kelas' ? 'active' : '' ?>">Laporan per Kelas</a>
+        <a href="?tab=siswa<?= $filterKelas ? '&kelas='.urlencode($filterKelas) : '' ?><?= $filterSiswaId ? '&siswa_id='.$filterSiswaId : '' ?>&bulan=<?= urlencode($filterBulan) ?>"
+            class="nav-tab <?= $tab === 'siswa' ? 'active' : '' ?>">Detail per Siswa</a>
     </div>
 
     <!-- ==============================================
          VIEW: TAB LAPORAN KELAS
          ============================================== -->
     <?php if ($tab === 'kelas'): ?>
+    
     <div class="modern-card">
         <form method="GET" class="filter-grid">
             <input type="hidden" name="tab" value="kelas">
@@ -188,6 +251,8 @@ function iconCheck(bool $status) {
     </div>
 
     <?php if ($filterKelas !== ''): ?>
+    
+    <!-- STATISTIK KARTU -->
     <div class="stats-grid">
         <div class="stat-box"><div class="title">Total Siswa</div><div class="value"><?= $statTotal ?></div></div>
         <div class="stat-box"><div class="title">Sudah Lapor</div><div class="value" style="color:#059669;"><?= $statTerkirim ?></div></div>
@@ -195,6 +260,53 @@ function iconCheck(bool $status) {
         <div class="stat-box"><div class="title">Tervalidasi</div><div class="value" style="color:#2563eb;"><?= $statValid ?></div></div>
     </div>
 
+    <!-- GRAFIK 7 KEGIATAN (CHART.JS) -->
+    <div class="modern-card" style="margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1e293b; font-size: 16px;">Grafik Pelaksanaan 7 KAIH (Kelas <?= htmlspecialchars($filterKelas) ?> - <?= fmtDate($filterTanggal) ?>)</h3>
+        <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="kegiatanChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('kegiatanChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Bangun Pagi', 'Ibadah', 'Olahraga', 'Sarapan', 'Membaca', 'Membantu', 'Menabung'],
+                datasets: [{
+                    label: 'Jumlah Siswa Mengerjakan',
+                    data: [
+                        <?= $statBangun ?>, 
+                        <?= $statIbadah ?>, 
+                        <?= $statOlahraga ?>, 
+                        <?= $statSarapan ?>, 
+                        <?= $statMembaca ?>, 
+                        <?= $statMembantu ?>, 
+                        <?= $statMenabung ?>
+                    ],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#14b8a6'],
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+
+    <!-- TABEL MONITORING -->
     <div class="modern-card" style="padding: 0; overflow-x: auto;">
         <table class="table-modern">
             <thead>
@@ -202,16 +314,15 @@ function iconCheck(bool $status) {
                     <th style="width: 50px;">No</th>
                     <th>Nama Siswa</th>
                     <th>Status Laporan</th>
-                    <th style="text-align:center;" title="Bangun Pagi">🌞</th>
-                    <th style="text-align:center;" title="Ibadah">🤲</th>
-                    <th style="text-align:center;" title="Olahraga">🏃</th>
-                    <th style="text-align:center;" title="Sarapan">🍳</th>
-                    <th style="text-align:center;" title="Membaca">📚</th>
-                    <th style="text-align:center;" title="Membantu">🧹</th>
-                    <th style="text-align:center;" title="Menabung">💰</th>
-                    <th>Validasi Ortu</th>
-                    <th>Validasi Guru</th>
-                    <th>Aksi</th>
+                    <th style="text-align:center;" title="Bangun Pagi">Bangun Pagi</th>
+                    <th style="text-align:center;" title="Ibadah">Ibadah</th>
+                    <th style="text-align:center;" title="Olahraga">Olahraga</th>
+                    <th style="text-align:center;" title="Sarapan">Sarapan</th>
+                    <th style="text-align:center;" title="Membaca">Membaca</th>
+                    <th style="text-align:center;" title="Membantu">Membantu</th>
+                    <th style="text-align:center;" title="Menabung">Menabung</th>
+                    <th style="text-align:center;">Status Validasi</th>
+                    <th style="text-align:center;">Aksi Admin</th>
                 </tr>
             </thead>
             <tbody>
@@ -238,21 +349,56 @@ function iconCheck(bool $status) {
                     <?php else: ?>
                         <td colspan="7" style="text-align:center; color:#cbd5e1; font-size:12px;">Tidak ada data</td>
                     <?php endif; ?>
-
-                    <td><?= $ortu ? '<span class="badge badge-blue">✓ Ortu</span>' : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">Pending</span>' ?></td>
-                    <td><?= $guru ? '<span class="badge badge-blue">✓ Guru</span>' : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">Pending</span>' ?></td>
-                    <td><a href="?tab=siswa&kelas=<?= urlencode($row['kelas'] ?? '') ?>&siswa_id=<?= $row['siswa_id'] ?>&bulan=<?= substr($filterTanggal, 0, 7) ?>" style="color:#2563eb; text-decoration:none; font-weight:bold; font-size:12px;">Detail ➔</a></td>
+                    
+                    <td style="text-align:center;">
+                        <?php 
+                        if ($sent) {
+                            if ($ortu && $guru) {
+                                $jam_ortu = date('H:i', strtotime($row['orang_tua_validated_at']));
+                                $jam_guru = date('H:i', strtotime($row['guru_validated_at']));
+                                echo '<span class="badge badge-blue">✔️ Ortu & Guru</span><br><span style="font-size:10px; color:#64748b; margin-top:4px; display:inline-block;">Ortu: '.$jam_ortu.' | Guru: '.$jam_guru.'</span>';
+                            } elseif ($ortu) {
+                                $jam_ortu = date('H:i', strtotime($row['orang_tua_validated_at']));
+                                echo '<span class="badge badge-blue">✔️ Orang Tua</span><br><span style="font-size:10px; color:#64748b; margin-top:4px; display:inline-block;">Jam: '.$jam_ortu.'</span>';
+                            } elseif ($guru) {
+                                $jam_guru = date('H:i', strtotime($row['guru_validated_at']));
+                                echo '<span class="badge badge-blue">✔️ Guru</span><br><span style="font-size:10px; color:#64748b; margin-top:4px; display:inline-block;">Jam: '.$jam_guru.'</span>';
+                            } else {
+                                echo '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">⏳ Menunggu</span>';
+                            }
+                        } else {
+                            echo '<span style="color:#cbd5e1;">-</span>';
+                        }
+                        ?>
+                    </td>
+                    
+                    <!-- KONTROL MASTER ADMIN -->
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
+                            <a href="?tab=siswa&kelas=<?= urlencode($row['kelas'] ?? '') ?>&siswa_id=<?= $row['siswa_id'] ?>&bulan=<?= substr($filterTanggal, 0, 7) ?>" style="color:#2563eb; text-decoration:none; font-weight:bold; font-size:12px;">Detail ➡️</a>
+                            
+                            <?php if ($sent): ?>
+                                <?php if ($ortu || $guru): ?>
+                                    <a href="?aksi_admin=batal&laporan_id=<?= $row['laporan_id'] ?>&guru_id=<?= $filterGuruId ?>&kelas=<?= urlencode($filterKelas) ?>&tanggal=<?= $filterTanggal ?>" onclick="return confirm('Yakin membatalkan validasi laporan ini sebagai Admin?');" class="badge badge-red" style="text-decoration:none;">Batal Setuju</a>
+                                <?php else: ?>
+                                    <a href="?aksi_admin=setuju&laporan_id=<?= $row['laporan_id'] ?>&guru_id=<?= $filterGuruId ?>&kelas=<?= urlencode($filterKelas) ?>&tanggal=<?= $filterTanggal ?>" onclick="return confirm('Validasi paksa laporan ini sebagai Admin?');" class="badge badge-green" style="text-decoration:none;">Setujui (Admin)</a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+                    </td>
                 </tr>
                 <?php endforeach; endif; ?>
             </tbody>
         </table>
     </div>
+    
     <?php endif; ?>
 
     <!-- ==============================================
          VIEW: TAB DETAIL SISWA
          ============================================== -->
     <?php elseif ($tab === 'siswa'): ?>
+    
     <div class="modern-card">
         <form method="GET" class="filter-grid">
             <input type="hidden" name="tab" value="siswa">
@@ -310,19 +456,18 @@ function iconCheck(bool $status) {
                 <span class="badge badge-blue" style="margin-left: 10px;"><?= $score ?>/7 Kegiatan</span>
             </div>
             <div style="font-size:12px; font-weight:normal;">
-                <?= !empty($lh['orang_tua_validated_at']) ? '<span style="color:#059669;">✓ Val Ortu</span>' : '<span style="color:#cbd5e1;">Pending Ortu</span>' ?> | 
-                <?= !empty($lh['guru_validated_at']) ? '<span style="color:#059669;">✓ Val Guru</span>' : '<span style="color:#cbd5e1;">Pending Guru</span>' ?>
-                ▼
+                 <?php $is_val = !empty($lh['orang_tua_validated_at']) || !empty($lh['guru_validated_at']); ?>
+                <?= $is_val ? '<span style="color:#059669; font-weight:bold;">✔️ Sudah Divalidasi</span>' : '<span style="color:#f59e0b; font-weight:bold;">⏳ Menunggu Validasi</span>' ?>
             </div>
         </div>
         
         <div class="accordion-body" id="<?= $dayId ?>">
             <div class="detail-grid">
-                <div class="detail-item"><strong>🌞 Bangun Pagi</strong> <?= $lh['bangun'] ? '<span style="color:#059669;font-weight:bold;">Tepat Waktu</span>' : 'Belum' ?></div>
-                <div class="detail-item"><strong>🤲 Ibadah</strong> <?= $lh['ibadah'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['ibadah_catatan']) ?></span></div>
-                <div class="detail-item"><strong>🏃 Olahraga</strong> <?= $lh['olahraga'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['olahraga_jenis']) ?></span></div>
+                <div class="detail-item"><strong>🌅 Bangun Pagi</strong> <?= $lh['bangun'] ? '<span style="color:#059669;font-weight:bold;">Tepat Waktu</span>' : 'Belum' ?></div>
+                <div class="detail-item"><strong>🕌 Ibadah</strong> <?= $lh['ibadah'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['ibadah_catatan']) ?></span></div>
+                <div class="detail-item"><strong>⚽ Olahraga</strong> <?= $lh['olahraga'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['olahraga_jenis']) ?></span></div>
                 <div class="detail-item"><strong>🍳 Sarapan</strong> <?= $lh['sarapan'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['sarapan_menu']) ?></span></div>
-                <div class="detail-item"><strong>📚 Membaca</strong> <?= $lh['membaca'] ? 'Sudah (' . $lh['membaca_menit'] . ' Menit)' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['membaca_judul']) ?></span></div>
+                <div class="detail-item"><strong>📖 Membaca</strong> <?= $lh['membaca'] ? 'Sudah (' . $lh['membaca_menit'] . ' Menit)' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['membaca_judul']) ?></span></div>
                 <div class="detail-item"><strong>🧹 Membantu Ortu</strong> <?= $lh['membantu'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;"><?= htmlspecialchars($lh['membantu_jenis']) ?></span></div>
                 <div class="detail-item"><strong>💰 Menabung</strong> <?= $lh['menabung'] ? 'Sudah' : 'Belum' ?><br><span style="font-size:12px; color:#64748b;">Rp <?= number_format((int)$lh['menabung_nominal'], 0, ',', '.') ?></span></div>
             </div>
@@ -338,8 +483,8 @@ function iconCheck(bool $status) {
         Silakan pilih filter Kelas dan Nama Siswa di atas untuk melihat detail laporannya.
     </div>
     <?php endif; ?>
-
     <?php endif; ?>
+
 </div>
 
 <script>

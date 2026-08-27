@@ -1,6 +1,8 @@
 <?php
 // aplikasi/siswa/kaih.php
+session_start();
 require_once '../includes/header-kaih.php';
+require_once '../../config/database.php';
 
 $message = '';
 $message_type = '';
@@ -33,14 +35,14 @@ function ensureLaporanHarianTable($pdo) {
             `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
             `ibadah_catatan` VARCHAR(255) NULL,
             `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
-            `olahraga_jenis` VARCHAR(50) NULL,
+            `olahraga_jenis` VARCHAR(255) NULL,
             `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
-            `sarapan_menu` VARCHAR(50) NULL,
+            `sarapan_menu` VARCHAR(255) NULL,
             `membaca` TINYINT(1) NOT NULL DEFAULT 0,
             `membaca_judul` VARCHAR(255) NULL,
             `membaca_menit` INT NULL,
             `membantu` TINYINT(1) NOT NULL DEFAULT 0,
-            `membantu_jenis` VARCHAR(50) NULL,
+            `membantu_jenis` VARCHAR(255) NULL,
             `menabung` TINYINT(1) NOT NULL DEFAULT 0,
             `menabung_keterangan` VARCHAR(255) NULL,
             `orang_tua_validated_at` DATETIME NULL,
@@ -50,6 +52,12 @@ function ensureLaporanHarianTable($pdo) {
             UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
             INDEX `idx_tanggal` (`tanggal`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Cek dan tambahkan kolom bangun_catatan jika belum ada
+        $checkCol = $pdo->query("SHOW COLUMNS FROM `laporan_harian` LIKE 'bangun_catatan'");
+        if ($checkCol->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `laporan_harian` ADD `bangun_catatan` VARCHAR(255) NULL AFTER `bangun`");
+        }
         return true;
     } catch (PDOException $e) {
         return false;
@@ -146,24 +154,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
 
 // Ambil data hari ini
 $data_hari_ini = null;
+$is_validated = false;
+
 if ($siswa_id > 0) {
     try {
         $stmt = $pdo->prepare("SELECT * FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
-        $stmt->execute([$siswa_id, date('Y-m-d')]);
+        $stmt->execute([$siswa_id, $tanggal_hari_ini]);
         $data_hari_ini = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 }
 
 $total_terisi = 0;
 if ($data_hari_ini) {
-    $total_terisi = 
-        ($data_hari_ini['bangun'] ?? 0) +
-        ($data_hari_ini['ibadah'] ?? 0) +
-        ($data_hari_ini['olahraga'] ?? 0) +
-        ($data_hari_ini['sarapan'] ?? 0) +
-        ($data_hari_ini['membaca'] ?? 0) +
-        ($data_hari_ini['membantu'] ?? 0) +
-        ($data_hari_ini['menabung'] ?? 0);
+    $total_terisi = ($data_hari_ini['bangun'] ?? 0) + ($data_hari_ini['ibadah'] ?? 0) + ($data_hari_ini['olahraga'] ?? 0) + ($data_hari_ini['sarapan'] ?? 0) + ($data_hari_ini['membaca'] ?? 0) + ($data_hari_ini['membantu'] ?? 0) + ($data_hari_ini['menabung'] ?? 0);
+}
+
+// ============================================================
+// QUERY AMBIL RIWAYAT KAIH SISWA (30 HARI TERAKHIR)
+// ============================================================
+$riwayat_kaih = [];
+if ($siswa_id > 0) {
+    try {
+        $stmtR = $pdo->prepare("SELECT * FROM laporan_harian WHERE siswa_id = ? ORDER BY tanggal DESC LIMIT 30");
+        $stmtR->execute([$siswa_id]);
+        $riwayat_kaih = $stmtR->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {}
 }
 
 $today = date('Y-m-d');
@@ -619,6 +634,7 @@ if ($total_terisi >= 7) {
         </div>
     </div>
 
+    <!-- FORM PENGISIAN DENGAN DESKRIPSI -->
     <form method="POST" action="">
         <input type="hidden" name="simpan_kaih" value="1">
 
@@ -787,6 +803,7 @@ if ($total_terisi >= 7) {
                 <textarea name="menabung_keterangan" placeholder="Contoh: Hari ini saya menabung Rp5.000 dari uang saku, rencana mau ditabung untuk membeli buku..."><?php echo $data_hari_ini['menabung_keterangan'] ?? ''; ?></textarea>
             </div>
         </div>
+        <?php endforeach; ?>
 
         <button type="submit" class="btn-simpan">
             💾 <?php echo ($data_hari_ini) ? 'Update KAIH Hari Ini' : 'Simpan KAIH Hari Ini'; ?>
