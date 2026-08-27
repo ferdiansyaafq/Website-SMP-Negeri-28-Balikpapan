@@ -7,6 +7,7 @@ $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $total_kaih = 0;
 $tervalidasi = 0;
 $menunggu = 0;
+$total_refleksi = 0;
 
 if ($siswa_id > 0) {
     try {
@@ -22,139 +23,202 @@ if ($siswa_id > 0) {
         
         // Menunggu validasi
         $menunggu = $total_kaih - $tervalidasi;
+        
+        // Total Refleksi
+        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM refleksi WHERE siswa_id = ?");
+        $stmt->execute([$siswa_id]);
+        $total_refleksi = $stmt->fetchColumn();
     } catch (PDOException $e) {
         // Jika tabel belum ada, abaikan
     }
 }
 ?>
 
-<!-- Tambahkan CSS untuk responsive -->
 <style>
+    /* ============================================================
+       DASHBOARD SISWA - RESPONSIF
+       ============================================================ */
+    
+    .dashboard-wrapper {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 0 12px;
+    }
+
     .dashboard-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
         margin-top: 10px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        padding: 0 10px;
-    }
-
-    .dashboard-grid .card-absensi {
-        order: 1;
-    }
-
-    .dashboard-grid .card-kaih {
-        order: 2;
     }
 
     .dashboard-card {
         background: white;
         border-radius: 16px;
-        padding: 30px 25px;           /* Kurangi padding */
+        padding: 30px 20px 25px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         text-align: center;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
         border: 2px solid transparent;
         cursor: pointer;
-        min-height: 200px;            /* Kurangi tinggi minimum */
+        text-decoration: none;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        text-decoration: none;
-        max-width: 500px;             /* Batasi lebar maksimum */
-        margin: 0 auto;               /* Center card */
+        min-height: 180px;
         width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .dashboard-card:hover::after {
+        opacity: 1;
     }
 
     .dashboard-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card .card-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+        display: block;
     }
 
     .dashboard-card h3 {
         color: #1e293b;
-        font-size: 20px;
-        margin-bottom: 8px;
+        font-size: 18px;
+        margin-bottom: 4px;
         font-weight: 700;
     }
 
     .dashboard-card p {
         color: #64748b;
-        font-size: 14px;
+        font-size: 13px;
         margin: 0;
+        line-height: 1.4;
     }
 
-    .dashboard-card .btn-absensi {
-        margin-top: 15px;
+    .dashboard-card .btn-action {
+        margin-top: 14px;
+        padding: 6px 22px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+    }
+
+    .dashboard-card .btn-action:hover {
+        transform: scale(1.05);
+    }
+
+    .badge-count {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 14px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 10px;
+        display: inline-block;
+    }
+
+    /* ============================================================
+       WARNA CARD
+       ============================================================ */
+
+    /* Absensi - Biru */
+    .card-absensi {
+        border-color: #e0f2fe;
+    }
+    .card-absensi::after {
+        background: linear-gradient(90deg, #0284c7, #38bdf8);
+    }
+    .card-absensi:hover {
+        border-color: #0284c7;
+    }
+    .card-absensi .btn-action {
         background: #0284c7;
         color: white;
-        padding: 6px 20px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        transition: all 0.3s;
     }
-
-    .dashboard-card .btn-absensi:hover {
+    .card-absensi .btn-action:hover {
         background: #0369a1;
-        transform: scale(1.05);
     }
 
-    .dashboard-card .btn-kaih {
-        margin-top: 15px;
+    /* KAIH - Hijau */
+    .card-kaih {
+        border-color: #d1fae5;
+    }
+    .card-kaih::after {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .card-kaih:hover {
+        border-color: #10b981;
+    }
+    .card-kaih .btn-action {
         background: #10b981;
         color: white;
-        padding: 6px 20px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        transition: all 0.3s;
     }
-
-    .dashboard-card .btn-kaih:hover {
+    .card-kaih .btn-action:hover {
         background: #059669;
-        transform: scale(1.05);
     }
 
-    /* Mode Mobile - Ubah menjadi 1 kolom dengan Absensi di atas */
+    /* Refleksi - Ungu */
+    .card-refleksi {
+        border-color: #ede9fe;
+        grid-column: span 1;
+    }
+    .card-refleksi::after {
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    }
+    .card-refleksi:hover {
+        border-color: #8b5cf6;
+    }
+    .card-refleksi .btn-action {
+        background: #8b5cf6;
+        color: white;
+    }
+    .card-refleksi .btn-action:hover {
+        background: #7c3aed;
+    }
+
+    /* ============================================================
+       RESPONSIF
+       ============================================================ */
+
     @media (max-width: 768px) {
-        .dashboard-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 0 15px;
-        }
-
-        .dashboard-grid .card-absensi {
-            order: 1;
-        }
-
-        .dashboard-grid .card-kaih {
-            order: 2;
-        }
-
-        .dashboard-card {
-            padding: 25px 20px;
-            min-height: 150px;
-        }
-
-        .dashboard-card h3 {
-            font-size: 18px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .dashboard-grid {
-            gap: 12px;
+        .dashboard-wrapper {
             padding: 0 8px;
         }
 
+        .dashboard-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
         .dashboard-card {
-            padding: 20px 15px;
-            min-height: 130px;
+            padding: 22px 16px 20px;
+            min-height: 150px;
+        }
+
+        .dashboard-card .card-icon {
+            font-size: 30px;
         }
 
         .dashboard-card h3 {
@@ -162,36 +226,150 @@ if ($siswa_id > 0) {
         }
 
         .dashboard-card p {
+            font-size: 12px;
+        }
+
+        .dashboard-card .btn-action {
+            padding: 5px 16px;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+
+        /* Refleksi tetap full width di tablet */
+        .card-refleksi {
+            grid-column: span 2;
+        }
+
+        .badge-count {
+            font-size: 11px;
+            padding: 2px 12px;
+            margin-top: 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-wrapper {
+            padding: 0 4px;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .dashboard-card {
+            padding: 16px 10px 14px;
+            min-height: 120px;
+            border-radius: 12px;
+        }
+
+        .dashboard-card .card-icon {
+            font-size: 26px;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .dashboard-card p {
+            font-size: 11px;
+        }
+
+        .dashboard-card .btn-action {
+            padding: 4px 12px;
+            font-size: 10px;
+            margin-top: 8px;
+            border-radius: 14px;
+        }
+
+        /* Refleksi full width di HP */
+        .card-refleksi {
+            grid-column: span 2;
+        }
+
+        .badge-count {
+            font-size: 10px;
+            padding: 1px 10px;
+            margin-top: 6px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .dashboard-grid {
+            gap: 8px;
+        }
+
+        .dashboard-card {
+            padding: 12px 8px 10px;
+            min-height: 100px;
+            border-radius: 10px;
+        }
+
+        .dashboard-card .card-icon {
+            font-size: 22px;
+        }
+
+        .dashboard-card h3 {
             font-size: 13px;
         }
 
-        .dashboard-card .btn-absensi,
-        .dashboard-card .btn-kaih {
-            padding: 5px 16px;
-            font-size: 11px;
+        .dashboard-card p {
+            font-size: 10px;
+        }
+
+        .dashboard-card .btn-action {
+            padding: 3px 10px;
+            font-size: 9px;
+            margin-top: 6px;
+        }
+
+        .badge-count {
+            font-size: 9px;
+            padding: 1px 8px;
+            margin-top: 4px;
         }
     }
 </style>
 
-<div class="dashboard-grid">
-    
-    <!-- Card Absensi - Akan di atas di mode mobile -->
-    <a href="absensi.php" class="dashboard-card card-absensi">
-        <h3>Absensi</h3>
-        <p>Catat kehadiran hari ini</p>
-        <div class="btn-absensi">
-            Isi Absensi
-        </div>
-    </a>
+<div class="dashboard-wrapper">
 
-    <!-- Card KAIH - Akan di bawah di mode mobile -->
-    <a href="kaih.php" class="dashboard-card card-kaih">
-        <h3>KAIH</h3>
-        <p>Catat 7 Kebiasaan Anak Indonesia Hebat</p>
-        <div class="btn-kaih">
-            Isi Formulir
-        </div>
-    </a>
+    <div class="dashboard-grid">
+        
+        <!-- ============================================================
+             CARD ABSENSI
+             ============================================================ -->
+        <a href="absensi.php" class="dashboard-card card-absensi">
+            <span class="card-icon">📋</span>
+            <h3>Absensi</h3>
+            <p>Catat kehadiran hari ini</p>
+            <span class="btn-action">Isi Absensi</span>
+        </a>
+
+        <!-- ============================================================
+             CARD KAIH
+             ============================================================ -->
+        <a href="kaih.php" class="dashboard-card card-kaih">
+            <span class="card-icon">🌟</span>
+            <h3>KAIH</h3>
+            <p>7 Kebiasaan Anak Indonesia Hebat</p>
+            <span class="btn-action">Isi Formulir</span>
+        </a>
+
+        <!-- ============================================================
+             CARD REFLEKSI
+             ============================================================ -->
+        <a href="refleksi.php" class="dashboard-card card-refleksi">
+            <span class="card-icon">📝</span>
+            <h3>Refleksi</h3>
+            <p>Tulis pembelajaran &amp; pengalamanmu</p>
+            <span class="btn-action">Tulis Refleksi</span>
+            <span class="badge-count">📊 <?php echo $total_refleksi; ?> refleksi</span>
+        </a>
+
+    </div>
 
 </div>
 

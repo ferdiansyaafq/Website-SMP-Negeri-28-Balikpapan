@@ -25,8 +25,6 @@
                     <li><a href="profil.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Profil Sekolah</a></li>
                     <li><a href="informasi.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Informasi</a></li>
                     <li><a href="login.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">KAIH</a></li>
-                    <li><a href="login.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Guru</a></li>
-                    <li><a href="panduan.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Panduan</a></li>
                 </ul>
             </div>
             <div>

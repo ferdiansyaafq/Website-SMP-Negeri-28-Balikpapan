@@ -29,6 +29,7 @@ function ensureLaporanHarianTable($pdo) {
             `siswa_id` INT NOT NULL,
             `tanggal` DATE NOT NULL,
             `bangun` TINYINT(1) NOT NULL DEFAULT 0,
+            `bangun_keterangan` VARCHAR(255) NULL,
             `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
             `ibadah_catatan` VARCHAR(255) NULL,
             `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
@@ -41,7 +42,7 @@ function ensureLaporanHarianTable($pdo) {
             `membantu` TINYINT(1) NOT NULL DEFAULT 0,
             `membantu_jenis` VARCHAR(50) NULL,
             `menabung` TINYINT(1) NOT NULL DEFAULT 0,
-            `menabung_nominal` INT NULL,
+            `menabung_keterangan` VARCHAR(255) NULL,
             `orang_tua_validated_at` DATETIME NULL,
             `guru_validated_at` DATETIME NULL,
             `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +58,30 @@ function ensureLaporanHarianTable($pdo) {
 ensureLaporanHarianTable($pdo);
 
 // ============================================================
+// CEK & TAMBAHKAN KOLOM KETERANGAN
+// ============================================================
+function ensureKeteranganColumns($pdo) {
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'bangun_keterangan'");
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN bangun_keterangan VARCHAR(255) NULL AFTER bangun");
+        }
+        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'menabung_keterangan'");
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN menabung_keterangan VARCHAR(255) NULL AFTER menabung");
+        }
+        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'membaca_judul'");
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN membaca_judul VARCHAR(255) NULL AFTER membaca");
+        }
+        return true;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+ensureKeteranganColumns($pdo);
+
+// ============================================================
 // PROSES SIMPAN KAIH
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
@@ -70,6 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
     $membantu = isset($_POST['membantu']) && $_POST['membantu'] == 1 ? 1 : 0;
     $menabung = isset($_POST['menabung']) && $_POST['menabung'] == 1 ? 1 : 0;
     
+    $bangun_keterangan = trim($_POST['bangun_keterangan'] ?? '');
+    $membaca_judul = trim($_POST['membaca_judul'] ?? '');
+    $menabung_keterangan = trim($_POST['menabung_keterangan'] ?? '');
+    
     if ($siswa_id > 0) {
         try {
             $stmt = $pdo->prepare("SELECT id FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
@@ -79,16 +108,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
             if ($existing) {
                 $stmt = $pdo->prepare("UPDATE laporan_harian SET 
                     bangun = ?, ibadah = ?, olahraga = ?, sarapan = ?, 
-                    membaca = ?, membantu = ?, menabung = ?, updated_at = NOW() 
+                    membaca = ?, membantu = ?, menabung = ?,
+                    bangun_keterangan = ?, membaca_judul = ?, menabung_keterangan = ?,
+                    updated_at = NOW() 
                     WHERE siswa_id = ? AND tanggal = ?");
-                $stmt->execute([$bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung, $siswa_id, $tanggal]);
+                $stmt->execute([
+                    $bangun, $ibadah, $olahraga, $sarapan, 
+                    $membaca, $membantu, $menabung,
+                    $bangun_keterangan, $membaca_judul, $menabung_keterangan,
+                    $siswa_id, $tanggal
+                ]);
                 $message = '✅ Data KAIH berhasil diperbarui!';
                 $message_type = 'success';
             } else {
                 $stmt = $pdo->prepare("INSERT INTO laporan_harian (
-                    siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
-                $stmt->execute([$siswa_id, $tanggal, $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung]);
+                    siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
+                    bangun_keterangan, membaca_judul, menabung_keterangan,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+                $stmt->execute([
+                    $siswa_id, $tanggal,
+                    $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
+                    $bangun_keterangan, $membaca_judul, $menabung_keterangan
+                ]);
                 $message = '✅ Data KAIH berhasil disimpan! Terus jaga kebiasaan baik ya! 🎉';
                 $message_type = 'success';
             }
@@ -130,7 +172,6 @@ if ($last_submit !== $today) {
     $_SESSION['last_kaih_date'] = $today;
 }
 
-// Motivasi berdasarkan progress
 $motivation = '';
 $emoji = '';
 if ($total_terisi >= 7) {
@@ -152,11 +193,6 @@ if ($total_terisi >= 7) {
 ?>
 
 <style>
-    /* ============================================================
-       DESIGN GEN Z - MODERN, FUN, COLORFUL
-       ============================================================ */
-    
-    /* Font & Base */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
     
     .kaih-container {
@@ -166,9 +202,8 @@ if ($total_terisi >= 7) {
         padding: 0 12px;
     }
 
-    /* ===== HEADER ===== */
     .kaih-header {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+        background: linear-gradient(135deg, #f97316, #ea580c, #fb923c);
         border-radius: 24px;
         padding: 30px 24px 24px;
         margin-bottom: 20px;
@@ -176,7 +211,7 @@ if ($total_terisi >= 7) {
         color: white;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 8px 32px rgba(249, 115, 22, 0.3);
     }
     .kaih-header::before {
         content: '';
@@ -224,7 +259,6 @@ if ($total_terisi >= 7) {
         font-weight: 700;
     }
 
-    /* ===== PROGRESS CARD ===== */
     .progress-card {
         background: white;
         border-radius: 20px;
@@ -251,7 +285,7 @@ if ($total_terisi >= 7) {
     .progress-card .number {
         font-size: 52px;
         font-weight: 800;
-        background: linear-gradient(135deg, #6366f1, #a855f7);
+        background: linear-gradient(135deg, #f97316, #ea580c, #fb923c);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -273,7 +307,7 @@ if ($total_terisi >= 7) {
     }
     .progress-bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+        background: linear-gradient(90deg, #fb923c, #f97316, #ea580c);
         border-radius: 10px;
         transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         width: 0%;
@@ -291,8 +325,8 @@ if ($total_terisi >= 7) {
         color: #16a34a;
     }
     .progress-card .status-text.pending {
-        background: #fef3c7;
-        color: #d97706;
+        background: #ffedd5;
+        color: #9a3412;
     }
     .progress-card .status-text.empty {
         background: #f1f5f9;
@@ -308,49 +342,71 @@ if ($total_terisi >= 7) {
         font-size: 20px;
     }
 
-    /* ===== HABIT ITEMS ===== */
+    /* ===== HABIT ITEMS - Perbaikan Tata Letak ===== */
     .habit-item {
         background: white;
         border-radius: 16px;
-        padding: 14px 18px;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        padding: 16px 18px;
+        margin-bottom: 12px;
         transition: all 0.3s ease;
         border: 2px solid #f1f5f9;
         box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        cursor: pointer;
     }
     .habit-item:hover {
-        border-color: #e2e8f0;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        border-color: #fed7aa;
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.08);
     }
+
+    /* HEADER: Judul di kiri, Opsi di kanan */
+    .habit-item .habit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .habit-item .habit-left {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .habit-item .habit-right {
+        flex-shrink: 0;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding-top: 2px;
+    }
+
     .habit-item .label {
         font-weight: 600;
         font-size: 15px;
         color: #1e293b;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
     .habit-item .label .icon {
-        font-size: 22px;
-        width: 36px;
-        height: 36px;
+        font-size: 20px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f8fafc;
-        border-radius: 12px;
-    }
-    .habit-item .options {
-        display: flex;
-        gap: 6px;
-        align-items: center;
+        background: #ffedd5;
+        border-radius: 10px;
         flex-shrink: 0;
     }
+    .habit-item .description {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 2px;
+        padding-left: 42px;
+        line-height: 1.4;
+    }
+
+    /* Opsi Ya/Tidak */
     .habit-item .options label {
         display: flex;
         align-items: center;
@@ -367,7 +423,7 @@ if ($total_terisi >= 7) {
         font-family: 'Poppins', sans-serif;
     }
     .habit-item .options label:hover {
-        background: #f1f5f9;
+        background: #ffedd5;
         transform: scale(1.02);
     }
     .habit-item .options label input[type="radio"] {
@@ -386,11 +442,45 @@ if ($total_terisi >= 7) {
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
     }
 
-    /* ===== SUBMIT BUTTON ===== */
+    /* Keterangan di bawah */
+    .habit-item .keterangan-wrapper {
+        margin-top: 10px;
+        padding-left: 42px;
+        display: none;
+    }
+    .habit-item .keterangan-wrapper.show {
+        display: block;
+    }
+    .habit-item .keterangan-wrapper .label-keterangan {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .habit-item .keterangan-wrapper textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.3s;
+        background: #fafafa;
+        resize: vertical;
+        min-height: 50px;
+    }
+    .habit-item .keterangan-wrapper textarea:focus {
+        outline: none;
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        background: white;
+    }
+
     .btn-simpan {
         width: 100%;
         padding: 16px;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        background: linear-gradient(135deg, #f97316, #ea580c);
         color: white;
         border: none;
         border-radius: 16px;
@@ -399,38 +489,33 @@ if ($total_terisi >= 7) {
         cursor: pointer;
         transition: all 0.3s ease;
         margin-top: 8px;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
         font-family: 'Poppins', sans-serif;
         letter-spacing: -0.3px;
     }
     .btn-simpan:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
-    }
-    .btn-simpan:active {
-        transform: translateY(0);
+        box-shadow: 0 8px 32px rgba(249, 115, 22, 0.4);
     }
 
-    /* ===== TIPS ===== */
     .tips-box {
         margin-top: 16px;
         padding: 14px 18px;
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        background: linear-gradient(135deg, #ffedd5, #fed7aa);
         border-radius: 16px;
-        border: 1px dashed #cbd5e1;
+        border: 1px dashed #fb923c;
         text-align: center;
-        color: #475569;
+        color: #9a3412;
         font-size: 13px;
         font-weight: 500;
     }
     .tips-box strong {
-        color: #6366f1;
+        color: #f97316;
     }
     .tips-box .sparkle {
         font-size: 18px;
     }
 
-    /* ===== ALERT ===== */
     .alert {
         padding: 14px 18px;
         border-radius: 14px;
@@ -453,64 +538,45 @@ if ($total_terisi >= 7) {
         border: 1px solid #fecaca;
     }
 
-    /* ===== RESPONSIVE ===== */
     @media (max-width: 500px) {
         .kaih-container { padding: 0 6px; }
         .kaih-header { padding: 24px 16px 20px; }
         .kaih-header .title { font-size: 19px; }
         .kaih-header .subtitle { font-size: 13px; }
         .progress-card .number { font-size: 42px; }
-        .habit-item {
-            padding: 12px 14px;
-            flex-wrap: wrap;
-            gap: 6px 0;
+        
+        .habit-item { padding: 12px 14px; }
+        .habit-item .habit-header {
+            flex-direction: column;
+            align-items: stretch;
         }
-        .habit-item .label {
-            font-size: 14px;
-            width: 100%;
-        }
-        .habit-item .label .icon {
-            width: 30px;
-            height: 30px;
-            font-size: 18px;
-        }
-        .habit-item .options {
-            width: 100%;
+        .habit-item .habit-right {
             justify-content: flex-start;
-            padding-left: 46px;
+            padding-left: 42px;
+            margin-top: 2px;
         }
-        .habit-item .options label {
-            padding: 4px 14px;
-            font-size: 13px;
-        }
+        .habit-item .label { font-size: 14px; }
+        .habit-item .label .icon { width: 28px; height: 28px; font-size: 16px; }
+        .habit-item .description { padding-left: 38px; font-size: 11px; }
+        .habit-item .keterangan-wrapper { padding-left: 0; }
+        .habit-item .options label { padding: 4px 14px; font-size: 13px; }
+        
         .btn-simpan { font-size: 15px; padding: 14px; }
         .progress-card .status-text { font-size: 13px; }
     }
 
     @media (max-width: 400px) {
-        .habit-item .options label {
-            padding: 3px 10px;
-            font-size: 12px;
-        }
-        .habit-item .label {
-            font-size: 13px;
-        }
-        .habit-item .label .icon {
-            width: 26px;
-            height: 26px;
-            font-size: 16px;
-        }
-        .habit-item .options {
-            padding-left: 38px;
-        }
+        .habit-item .options label { padding: 3px 10px; font-size: 12px; }
+        .habit-item .label { font-size: 13px; }
+        .habit-item .label .icon { width: 24px; height: 24px; font-size: 14px; }
+        .habit-item .description { padding-left: 34px; font-size: 10px; }
+        .habit-item .habit-right { padding-left: 34px; }
+        .habit-item .keterangan-wrapper textarea { font-size: 12px; padding: 6px 10px; min-height: 40px; }
     }
 </style>
 
 <div class="kaih-container">
 
-    <!-- ============================================================
-         HEADER
-         ============================================================ -->
     <div class="kaih-header">
         <span class="header-emoji">🌟</span>
         <div class="title">Hai, <?php echo htmlspecialchars($nama_siswa); ?>!</div>
@@ -519,18 +585,12 @@ if ($total_terisi >= 7) {
         </div>
     </div>
 
-    <!-- ============================================================
-         ALERT
-         ============================================================ -->
     <?php if ($message): ?>
         <div class="alert alert-<?php echo $message_type; ?>">
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
 
-    <!-- ============================================================
-         PROGRESS
-         ============================================================ -->
     <div class="progress-card">
         <div class="label">🎯 Progress Hari Ini</div>
         <div class="number-wrap">
@@ -559,126 +619,180 @@ if ($total_terisi >= 7) {
         </div>
     </div>
 
-    <!-- ============================================================
-         FORM
-         ============================================================ -->
     <form method="POST" action="">
         <input type="hidden" name="simpan_kaih" value="1">
 
         <!-- 1. Bangun Pagi -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">🌅</span> Bangun Pagi
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">🌅</span> Bangun Pagi
+                    </div>
+                    <div class="description">Bangun sebelum pukul 05.30 dan siapkan diri untuk beraktivitas</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="bangun" value="1" <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="bangun" value="0" <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="bangun" value="1" <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="bangun" value="0" <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'show' : ''; ?>">
+                <span class="label-keterangan">📝 Ceritakan pengalaman bangun pagimu:</span>
+                <textarea name="bangun_keterangan" placeholder="Contoh: Saya bangun pukul 05.00, langsung sholat subuh dan bersiap ke sekolah..."><?php echo $data_hari_ini['bangun_keterangan'] ?? ''; ?></textarea>
             </div>
         </div>
 
         <!-- 2. Beribadah -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">🕌</span> Beribadah
-            </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="ibadah" value="1" <?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="ibadah" value="0" <?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">🕌</span> Beribadah
+                    </div>
+                    <div class="description">Laksanakan ibadah sesuai keyakinan dan ajaran agama masing-masing</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="ibadah" value="1" <?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="ibadah" value="0" <?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 3. Berolahraga -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">⚽</span> Berolahraga
-            </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="olahraga" value="1" <?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="olahraga" value="0" <?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">⚽</span> Berolahraga
+                    </div>
+                    <div class="description">Lakukan aktivitas fisik minimal 30 menit untuk menjaga kesehatan</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="olahraga" value="1" <?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="olahraga" value="0" <?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 4. Sarapan Sehat -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">🥗</span> Sarapan Sehat
-            </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="sarapan" value="1" <?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="sarapan" value="0" <?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">🥗</span> Sarapan Sehat
+                    </div>
+                    <div class="description">Konsumsi makanan bergizi seimbang di pagi hari untuk energi belajar</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="sarapan" value="1" <?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="sarapan" value="0" <?php echo ($data_hari_ini && $data_hari_ini['sarapan'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 5. Gemar Belajar -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">📚</span> Gemar Belajar
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">📚</span> Gemar Belajar
+                    </div>
+                    <div class="description">Luangkan waktu minimal 1 jam untuk membaca dan belajar hal baru</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="membaca" value="1" <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="membaca" value="0" <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="membaca" value="1" <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="membaca" value="0" <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'show' : ''; ?>">
+                <span class="label-keterangan">📖 Apa yang kamu pelajari / baca hari ini?</span>
+                <textarea name="membaca_judul" placeholder="Contoh: Saya membaca buku IPA tentang tata surya dan belajar 5 kosakata baru..."><?php echo $data_hari_ini['membaca_judul'] ?? ''; ?></textarea>
             </div>
         </div>
 
         <!-- 6. Membantu Orang Tua -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">🤝</span> Membantu Orang Tua
-            </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="membantu" value="1" <?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="membantu" value="0" <?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">🤝</span> Membantu Orang Tua
+                    </div>
+                    <div class="description">Tunjukkan rasa sayang dengan membantu pekerjaan rumah tangga</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="membantu" value="1" <?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="membantu" value="0" <?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 7. Menabung -->
         <div class="habit-item">
-            <div class="label">
-                <span class="icon">💰</span> Menabung
+            <div class="habit-header">
+                <div class="habit-left">
+                    <div class="label">
+                        <span class="icon">💰</span> Menabung
+                    </div>
+                    <div class="description">Sisihkan sebagian uang saku untuk ditabung sebagai kebiasaan baik</div>
+                </div>
+                <div class="habit-right">
+                    <div class="options">
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'checked-ya' : ''; ?>">
+                            <input type="radio" name="menabung" value="1" <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'checked' : ''; ?> required> Ya
+                        </label>
+                        <label class="<?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 0) ? 'checked-tidak' : ''; ?>">
+                            <input type="radio" name="menabung" value="0" <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 0) ? 'checked' : ''; ?>> Tidak
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div class="options">
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'checked-ya' : ''; ?>">
-                    <input type="radio" name="menabung" value="1" <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'checked' : ''; ?> required> Ya
-                </label>
-                <label class="<?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 0) ? 'checked-tidak' : ''; ?>">
-                    <input type="radio" name="menabung" value="0" <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 0) ? 'checked' : ''; ?>> Tidak
-                </label>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'show' : ''; ?>">
+                <span class="label-keterangan">💰 Ceritakan pengalaman menabungmu:</span>
+                <textarea name="menabung_keterangan" placeholder="Contoh: Hari ini saya menabung Rp5.000 dari uang saku, rencana mau ditabung untuk membeli buku..."><?php echo $data_hari_ini['menabung_keterangan'] ?? ''; ?></textarea>
             </div>
         </div>
 
-        <!-- Submit Button -->
         <button type="submit" class="btn-simpan">
             💾 <?php echo ($data_hari_ini) ? 'Update KAIH Hari Ini' : 'Simpan KAIH Hari Ini'; ?>
         </button>
     </form>
 
-    <!-- ============================================================
-         TIPS
-         ============================================================ -->
     <div class="tips-box">
         <span class="sparkle">💡</span>
         <strong>Tips:</strong> Catat kebiasaan baikmu setiap hari! 
@@ -688,25 +802,33 @@ if ($total_terisi >= 7) {
 </div>
 
 <script>
-// Styling otomatis saat radio dipilih
 document.querySelectorAll('.habit-item input[type="radio"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
-        var parent = this.closest('.options');
-        parent.querySelectorAll('label').forEach(function(label) {
+        var parent = this.closest('.habit-item');
+        var options = parent.querySelector('.options');
+        var keterangan = parent.querySelector('.keterangan-wrapper');
+        
+        options.querySelectorAll('label').forEach(function(label) {
             label.classList.remove('checked-ya', 'checked-tidak');
         });
+        
         if (this.checked) {
             var label = this.closest('label');
             if (this.value == 1) {
                 label.classList.add('checked-ya');
+                if (keterangan) {
+                    keterangan.classList.add('show');
+                }
             } else {
                 label.classList.add('checked-tidak');
+                if (keterangan) {
+                    keterangan.classList.remove('show');
+                }
             }
         }
     });
 });
 
-// Animasi progress bar saat load
 document.addEventListener('DOMContentLoaded', function() {
     const fill = document.querySelector('.progress-bar-fill');
     if (fill) {

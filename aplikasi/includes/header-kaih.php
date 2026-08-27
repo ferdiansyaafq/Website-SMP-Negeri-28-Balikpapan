@@ -243,7 +243,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
-        <img src="<?php echo BASE_URL; ?>assets/img/logo-sekolah.png" alt="Logo">
+        <img src="<?php echo BASE_URL; ?>assets/img/logo-sekolah.png" alt="Logo Sekolah">
         <h2><?php echo ucfirst($role); ?> KAIH</h2>
         <p>SMP Negeri 28 Balikpapan</p>
     </div>
@@ -255,6 +255,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
     <nav class="menu">
         <?php if ($role === 'admin'): ?>
+            <!-- MENU ADMIN -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Dashboard
             </a>
@@ -270,8 +271,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
                 <span class="icon">📄</span> Laporan
             </a>
+            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
+                <span class="icon">📝</span> Refleksi
+            </a>
 
         <?php elseif ($role === 'guru'): ?>
+            <!-- MENU GURU -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Dashboard
             </a>
@@ -281,8 +286,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Rekap
             </a>
+            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
+                <span class="icon">📝</span> Refleksi
+            </a>
 
         <?php elseif ($role === 'siswa'): ?>
+            <!-- MENU SISWA -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Dashboard
             </a>
@@ -295,8 +304,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Rekap
             </a>
+            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
+                <span class="icon">✍️</span> Refleksi
+            </a>
 
         <?php elseif ($role === 'orang_tua'): ?>
+            <!-- MENU ORANG TUA -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Dashboard
             </a>
@@ -305,6 +318,9 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             </a>
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
                 <span class="icon">📊</span> Rekap
+            </a>
+            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
+                <span class="icon">📝</span> Refleksi
             </a>
         <?php endif; ?>
 
