@@ -19,6 +19,13 @@ if ($siswa_id > 0) {
 }
 
 // ============================================================
+// AMBIL BULAN YANG DIPILIH DARI GET
+// ============================================================
+$bulan_terpilih = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
+$bulan = date('m', strtotime($bulan_terpilih . '-01'));
+$tahun = date('Y', strtotime($bulan_terpilih . '-01'));
+
+// ============================================================
 // FUNGSI CEK & LENGKAPI ABSENSI BULANAN
 // ============================================================
 function lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun) {
@@ -43,7 +50,7 @@ function lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun) {
                 if (!$existing && $tgl_str < date('Y-m-d')) {
                     $stmt = $pdo->prepare("INSERT INTO absensi (
                         siswa_id, tanggal, status, deskripsi, catatan, created_at, updated_at
-                    ) VALUES (?, ?, 'alpha', 'Sesi kelas reguler', 'Absen', NOW(), NOW())");
+                    ) VALUES (?, ?, 'alpha', 'Sesi kelas reguler', 'Tidak absen (otomatis)', NOW(), NOW())");
                     $stmt->execute([$siswa_id, $tgl_str]);
                 }
             }
@@ -70,14 +77,11 @@ function lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun) {
             $tgl_str = $current->format('Y-m-d');
             $hari = $current->format('N');
             
-            // Hanya proses hari Senin-Jumat (1-5) dan tanggal sudah lewat
             if ($hari >= 1 && $hari <= 5 && $tgl_str < date('Y-m-d')) {
-                // Cek apakah sudah ada data KAIH untuk tanggal ini
                 $stmt = $pdo->prepare("SELECT id FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
                 $stmt->execute([$siswa_id, $tgl_str]);
                 $existing = $stmt->fetch();
                 
-                // Jika belum ada data, buat data kosong (semua 0)
                 if (!$existing) {
                     $stmt = $pdo->prepare("INSERT INTO laporan_harian (
                         siswa_id, tanggal, bangun, ibadah, ibadah_catatan,
@@ -104,19 +108,19 @@ function lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun) {
 // ============================================================
 // AMBIL DATA REKAP
 // ============================================================
-$bulan_ini = date('Y-m');
+$bulan_ini = $tahun . '-' . $bulan;
 $rekap_absensi = [];
 $rekap_kaih = [];
 
-$nama_bulan = bulanIndo(date('F'));
-$tahun = date('Y');
+$nama_bulan = bulanIndo(date('F', strtotime($bulan_ini . '-01')));
+$tahun_display = $tahun;
 
 if ($siswa_id > 0) {
     // LENGKAPI DATA ABSENSI BULAN INI
-    lengkapiAbsensiBulanan($pdo, $siswa_id, date('m'), date('Y'));
+    lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun);
     
     // LENGKAPI DATA KAIH BULAN INI
-    lengkapiKAIHBulanan($pdo, $siswa_id, date('m'), date('Y'));
+    lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun);
     
     // Rekap Absensi
     try {
@@ -160,23 +164,17 @@ foreach ($rekap_absensi as $row) {
     }
 }
 
-$total_tidak_hadir = $total_alpha + $total_izin + $total_sakit;
-
 // ============================================================
 // HITUNG STATISTIK KAIH
 // ============================================================
 $total_kaih = count($rekap_kaih);
 $total_kebiasaan = 0;
-$hari_dengan_data = 0;
 
 foreach ($rekap_kaih as $row) {
-    $total = ($row['bangun'] ?? 0) + ($row['ibadah'] ?? 0) + ($row['olahraga'] ?? 0) + 
-             ($row['sarapan'] ?? 0) + ($row['membaca'] ?? 0) + ($row['membantu'] ?? 0) + 
-             ($row['menabung'] ?? 0);
-    $total_kebiasaan += $total;
-    if ($total > 0) {
-        $hari_dengan_data++;
-    }
+    $total_kebiasaan += 
+        ($row['bangun'] ?? 0) + ($row['ibadah'] ?? 0) + ($row['olahraga'] ?? 0) + 
+        ($row['sarapan'] ?? 0) + ($row['membaca'] ?? 0) + ($row['membantu'] ?? 0) + 
+        ($row['menabung'] ?? 0);
 }
 
 // ============================================================
@@ -214,7 +212,25 @@ function getHariSekolahBulan($bulan, $tahun) {
     return $count;
 }
 
-$total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
+$total_hari_sekolah = getHariSekolahBulan($bulan, $tahun);
+
+// ============================================================
+// FUNGSI UNTUK MENGHASILKAN OPSI BULAN (1 TAHUN TERAKHIR)
+// ============================================================
+function getBulanOptions($selected) {
+    $options = '';
+    $current = new DateTime();
+    $current->modify('-11 months'); // Mulai dari 11 bulan yang lalu
+    
+    for ($i = 0; $i < 12; $i++) {
+        $value = $current->format('Y-m');
+        $label = bulanIndo($current->format('F')) . ' ' . $current->format('Y');
+        $selected_attr = ($value == $selected) ? 'selected' : '';
+        $options .= '<option value="' . $value . '" ' . $selected_attr . '>' . $label . '</option>';
+        $current->modify('+1 month');
+    }
+    return $options;
+}
 ?>
 
 <style>
@@ -303,6 +319,44 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
     .badge-kebiasaan.not-done { background: #fee2e2; color: #dc2626; }
     .badge-kebiasaan.empty { background: #f1f5f9; color: #94a3b8; }
 
+    /* ============================================================
+       DROPDOWN FILTER BULAN
+       ============================================================ */
+    .filter-bulan-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 15px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .filter-bulan-wrapper label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+    }
+    .filter-bulan-wrapper select {
+        padding: 8px 16px;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        min-width: 160px;
+    }
+    .filter-bulan-wrapper select:hover {
+        border-color: #0284c7;
+    }
+    .filter-bulan-wrapper select:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2,132,199,0.1);
+    }
+
     @media (max-width: 768px) {
         .rekap-card { padding: 14px 12px; }
         .rekap-card h3 { font-size: 15px; }
@@ -312,6 +366,14 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
         .stat-item .number { font-size: 18px; }
         .stat-item .label { font-size: 10px; }
         .stat-rekap { gap: 6px; }
+        .filter-bulan-wrapper {
+            justify-content: center;
+        }
+        .filter-bulan-wrapper select {
+            padding: 6px 12px;
+            font-size: 13px;
+            min-width: 140px;
+        }
     }
 
     @media (max-width: 600px) {
@@ -330,6 +392,21 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
         .stat-item .label { font-size: 9px; }
         .stat-rekap { grid-template-columns: repeat(2, 1fr); gap: 4px; }
         .badge-kebiasaan { font-size: 8px; padding: 1px 5px; }
+        .filter-bulan-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+        }
+        .filter-bulan-wrapper select {
+            width: 100%;
+            min-width: unset;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        .filter-bulan-wrapper label {
+            font-size: 13px;
+            text-align: center;
+        }
     }
 </style>
 
@@ -340,7 +417,7 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
          ============================================================ -->
     <div class="rekap-card" style="text-align: center; background: linear-gradient(135deg, #0284c7, #0369a1); color: white;">
         <h3 style="color: white; justify-content: center;">
-             Rekap Bulan <?php echo $nama_bulan . ' ' . $tahun; ?>
+            📊 Rekap Bulan <?php echo $nama_bulan . ' ' . $tahun_display; ?>
         </h3>
         <div style="font-size: 14px; opacity: 0.9;">
             <?php echo htmlspecialchars($nama_siswa); ?> - <?php echo htmlspecialchars($kelas); ?>
@@ -348,10 +425,22 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
     </div>
 
     <!-- ============================================================
+         FILTER BULAN - DROPDOWN
+         ============================================================ -->
+    <div class="filter-bulan-wrapper">
+        <label for="bulan_filter">📅 Pilih Bulan:</label>
+        <form method="GET" action="" id="formFilterBulan">
+            <select name="bulan" id="bulan_filter" onchange="this.form.submit()">
+                <?php echo getBulanOptions($bulan_terpilih); ?>
+            </select>
+        </form>
+    </div>
+
+    <!-- ============================================================
          REKAP ABSENSI
          ============================================================ -->
     <div class="rekap-card">
-        <h3> Rekap Absensi Bulan <?php echo $nama_bulan . ' ' . $tahun; ?></h3>
+        <h3>📋 Rekap Absensi Bulan <?php echo $nama_bulan . ' ' . $tahun_display; ?></h3>
         
         <div class="stat-rekap">
             <div class="stat-item total">
@@ -406,7 +495,7 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
          REKAP KAIH
          ============================================================ -->
     <div class="rekap-card">
-        <h3> Rekap KAIH Bulan <?php echo $nama_bulan . ' ' . $tahun; ?></h3>
+        <h3>🌟 Rekap KAIH Bulan <?php echo $nama_bulan . ' ' . $tahun_display; ?></h3>
         
         <div class="stat-rekap">
             <div class="stat-item total">
@@ -455,7 +544,6 @@ $total_hari_sekolah = getHariSekolahBulan(date('m'), date('Y'));
                                  ($row['sarapan'] ?? 0) + ($row['membaca'] ?? 0) + ($row['membantu'] ?? 0) + 
                                  ($row['menabung'] ?? 0);
                         
-                        // Tentukan class untuk badge
                         $class_bangun = $row['bangun'] ? 'done' : 'not-done';
                         $class_ibadah = $row['ibadah'] ? 'done' : 'not-done';
                         $class_olahraga = $row['olahraga'] ? 'done' : 'not-done';

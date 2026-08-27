@@ -1,6 +1,7 @@
 <?php
 // aplikasi/siswa/absensi.php
 require_once '../includes/header-kaih.php';
+require_once '../../config/database.php';
 
 $message = '';
 $message_type = '';
@@ -405,7 +406,7 @@ foreach ($tanggal_minggu as $tgl) {
                                 <form method="POST" action="" style="display: inline;">
                                     <input type="hidden" name="absen" value="1">
                                     <input type="hidden" name="tanggal" value="<?php echo $tgl_str; ?>">
-                                    <button type="submit" class="btn-hadir">Hadir</button>
+                                    <button type="submit" class="btn-hadir">Klik Untuk Hadir</button>
                                 </form>
                             <?php endif; ?>
                         </td>

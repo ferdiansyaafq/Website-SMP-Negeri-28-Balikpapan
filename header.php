@@ -17,7 +17,7 @@ if (!function_exists('pickFirstExistingImage')) {
 }
 
 $logoSekolah = pickFirstExistingImage([
-    'assets/img/logo-sekolah.png',
+    'assets/img/logo-sekolah1.jpeg',
     'assets/img/logo.png',
 ], 'assets/img/logo-sekolah.svg');
 
@@ -28,7 +28,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head> <title>SMP Negeri 28 Balikpapan</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/x-icon" href="assets/img/logo-sekolah.png">
+<link rel="icon" type="image/x-icon" href="assets/img/logo1.jpeg">
 <link rel="shortcut icon" type="image/x-icon" href="assets/img/logo-sekolah.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -401,7 +401,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
         <div class="mobile-submenu" id="submenu-lainnya">
             <a href="login.php">Login</a>
             <a href="lainnya.php#faq">FAQ</a>
-            <a href="lainnya.php#kontak">Kontak</a>
+            <a href="lainnya.php#Survei-Pelayanan">Survei Pelayanan</a>
         </div>
     </div>
 </div>
@@ -451,7 +451,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
                 <div class="dropdown-menu">
                     <a href="login.php">Login</a>
                     <a href="lainnya.php#faq">FAQ</a>
-                    <a href="lainnya.php#kontak">Kontak</a>
+                    <a href="proses_survei.php#Survey-Pelayanan">Survei Pelayanan</a>
                 </div>
             </div>
         </nav>

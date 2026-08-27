@@ -1,5 +1,31 @@
 <?php
 // aplikasi/ortu/monitoring.php
+session_start();
+require_once '../../config/database.php';
+
+if (isset($_GET['aksi']) && isset($_GET['id'])) {
+    $id_laporan = (int)$_GET['id'];
+    $aksi = $_GET['aksi'];
+    
+    try {
+        if ($aksi === 'setuju') {
+            $sql = "UPDATE laporan_harian SET orang_tua_validated_at = NOW() WHERE id = :id";
+        } elseif ($aksi === 'batal') {
+            // BATAL SETUJU MERESET KEDUANYA AGAR KEMBALI PENDING
+            $sql = "UPDATE laporan_harian SET guru_validated_at = NULL, orang_tua_validated_at = NULL WHERE id = :id";
+        }
+        
+        if (isset($sql)) {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $id_laporan]);
+        }
+        
+        $nisn_param = isset($_GET['nisn']) ? '&nisn=' . urlencode($_GET['nisn']) : '';
+        header("Location: monitoring.php?bulan=" . urlencode($_GET['bulan'] ?? date('Y-m')) . $nisn_param);
+        exit;
+    } catch (PDOException $e) {}
+}
+
 require_once '../includes/header-kaih.php';
 
 // Halaman khusus untuk role orang_tua
