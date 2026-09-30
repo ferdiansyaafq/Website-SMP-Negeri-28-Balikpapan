@@ -1,5 +1,5 @@
 <?php
-$page_title = "Lainnya - Login, FAQ, Survei Pelayanan";
+$page_title = "FAQ - SMP Negeri 28 Balikpapan";
 include 'header.php';
 ?>
 
@@ -23,7 +23,7 @@ include 'header.php';
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 40px auto;
     padding: 0 40px;
 }
@@ -34,7 +34,6 @@ include 'header.php';
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     margin-bottom: 30px;
-    scroll-margin-top: 100px;
 }
 
 .section-title {
@@ -44,14 +43,6 @@ include 'header.php';
     font-weight: 800;
     border-left: 5px solid #0284c7;
     padding-left: 15px;
-}
-
-.text-content {
-    font-size: 16px;
-    color: #475569;
-    line-height: 1.9;
-    margin-bottom: 15px;
-    text-align: justify;
 }
 
 .faq-item {
@@ -91,62 +82,67 @@ include 'header.php';
     display: block;
 }
 
-/* ========================================= */
-/* CSS UNTUK RATING BINTANG INTERAKTIF       */
-/* ========================================= */
-.star-rating {
-    display: flex;
-    flex-direction: row-reverse; /* Membalik urutan agar efek hover CSS berfungsi ke kiri */
-    justify-content: flex-end;
-    gap: 5px;
+/* CTA Card untuk Survey */
+.cta-card {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(2, 132, 199, 0.3);
 }
-.star-rating input {
-    display: none; /* Sembunyikan radio button asli */
+
+.cta-card h3 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 10px;
 }
-.star-rating label {
-    font-size: 40px;
-    color: #d1d5db; /* Warna abu-abu bawaan */
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
+
+.cta-card p {
+    font-size: 15px;
+    opacity: 0.9;
+    margin-bottom: 20px;
 }
-/* Efek menyala saat di-hover atau diklik */
-.star-rating label:hover,
-.star-rating label:hover ~ label,
-.star-rating input:checked ~ label {
-    color: #fbbf24; /* Warna kuning menyala */
+
+.btn-cta {
+    display: inline-block;
+    padding: 14px 32px;
+    background: white;
+    color: #0284c7;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 @media (max-width: 768px) {
-    .page-header {
-        padding: 40px 20px;
-    }
-    .page-header h1 {
-        font-size: 26px;
-    }
-    .container {
-        padding: 0 20px;
-        margin: 20px auto;
-    }
-    .section {
-        padding: 25px;
-    }
-    .section-title {
-        font-size: 22px;
-    }
+    .page-header { padding: 40px 20px; }
+    .page-header h1 { font-size: 26px; }
+    .container { padding: 0 20px; margin: 20px auto; }
+    .section { padding: 25px; }
+    .section-title { font-size: 22px; }
+    .cta-card { padding: 30px 20px; }
+    .cta-card h3 { font-size: 20px; }
 }
 </style>
 
 <div class="page-header">
-    <h1>Lainnya</h1>
-    <p>Login, FAQ dan Form Survei Pelayanan</p>
+    <h1>❓ FAQ</h1>
+    <p>Pertanyaan yang Sering Diajukan</p>
 </div>
 
 <div class="container">
-    
-    <!-- ================= SECTION FAQ ================= -->
-    <div class="section" id="faq">
-        <h2 class="section-title">❓ Pertanyaan yang Sering Diajukan (FAQ)</h2>
-        
+
+    <!-- FAQ -->
+    <div class="section">
+        <h2 class="section-title">❓ Pertanyaan yang Sering Diajukan</h2>
+
         <div class="faq-item">
             <div class="faq-question" onclick="toggleFaq(this)">
                 Apa itu KAIH?
@@ -193,69 +189,26 @@ include 'header.php';
                 <span>▾</span>
             </div>
             <div class="faq-answer">
-                Anda dapat mengisi form survei pelayanan di bawah ini untuk memberikan masukan atau menghubungi pihak sekolah.
+                Anda dapat mengisi form survei pelayanan untuk memberikan masukan atau menghubungi pihak sekolah langsung melalui kontak yang tersedia.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                Bagaimana cara melaporkan bullying?
+                <span>▾</span>
+            </div>
+            <div class="faq-answer">
+                Anda dapat melaporkan kasus bullying melalui menu <a href="bullying.php" style="color:#0284c7;font-weight:700;">Pelaporan Bullying</a>. Semua laporan akan dijaga kerahasiaannya.
             </div>
         </div>
     </div>
 
-    <!-- ================= SECTION FORM SURVEI ================= -->
-    <div class="section" id="Survei-Pelayanan">
-        <h2 class="section-title">📝 Form Survei Pelayanan</h2>
-        <p style="margin-bottom: 25px; color: #475569;">Kami siap melayani dan menerima masukan dari Anda demi peningkatan kualitas sekolah.</p>
-
-        <div class="survei-container" style="background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 40px; max-width: 700px; margin: 0 auto; border: 1px solid #f0f0f0;">
-            
-            <form action="proses_survei.php" method="POST">
-                <!-- Input Nama -->
-                <div style="margin-bottom: 20px;">
-                    <label style="font-weight: 600; color: #333; display: block; margin-bottom: 8px;">Nama Lengkap</label>
-                    <input type="text" name="nama_pengisi" required placeholder="Masukkan nama Anda..." style="width: 100%; padding: 14px 15px; border: 2px solid #eef2f5; border-radius: 12px; outline: none; transition: 0.3s; background-color: #fcfcfc;">
-                </div>
-
-                <!-- Pilih Peran -->
-                <div style="margin-bottom: 20px;">
-                    <label style="font-weight: 600; color: #333; display: block; margin-bottom: 8px;">Status</label>
-                    <select name="peran" required style="width: 100%; padding: 14px 15px; border: 2px solid #eef2f5; border-radius: 12px; outline: none; background-color: #fcfcfc; cursor: pointer;">
-                        <option value="Siswa">Siswa</option>
-                        <option value="Orang Tua">Orang Tua / Wali Murid</option>
-                        <option value="Masyarakat">Masyarakat Umum</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-
-                <!-- Rating Bintang Interaktif -->
-                <div style="margin-bottom: 20px;">
-                    <label style="font-weight: 600; color: #333; display: block; margin-bottom: 8px;">Beri Nilai (1 - 5 Bintang)</label>
-                    <div class="star-rating">
-                        <input type="radio" id="star5" name="rating" value="5" required />
-                        <label for="star5" title="5 Bintang">★</label>
-                        
-                        <input type="radio" id="star4" name="rating" value="4" />
-                        <label for="star4" title="4 Bintang">★</label>
-                        
-                        <input type="radio" id="star3" name="rating" value="3" />
-                        <label for="star3" title="3 Bintang">★</label>
-                        
-                        <input type="radio" id="star2" name="rating" value="2" />
-                        <label for="star2" title="2 Bintang">★</label>
-                        
-                        <input type="radio" id="star1" name="rating" value="1" />
-                        <label for="star1" title="1 Bintang">★</label>
-                    </div>
-                </div>
-
-                <!-- Ulasan -->
-                <div style="margin-bottom: 25px;">
-                    <label style="font-weight: 600; color: #333; display: block; margin-bottom: 8px;">Ulasan & Saran</label>
-                    <textarea name="ulasan" rows="4" required placeholder="Tuliskan pengalaman atau saran Anda di sini..." style="width: 100%; padding: 14px 15px; border: 2px solid #eef2f5; border-radius: 12px; outline: none; resize: vertical; background-color: #fcfcfc;"></textarea>
-                </div>
-
-                <!-- Tombol Submit -->
-                <button type="submit" style="background: #0d6efd; color: white; border: none; padding: 15px 20px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3); transition: transform 0.2s;">
-                    Kirim Ulasan
-                </button>
-            </form>
-        </div>
+    <!-- CTA ke Survey -->
+    <div class="cta-card">
+        <h3>📝 Punya Masukan untuk Sekolah?</h3>
+        <p>Suara Anda sangat berarti untuk peningkatan kualitas pendidikan di SMP Negeri 28 Balikpapan.</p>
+        <a href="survey.php" class="btn-cta">Isi Survei Pelayanan →</a>
     </div>
 
 </div>

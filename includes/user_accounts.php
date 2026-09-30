@@ -159,7 +159,7 @@ function deleteStudentAccounts(mysqli $conn, int $siswaId): void
 function syncGuruAccount(mysqli $conn, int $guruId, string $nip, ?string $newPassword = null, bool $forceResetPassword = false): void
 {
     $nip = normalizeLoginIdentifier($nip);
-    upsertLinkedUser($conn, 'guru', $nip, $nip, $guruId, null, $newPassword, $forceResetPassword);
+    upsertLinkedUser($conn, 'guru', $nip, '123456', $guruId, null, $newPassword, $forceResetPassword);
 }
 
 function deleteGuruAccount(mysqli $conn, int $guruId): void

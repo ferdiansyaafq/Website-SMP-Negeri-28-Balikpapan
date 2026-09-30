@@ -1,3 +1,22 @@
+<style>
+    .site-footer-quick-menu { padding-left: 18px; }
+    .site-footer-email {
+        margin: 0;
+        opacity: 0.9;
+        line-height: 1.6;
+        font-size: 16px;
+        white-space: nowrap;
+        word-break: normal;
+    }
+    @media (max-width: 600px) {
+        .site-footer-quick-menu { padding-left: 0; }
+        .site-footer-email {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+    }
+</style>
+
 <footer style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); margin-top: 80px; padding: 60px 0 30px; color: white; position: relative; overflow: hidden;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 40px;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
@@ -14,17 +33,20 @@
                 </div>
                 <div>
                     <h4 style="font-size: 18px; margin-bottom: 12px; font-weight: 700;">Kontak Kami</h4>
-                    <p style="opacity: 0.9; line-height: 1.6; word-break: break-all;">
-                        admin@smpn28balikpapan.sch.id
+                    <p class="site-footer-email">
+                        smpnegeri28.balikpapan@gmail.com
                     </p>
                 </div>
             </div>
-            <div>
+            <div class="site-footer-quick-menu">
                 <h4 style="font-size: 18px; margin-bottom: 12px; font-weight: 700;">Menu Cepat</h4>
                 <ul style="list-style: none; line-height: 2.2;">
+                    <li><a href="index.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Beranda</a></li>
+                    <li><a href="login.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Login KAIH</a></li>
                     <li><a href="profil.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Profil Sekolah</a></li>
-                    <li><a href="informasi.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Informasi</a></li>
-                    <li><a href="login.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">KAIH</a></li>
+                    <li><a href="informasi.php#berita" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Berita &amp; Pengumuman</a></li>
+                    <li><a href="bullying.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Pelaporan Bullying</a></li>
+                    <li><a href="survey.php#Survei-Pelayanan" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Survei Pelayanan</a></li>
                 </ul>
             </div>
             <div>
@@ -54,7 +76,7 @@
         </div>
         
         <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 30px; text-align: center; opacity: 0.8; font-size: 14px;">
-            <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan & Inovasi Sosial Vastaruna ITK. All rights reserved.</p>
+            <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan & Inovasi Sosial Vastaruna ITK.</p>
         </div>
     </div>
 </footer>

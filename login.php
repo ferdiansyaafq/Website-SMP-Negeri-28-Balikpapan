@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="copyright">
-            Copyright &copy; <?php echo date('Y'); ?> <span>SMP Negeri 28 Balikpapan</span>
+            Copyright &copy; <?php echo date('Y'); ?> <span>SMP Negeri 28 Balikpapan x Vastaruna ITK.</span>
         </div>
     </div>
 </body>

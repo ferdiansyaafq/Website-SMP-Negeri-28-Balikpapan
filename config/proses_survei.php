@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     try {
         // 4. Siapkan query SQL menggunakan Prepared Statement PDO (Sangat aman dari SQL Injection)
-        $sql = "INSERT INTO survei_pelayanan (nama_pengisi, peran, rating, ulasan) 
+        $sql = "INSERT INTO survei (nama_pengisi, peran, rating, ulasan) 
                 VALUES (:nama_pengisi, :peran, :rating, :ulasan)";
         
         $stmt = $pdo->prepare($sql);

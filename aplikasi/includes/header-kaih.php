@@ -91,6 +91,11 @@ $role = $_SESSION['role'];
 $nama = $user['nama_lengkap'] ?? $_SESSION['username'];
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
+$sidebarLabel = match ($role) {
+    'admin' => 'Admin',
+    'orang_tua' => 'Orang Tua',
+    default => ucfirst($role),
+};
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -108,9 +113,20 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             color: white; padding: 25px 20px; overflow-y: auto; z-index: 1000;
         }
         .sidebar .logo { text-align: center; margin-bottom: 25px; }
-        .sidebar .logo img {
+        .sidebar .logo .user-avatar {
             width: 60px; height: 60px; border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.3); object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.16);
+            display: inline-block; position: relative;
+        }
+        .sidebar .logo .user-avatar::before {
+            content: ''; position: absolute; width: 17px; height: 17px;
+            border-radius: 50%; background: white; top: 10px; left: 18px;
+        }
+        .sidebar .logo .user-avatar::after {
+            content: ''; position: absolute; width: 31px; height: 16px;
+            border-radius: 18px 18px 10px 10px; background: white;
+            bottom: 9px; left: 11px;
         }
         .sidebar .logo h2 { font-size: 18px; margin-top: 10px; }
         .sidebar .logo p { font-size: 12px; opacity: 0.8; }
@@ -130,7 +146,6 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
         .sidebar .menu a:hover, .sidebar .menu a.active {
             background: rgba(255,255,255,0.15); color: white;
         }
-        .sidebar .menu a .icon { margin-right: 10px; }
 
         .sidebar .logout {
             margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);
@@ -243,89 +258,88 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
-        <img src="<?php echo BASE_URL; ?>assets/img/logo-sekolah.png" alt="Logo Sekolah">
-        <h2><?php echo ucfirst($role); ?> KAIH</h2>
+        <span class="user-avatar" role="img" aria-label="Profil pengguna"></span>
+        <h2>Sistem KAIH</h2>
         <p>SMP Negeri 28 Balikpapan</p>
     </div>
 
     <div class="user-info">
-        <div class="name"><?php echo htmlspecialchars($nama); ?></div>
-        <div class="role"><?php echo ucfirst($role); ?></div>
+        <?php if (in_array($role, ['siswa', 'guru'], true)): ?>
+            <div class="name"><?php echo htmlspecialchars($nama); ?></div>
+            <div class="role"><?php echo htmlspecialchars($sidebarLabel); ?></div>
+        <?php else: ?>
+            <div class="name"><?php echo htmlspecialchars($sidebarLabel); ?></div>
+        <?php endif; ?>
     </div>
 
     <nav class="menu">
         <?php if ($role === 'admin'): ?>
             <!-- MENU ADMIN -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Dashboard
+                Dashboard
             </a>
             <a href="siswa.php" class="<?php echo ($current_page == 'siswa.php') ? 'active' : ''; ?>">
-                <span class="icon">👨‍🎓</span> Kelola Siswa
+                Kelola Siswa
             </a>
             <a href="guru.php" class="<?php echo ($current_page == 'guru.php') ? 'active' : ''; ?>">
-                <span class="icon">👨‍🏫</span> Kelola Guru
+                Kelola Guru
             </a>
             <a href="kelas.php" class="<?php echo ($current_page == 'kelas.php') ? 'active' : ''; ?>">
-                <span class="icon">🏫</span> Kelola Kelas
+                Kelola Kelas
             </a>
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
-                <span class="icon">📄</span> Laporan
+                Laporan
             </a>
-            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
-                <span class="icon">📝</span> Refleksi
+            <a href="laporan-bullying.php" class="<?php echo ($current_page == 'laporan-bullying.php') ? 'active' : ''; ?>">
+                Laporan Bullying
             </a>
-
+            <a href="survei.php" class="<?php echo ($current_page == 'survei.php') ? 'active' : ''; ?>">
+                Survei Pelayanan
+            </a>
         <?php elseif ($role === 'guru'): ?>
             <!-- MENU GURU -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Dashboard
+                Dashboard
             </a>
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
-                <span class="icon">📋</span> Monitoring Siswa
+                Monitoring Siswa
             </a>
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Rekap
+                Rekap
             </a>
-            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
-                <span class="icon">📝</span> Refleksi
-            </a>
-
         <?php elseif ($role === 'siswa'): ?>
             <!-- MENU SISWA -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Dashboard
+                Dashboard
             </a>
             <a href="absensi.php" class="<?php echo ($current_page == 'absensi.php') ? 'active' : ''; ?>">
-                <span class="icon">📋</span> Absensi
+                Absensi
             </a>
             <a href="kaih.php" class="<?php echo ($current_page == 'kaih.php') ? 'active' : ''; ?>">
-                <span class="icon">📝</span> Formulir KAIH
+                Formulir KAIH
             </a>
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Rekap
+                Rekap
             </a>
             <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
-                <span class="icon">✍️</span> Refleksi
+                Refleksi
             </a>
 
         <?php elseif ($role === 'orang_tua'): ?>
             <!-- MENU ORANG TUA -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Dashboard
+                Dashboard
             </a>
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
-                <span class="icon">👨‍👩‍👧</span> Monitoring Anak
+                Monitoring Anak
             </a>
             <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
-                <span class="icon">📊</span> Rekap
-            </a>
-            <a href="refleksi.php" class="<?php echo ($current_page == 'refleksi.php') ? 'active' : ''; ?>">
-                <span class="icon">📝</span> Refleksi
+                Rekap
             </a>
         <?php endif; ?>
 
         <div class="logout">
-            <a href="../../logout.php"><span class="icon">🚪</span> Logout</a>
+            <a href="../../logout.php">Logout</a>
         </div>
     </nav>
 </div>

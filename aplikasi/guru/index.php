@@ -72,7 +72,7 @@ if ($kelas_guru) {
 </div>
 
 <div class="card">
-    <h3>📋 Kegiatan Siswa Hari Ini</h3>
+    <h3> Kegiatan Siswa Hari Ini</h3>
     <?php if ($kegiatan_hari_ini > 0): ?>
         <p style="color: #1e293b;">Ada <?php echo $kegiatan_hari_ini; ?> kegiatan siswa yang perlu diperhatikan.</p>
         <a href="monitoring.php" style="color: #0284c7; text-decoration: none; font-weight: 600;">Lihat detail →</a>

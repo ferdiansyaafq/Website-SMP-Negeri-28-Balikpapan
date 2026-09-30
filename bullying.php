@@ -228,41 +228,6 @@ include 'header.php';
     text-decoration: underline;
 }
 
-/* Info Box */
-.info-box {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.info-item {
-    background: #f8fafc;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-}
-
-.info-item .icon {
-    font-size: 28px;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.info-item .label {
-    font-size: 12px;
-    color: #94a3b8;
-    font-weight: 600;
-    display: block;
-}
-
-.info-item .value {
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 700;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .page-header {
@@ -285,10 +250,6 @@ include 'header.php';
     .bullying-form .form-row {
         grid-template-columns: 1fr;
         gap: 0;
-    }
-    .info-box {
-        grid-template-columns: 1fr;
-        gap: 10px;
     }
 }
 
@@ -335,7 +296,6 @@ include 'header.php';
         <h2 class="form-title">Form Laporan Perundungan</h2>
         <p class="form-subtitle">Isi data dengan lengkap agar kami bisa segera menindaklanjuti laporan Anda.</p>
 
-        <!-- Trust Badge -->
         <div class="trust-badge">
             <span class="icon">🔒</span>
             <div class="text">
@@ -345,26 +305,6 @@ include 'header.php';
             </div>
         </div>
 
-        <!-- Info Box -->
-        <div class="info-box">
-            <div class="info-item">
-                <span class="icon">⏰</span>
-                <span class="label">Waktu Tanggap</span>
-                <span class="value">Maksimal 2x24 jam</span>
-            </div>
-            <div class="info-item">
-                <span class="icon">🔐</span>
-                <span class="label">Kerahasiaan</span>
-                <span class="value">100% Terjamin</span>
-            </div>
-            <div class="info-item">
-                <span class="icon">📋</span>
-                <span class="label">Status Laporan</span>
-                <span class="value">Akan diinformasikan</span>
-            </div>
-        </div>
-
-        <!-- Notifikasi -->
         <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
             <div class="alert alert-success">
                 ✅ Laporan bullying berhasil dikirim! Tim kami akan segera menindaklanjuti dan menghubungi Anda dalam waktu 2x24 jam.
@@ -379,21 +319,18 @@ include 'header.php';
 
         <form action="proses_bullying.php" method="POST">
 
-            <!-- Nama Pelapor -->
             <div class="form-group">
                 <label>Nama Pelapor <span class="required">*</span></label>
                 <input type="text" name="nama_pelapor" required placeholder="Masukkan nama Anda (bisa anonim jika diisi dengan 'Anonim')">
                 <span class="hint">Anda bisa menulis "Anonim" jika ingin melaporkan secara rahasia.</span>
             </div>
 
-            <!-- Email/No HP -->
             <div class="form-group">
                 <label>Email atau No HP <span class="required">*</span></label>
                 <input type="text" name="kontak" required placeholder="Masukkan email atau nomor HP untuk konfirmasi">
                 <span class="hint">Kami akan menghubungi Anda untuk konfirmasi laporan dan perkembangan penanganan.</span>
             </div>
 
-            <!-- Status Pelapor -->
             <div class="form-group">
                 <label>Status Pelapor <span class="required">*</span></label>
                 <select name="status_pelapor" required>
@@ -406,66 +343,48 @@ include 'header.php';
                 </select>
             </div>
 
-            <!-- Data Korban -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Nama Korban <span class="required">*</span></label>
                     <input type="text" name="nama_korban" required placeholder="Nama siswa yang menjadi korban">
                 </div>
                 <div class="form-group">
-                    <label>Kelas Korban <span class="required">*</span></label>
-                    <input type="text" name="kelas_korban" required placeholder="Contoh: 7A, 8B, 9C">
+                    <label>Jenis Bullying <span class="required">*</span></label>
+                    <select name="jenis_bullying" required>
+                        <option value="">Pilih jenis bullying...</option>
+                        <option value="Fisik">Fisik (memukul, menendang, mendorong, dll.)</option>
+                        <option value="Verbal">Verbal (mengejek, menghina, mengancam, dll.)</option>
+                        <option value="Sosial">Sosial (mengucilkan, menyebarkan gossip, dll.)</option>
+                        <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
+                        <option value="Seksual">Pelecehan Seksual</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Jenis Bullying -->
-            <div class="form-group">
-                <label>Jenis Bullying <span class="required">*</span></label>
-                <select name="jenis_bullying" required>
-                    <option value="">Pilih jenis bullying...</option>
-                    <option value="Fisik">Fisik (memukul, menendang, mendorong, dll.)</option>
-                    <option value="Verbal">Verbal (mengejek, menghina, mengancam, dll.)</option>
-                    <option value="Sosial">Sosial (mengucilkan, menyebarkan gossip, dll.)</option>
-                    <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
-                    <option value="Seksual">Pelecehan Seksual</option>
-                    <option value="Lainnya">Lainnya</option>
-                </select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tanggal Kejadian <span class="required">*</span></label>
+                    <input type="date" name="tanggal_kejadian" required>
+                </div>
+                <div class="form-group">
+                    <label>Lokasi Kejadian <span class="required">*</span></label>
+                    <input type="text" name="lokasi" required placeholder="Contoh: Halaman sekolah, Kelas 7A, Kantin, dll.">
+                </div>
             </div>
 
-            <!-- Tanggal Kejadian -->
-            <div class="form-group">
-                <label>Tanggal Kejadian <span class="required">*</span></label>
-                <input type="date" name="tanggal_kejadian" required>
-            </div>
-
-            <!-- Lokasi -->
-            <div class="form-group">
-                <label>Lokasi Kejadian <span class="required">*</span></label>
-                <input type="text" name="lokasi" required placeholder="Contoh: Halaman sekolah, Kelas 7A, Kantin, dll.">
-            </div>
-
-            <!-- Deskripsi -->
             <div class="form-group">
                 <label>Deskripsi Kejadian <span class="required">*</span></label>
                 <textarea name="deskripsi" rows="5" required placeholder="Ceritakan secara detail kejadian yang dialami atau dilihat..."></textarea>
                 <span class="hint">Semakin detail laporan Anda, semakin cepat kami bisa menindaklanjutinya.</span>
             </div>
 
-            <!-- Saksi -->
-            <div class="form-group">
-                <label>Saksi (jika ada)</label>
-                <input type="text" name="saksi" placeholder="Nama saksi yang melihat kejadian (opsional)">
-                <span class="hint">Jika ada saksi, sebutkan nama agar kami bisa meminta keterangan tambahan.</span>
-            </div>
-
-            <!-- Submit -->
             <button type="submit" class="btn-submit">
                 🛡️ Kirim Laporan Bullying
             </button>
 
         </form>
 
-        <!-- Kontak Darurat -->
         <div class="emergency-contact">
             <p>
                 📞 <strong>Butuh bantuan segera?</strong> Hubungi layanan bantuan: 
@@ -474,16 +393,6 @@ include 'header.php';
             </p>
         </div>
 
-        <!-- Informasi Tambahan -->
-        <div style="margin-top: 16px; padding: 14px 18px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <p style="margin: 0; font-size: 13px; color: #64748b; text-align: center;">
-                <strong>💡 Apa yang terjadi setelah saya melapor?</strong><br>
-                1. Laporan akan diterima oleh tim penanganan khusus<br>
-                2. Tim akan melakukan investigasi dan konfirmasi<br>
-                3. Korban akan mendapatkan pendampingan<br>
-                4. Pelaku akan mendapatkan pembinaan sesuai aturan
-            </p>
-        </div>
     </div>
 
 </div>

@@ -6,24 +6,38 @@ include 'config/database.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // 3. Tangkap data dari form
-    $nama_siswa     = $_POST['nama_siswa'];
-    $kelas          = $_POST['kelas'];
-    $mata_pelajaran = $_POST['mata_pelajaran'];
-    $isi_refleksi   = $_POST['isi_refleksi'];
+    $nama_siswa     = trim($_POST['nama_siswa'] ?? '');
+    $kelas          = trim($_POST['kelas'] ?? '');
+    $mata_pelajaran = trim($_POST['mata_pelajaran'] ?? '');
+    $isi_refleksi   = trim($_POST['isi_refleksi'] ?? '');
 
     try {
-        // 4. Siapkan query PDO untuk mencegah SQL Injection
-        $sql = "INSERT INTO refleksi_siswa (nama_siswa, kelas, mata_pelajaran, isi_refleksi) 
-                VALUES (:nama_siswa, :kelas, :mata_pelajaran, :isi_refleksi)";
+        $studentStmt = $pdo->prepare(
+            'SELECT id FROM siswa WHERE nama_siswa = :nama_siswa AND kelas = :kelas LIMIT 1'
+        );
+        $studentStmt->execute([':nama_siswa' => $nama_siswa, ':kelas' => $kelas]);
+        $student = $studentStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$student) {
+            throw new RuntimeException('Data siswa tidak ditemukan. Pastikan nama dan kelas sesuai data sekolah.');
+        }
+
+        $sql = "INSERT INTO refleksi (
+                    siswa_id, tanggal, semester, tahun_ajaran,
+                    pelajaran_favorit, pengalaman_berkesan
+                ) VALUES (
+                    :siswa_id, CURDATE(), 'Ganjil', :tahun_ajaran,
+                    :pelajaran_favorit, :pengalaman_berkesan
+                )";
         
         $stmt = $pdo->prepare($sql);
         
         // 5. Eksekusi query
         $stmt->execute([
-            ':nama_siswa'     => $nama_siswa,
-            ':kelas'          => $kelas,
-            ':mata_pelajaran' => $mata_pelajaran,
-            ':isi_refleksi'   => $isi_refleksi
+            ':siswa_id'            => $student['id'],
+            ':tahun_ajaran'       => date('Y') . '/' . (date('Y') + 1),
+            ':pelajaran_favorit'  => $mata_pelajaran,
+            ':pengalaman_berkesan' => $isi_refleksi
         ]);
 
         // 6. Jika berhasil, beri notifikasi dan kembalikan ke halaman refleksi
@@ -33,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               </script>";
         exit();
 
-    } catch (PDOException $e) {
+    } catch (Throwable $e) {
         die("Gagal menyimpan data refleksi: " . $e->getMessage());
     }
 

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/database.php';
 
 function pickFirstExistingImage(array $candidates, string $fallback): string
 {
@@ -14,7 +15,7 @@ function pickFirstExistingImage(array $candidates, string $fallback): string
 }
 
 $logoSekolah = pickFirstExistingImage([
-    'assets/img/logo-sekolah.png',
+    'assets/img/logosekolah.png',
     'assets/img/logo.png',
 ], 'assets/img/logo-sekolah.svg');
 
@@ -46,29 +47,22 @@ if (empty($slideshowPhotos)) {
     ];
 }
 
-$beritaData = [
-    [
-        'tanggal' => '10 JUL 2026',
-        'kategori' => 'Pengumuman',
-        'judul' => 'PPDB Tahun Ajaran 2026/2027 Resmi Dibuka',
-        'deskripsi' => 'Penerimaan Peserta Didik Baru untuk tahun ajaran 2026/2027 telah resmi dibuka. Segera daftarkan putra-putri Anda.',
-        'gambar' => ''
-    ],
-    [
-        'tanggal' => '05 JUL 2026',
-        'kategori' => 'Akademik',
-        'judul' => 'Implementasi Kurikulum Merdeka dengan Deep Learning',
-        'deskripsi' => 'SMPN 28 Balikpapan resmi menerapkan pendekatan Pembelajaran Mendalam untuk meningkatkan kualitas pendidikan.',
-        'gambar' => ''
-    ],
-    [
-        'tanggal' => '01 JUL 2026',
-        'kategori' => 'Prestasi',
-        'judul' => 'Program 7 Kebiasaan Anak Indonesia Hebat Diluncurkan',
-        'deskripsi' => 'Program KAIH resmi diluncurkan untuk membentuk karakter dan kebiasaan positif siswa setiap hari.',
-        'gambar' => ''
-    ]
-];
+$beritaData = [];
+try {
+    $stmtBerita = $pdo->query(
+        "SELECT id, tanggal, kategori, judul, ringkasan AS deskripsi, gambar
+         FROM berita
+         WHERE status = 'terbit'
+         ORDER BY tanggal DESC, id DESC
+         LIMIT 3"
+    );
+    while ($berita = $stmtBerita->fetch(PDO::FETCH_ASSOC)) {
+        $berita['tanggal'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
+        $beritaData[] = $berita;
+    }
+} catch (PDOException $e) {
+    $beritaData = [];
+}
 
 $fasilitasData = [
     [
@@ -677,7 +671,7 @@ footer a[href*="wa.me"]:hover {
     </div>
     <div class="berita-grid">
         <?php foreach ($beritaData as $item): ?>
-        <div class="berita-card">
+        <article class="berita-card">
             <div class="berita-image">
                 <?php if (!empty($item['gambar'])): ?>
                     <img src="<?php echo htmlspecialchars($item['gambar']); ?>" alt="<?php echo htmlspecialchars($item['judul']); ?>">
@@ -687,12 +681,12 @@ footer a[href*="wa.me"]:hover {
                 <span class="berita-date"><?php echo $item['tanggal']; ?></span>
             </div>
             <div class="berita-content">
-                <span class="berita-category"><?php echo $item['kategori']; ?></span>
-                <h3><?php echo $item['judul']; ?></h3>
-                <p><?php echo $item['deskripsi']; ?></p>
-                <a href="#" class="berita-link">Baca Selengkapnya →</a>
+                <span class="berita-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
+                <h3><?php echo htmlspecialchars($item['judul']); ?></h3>
+                <p><?php echo htmlspecialchars($item['deskripsi']); ?></p>
+                <a href="berita-detail.php?id=<?php echo (int) $item['id']; ?>" class="berita-link">Baca Selengkapnya →</a>
             </div>
-        </div>
+        </article>
         <?php endforeach; ?>
     </div>
 </section>

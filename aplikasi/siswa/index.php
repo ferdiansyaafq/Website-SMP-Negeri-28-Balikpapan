@@ -48,7 +48,7 @@ if ($siswa_id > 0) {
 
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr;
         gap: 20px;
         margin-top: 10px;
     }
@@ -209,7 +209,7 @@ if ($siswa_id > 0) {
         }
 
         .dashboard-grid {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 14px;
         }
 
@@ -236,11 +236,6 @@ if ($siswa_id > 0) {
             margin-top: 12px;
         }
 
-        /* Refleksi tetap full width di tablet */
-        .card-refleksi {
-            grid-column: span 2;
-        }
-
         .badge-count {
             font-size: 11px;
             padding: 2px 12px;
@@ -254,7 +249,7 @@ if ($siswa_id > 0) {
         }
 
         .dashboard-grid {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-top: 6px;
         }
@@ -284,11 +279,6 @@ if ($siswa_id > 0) {
             font-size: 10px;
             margin-top: 8px;
             border-radius: 14px;
-        }
-
-        /* Refleksi full width di HP */
-        .card-refleksi {
-            grid-column: span 2;
         }
 
         .badge-count {
@@ -343,7 +333,6 @@ if ($siswa_id > 0) {
              CARD ABSENSI
              ============================================================ -->
         <a href="absensi.php" class="dashboard-card card-absensi">
-            <span class="card-icon">📋</span>
             <h3>Absensi</h3>
             <p>Catat kehadiran hari ini</p>
             <span class="btn-action">Isi Absensi</span>
@@ -353,7 +342,6 @@ if ($siswa_id > 0) {
              CARD KAIH
              ============================================================ -->
         <a href="kaih.php" class="dashboard-card card-kaih">
-            <span class="card-icon">🌟</span>
             <h3>KAIH</h3>
             <p>7 Kebiasaan Anak Indonesia Hebat</p>
             <span class="btn-action">Isi Formulir</span>
@@ -363,7 +351,6 @@ if ($siswa_id > 0) {
              CARD REFLEKSI
              ============================================================ -->
         <a href="refleksi.php" class="dashboard-card card-refleksi">
-            <span class="card-icon">📝</span>
             <h3>Refleksi</h3>
             <p>Tulis pembelajaran &amp; pengalamanmu</p>
             <span class="btn-action">Tulis Refleksi</span>

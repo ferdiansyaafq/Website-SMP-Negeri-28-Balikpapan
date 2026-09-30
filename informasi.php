@@ -1,5 +1,32 @@
 <?php
 $page_title = "Informasi";
+require_once __DIR__ . '/config/database.php';
+
+$currentPage = max(1, (int) ($_GET['page'] ?? 1));
+$itemsPerPage = 3;
+$totalBerita = 0;
+$beritaItems = [];
+
+try {
+    $totalBerita = (int) $pdo->query("SELECT COUNT(*) FROM berita WHERE status = 'terbit'")->fetchColumn();
+    $totalPages = max(1, (int) ceil($totalBerita / $itemsPerPage));
+    $currentPage = min($currentPage, $totalPages);
+    $offset = ($currentPage - 1) * $itemsPerPage;
+
+    $stmtBerita = $pdo->prepare(
+        "SELECT id, jenis, tanggal, kategori, judul, ringkasan
+         FROM berita
+         WHERE status = 'terbit'
+         ORDER BY tanggal DESC, id DESC
+         LIMIT :limit OFFSET :offset"
+    );
+    $stmtBerita->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
+    $stmtBerita->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmtBerita->execute();
+    $beritaItems = $stmtBerita->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $totalPages = 1;
+}
 include 'header.php';
 ?>
 
@@ -91,6 +118,68 @@ include 'header.php';
     color: #64748b;
     font-size: 14px;
     line-height: 1.6;
+}
+
+.pengumuman-item {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pengumuman-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.1);
+}
+
+.pengumuman-item .content h4 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.news-meta {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: #0284c7;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.news-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+}
+
+.news-pagination a,
+.news-pagination span {
+    min-width: 36px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.news-pagination a {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.news-pagination a:hover,
+.news-pagination .active {
+    background: #0284c7;
+    color: white;
+}
+
+.news-empty {
+    padding: 30px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    color: #64748b;
+    text-align: center;
 }
 
 .kaih-cards {
@@ -257,58 +346,44 @@ include 'header.php';
 </div>
 
 <div class="container">
+    <span id="berita" aria-hidden="true"></span>
     <div class="section" id="pengumuman">
-        <h2 class="section-title">Pengumuman Terbaru</h2>
+        <h2 class="section-title">📰 Berita &amp; Pengumuman</h2>
         <div class="pengumuman-list">
-            <div class="pengumuman-item">
-                <div class="date">10 JUL 2026</div>
-                <div class="content">
-                    <h4>Penerimaan Peserta Didik Baru (PPDB) 2026/2027</h4>
-                    <p>Pendaftaran PPDB Tahun Ajaran 2026/2027 telah dibuka.</p>
-                </div>
-            </div>
-            <div class="pengumuman-item">
-                <div class="date">05 JUL 2026</div>
-                <div class="content">
-                    <h4>Implementasi Kurikulum Merdeka dengan Deep Learning</h4>
-                    <p>SMP Negeri 28 Balikpapan resmi menerapkan pendekatan Pembelajaran Mendalam.</p>
-                </div>
-            </div>
-            <div class="pengumuman-item">
-                <div class="date">01 JUL 2026</div>
-                <div class="content">
-                    <h4>Program 7 Kebiasaan Anak Indonesia Hebat (KAIH)</h4>
-                    <p>Seluruh siswa diwajibkan mengikuti program KAIH.</p>
-                </div>
-            </div>
+            <?php if (empty($beritaItems)): ?>
+                <div class="news-empty">Belum ada berita atau pengumuman yang diterbitkan.</div>
+            <?php else: ?>
+                <?php foreach ($beritaItems as $item): ?>
+                <article class="pengumuman-item">
+                    <div class="date"><?php echo strtoupper(date('d M Y', strtotime($item['tanggal']))); ?></div>
+                    <div class="content">
+                        <span class="news-meta"><?php echo htmlspecialchars($item['jenis'] . ' · ' . $item['kategori']); ?></span>
+                        <h4><a href="berita-detail.php?id=<?php echo (int) $item['id']; ?>"><?php echo htmlspecialchars($item['judul']); ?></a></h4>
+                        <p><?php echo htmlspecialchars($item['ringkasan']); ?></p>
+                        <a href="berita-detail.php?id=<?php echo (int) $item['id']; ?>" class="berita-link">Baca selengkapnya →</a>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
-    </div>
 
-    <div class="section" id="berita">
-        <h2 class="section-title">📰 Berita Terkini</h2>
-        <div class="pengumuman-list">
-            <div class="pengumuman-item">
-                <div class="date">10 JUL 2026</div>
-                <div class="content">
-                    <h4>PPDB Tahun Ajaran 2026/2027 Resmi Dibuka</h4>
-                    <p>Penerimaan Peserta Didik Baru untuk tahun ajaran 2026/2027 telah resmi dibuka.</p>
-                </div>
-            </div>
-            <div class="pengumuman-item">
-                <div class="date">05 JUL 2026</div>
-                <div class="content">
-                    <h4>Implementasi Kurikulum Merdeka dengan Deep Learning</h4>
-                    <p>SMPN 28 Balikpapan resmi menerapkan pendekatan Pembelajaran Mendalam.</p>
-                </div>
-            </div>
-            <div class="pengumuman-item">
-                <div class="date">01 JUL 2026</div>
-                <div class="content">
-                    <h4>Program 7 Kebiasaan Anak Indonesia Hebat Diluncurkan</h4>
-                    <p>Program KAIH resmi diluncurkan untuk membentuk karakter positif siswa.</p>
-                </div>
-            </div>
-        </div>
+        <?php if ($totalPages > 1): ?>
+        <nav class="news-pagination" aria-label="Pagination berita">
+            <?php if ($currentPage > 1): ?>
+                <a href="?page=<?php echo $currentPage - 1; ?>">Sebelumnya</a>
+            <?php endif; ?>
+            <?php for ($page = 1; $page <= $totalPages; $page++): ?>
+                <?php if ($page === $currentPage): ?>
+                    <span class="active" aria-current="page"><?php echo $page; ?></span>
+                <?php else: ?>
+                    <a href="?page=<?php echo $page; ?>"><?php echo $page; ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="?page=<?php echo $currentPage + 1; ?>">Berikutnya</a>
+            <?php endif; ?>
+        </nav>
+        <?php endif; ?>
     </div>
 
         <div class="section" id="kaih">
