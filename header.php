@@ -402,6 +402,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             <a href="login.php">Login</a>
             <a href="lainnya.php#faq">FAQ</a>
             <a href="lainnya.php#Survei-Pelayanan">Survei Pelayanan</a>
+            <a href="bullying.php">Pelaporan Bullying</a>
         </div>
     </div>
 </div>
@@ -445,13 +446,14 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             </div>
             
             <div class="nav-item">
-                <a href="lainnya.php" class="<?php echo ($current_page === 'lainnya.php') ? 'active' : ''; ?>">
+                <a href="lainnya.php" class="<?php echo ($current_page === 'lainnya.php' || $current_page === 'bullying.php') ? 'active' : ''; ?>">
                     Lainnya <span class="arrow">▾</span>
                 </a>
                 <div class="dropdown-menu">
                     <a href="login.php">Login</a>
                     <a href="lainnya.php#faq">FAQ</a>
-                    <a href="proses_survei.php#Survey-Pelayanan">Survei Pelayanan</a>
+                    <a href="lainnya.php#Survei-Pelayanan">Survei Pelayanan</a>
+                    <a href="bullying.php">Pelaporan Bullying</a>
                 </div>
             </div>
         </nav>

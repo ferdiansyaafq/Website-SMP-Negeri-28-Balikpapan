@@ -54,7 +54,7 @@
         </div>
         
         <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 30px; text-align: center; opacity: 0.8; font-size: 14px;">
-            <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan.</p>
+            <p>&copy; <?php echo date('Y'); ?> SMP Negeri 28 Balikpapan & Inovasi Sosial Vastaruna ITK. All rights reserved.</p>
         </div>
     </div>
 </footer>

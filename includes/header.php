@@ -62,6 +62,10 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         </a>
                     </li>
                     
+                    <!-- ============================================================
+                         DROPDOWN ADMIN - HAPUS BAGIAN INI JIKA TIDAK DIPERLUKAN
+                         ============================================================ -->
+                    <!-- 
                     <li class="nav-item dropdown">
                         <a href="javascript:void(0)" class="nav-link dropdown-toggle">
                             <i class="fas fa-cog"></i> Admin
@@ -75,7 +79,21 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                             <li><a href="<?php echo dirname($_SERVER['PHP_SELF']); ?>/admin/users.php"><i class="fas fa-user-shield"></i> Kelola User</a></li>
                         </ul>
                     </li>
+                    -->
 
+                    <!-- Menu Tambahan (Opsional) -->
+                    <!-- 
+                    <li class="nav-item">
+                        <a href="<?php echo dirname($_SERVER['PHP_SELF']); ?>/rekap.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i> Rekap
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?php echo dirname($_SERVER['PHP_SELF']); ?>/refleksi.php" class="nav-link">
+                            <i class="fas fa-pen"></i> Refleksi
+                        </a>
+                    </li>
+                    -->
 
                 </ul>
 

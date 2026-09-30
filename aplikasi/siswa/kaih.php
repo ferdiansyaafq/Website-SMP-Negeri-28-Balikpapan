@@ -7,6 +7,30 @@ $message_type = '';
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $nama_siswa = 'Siswa';
 
+// ============================================================
+// CEK WAKTU UNTUK KAIH
+// ============================================================
+function cekWaktuKAIH() {
+    // Set timezone ke WITA (Asia/Makassar)
+    date_default_timezone_set('Asia/Makassar');
+    
+    $hari = date('N'); // 1=Senin, 7=Minggu
+    $jam = date('H:i'); // Format 24 jam
+    
+    // KAIH bisa diisi Senin-Minggu (1-7) -> semua hari
+    // Tidak ada batasan hari, semua hari boleh
+    
+    // KAIH hanya pukul 08.00 - 21.00 WITA
+    if ($jam < '08:00' || $jam > '21:00') {
+        return [
+            'status' => false,
+            'pesan' => '❌ Form KAIH hanya dapat diisi pukul 08.00 - 21.00 WITA!'
+        ];
+    }
+    
+    return ['status' => true];
+}
+
 // Ambil nama siswa
 if ($siswa_id > 0) {
     try {
@@ -85,62 +109,73 @@ ensureKeteranganColumns($pdo);
 // PROSES SIMPAN KAIH
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
-    $tanggal = date('Y-m-d');
     
-    $bangun = isset($_POST['bangun']) && $_POST['bangun'] == 1 ? 1 : 0;
-    $ibadah = isset($_POST['ibadah']) && $_POST['ibadah'] == 1 ? 1 : 0;
-    $olahraga = isset($_POST['olahraga']) && $_POST['olahraga'] == 1 ? 1 : 0;
-    $sarapan = isset($_POST['sarapan']) && $_POST['sarapan'] == 1 ? 1 : 0;
-    $membaca = isset($_POST['membaca']) && $_POST['membaca'] == 1 ? 1 : 0;
-    $membantu = isset($_POST['membantu']) && $_POST['membantu'] == 1 ? 1 : 0;
-    $menabung = isset($_POST['menabung']) && $_POST['menabung'] == 1 ? 1 : 0;
-    
-    $bangun_keterangan = trim($_POST['bangun_keterangan'] ?? '');
-    $membaca_judul = trim($_POST['membaca_judul'] ?? '');
-    $menabung_keterangan = trim($_POST['menabung_keterangan'] ?? '');
-    
-    if ($siswa_id > 0) {
-        try {
-            $stmt = $pdo->prepare("SELECT id FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
-            $stmt->execute([$siswa_id, $tanggal]);
-            $existing = $stmt->fetch();
-            
-            if ($existing) {
-                $stmt = $pdo->prepare("UPDATE laporan_harian SET 
-                    bangun = ?, ibadah = ?, olahraga = ?, sarapan = ?, 
-                    membaca = ?, membantu = ?, menabung = ?,
-                    bangun_keterangan = ?, membaca_judul = ?, menabung_keterangan = ?,
-                    updated_at = NOW() 
-                    WHERE siswa_id = ? AND tanggal = ?");
-                $stmt->execute([
-                    $bangun, $ibadah, $olahraga, $sarapan, 
-                    $membaca, $membantu, $menabung,
-                    $bangun_keterangan, $membaca_judul, $menabung_keterangan,
-                    $siswa_id, $tanggal
-                ]);
-                $message = '✅ Data KAIH berhasil diperbarui!';
-                $message_type = 'success';
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO laporan_harian (
-                    siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
-                    bangun_keterangan, membaca_judul, menabung_keterangan,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
-                $stmt->execute([
-                    $siswa_id, $tanggal,
-                    $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
-                    $bangun_keterangan, $membaca_judul, $menabung_keterangan
-                ]);
-                $message = '✅ Data KAIH berhasil disimpan! Terus jaga kebiasaan baik ya! 🎉';
-                $message_type = 'success';
+    // ============================================================
+    // CEK WAKTU KAIH
+    // ============================================================
+    $cek = cekWaktuKAIH();
+    if (!$cek['status']) {
+        $message = $cek['pesan'];
+        $message_type = 'error';
+    } else {
+        // Lanjutkan proses simpan KAIH
+        $tanggal = date('Y-m-d');
+        
+        $bangun = isset($_POST['bangun']) && $_POST['bangun'] == 1 ? 1 : 0;
+        $ibadah = isset($_POST['ibadah']) && $_POST['ibadah'] == 1 ? 1 : 0;
+        $olahraga = isset($_POST['olahraga']) && $_POST['olahraga'] == 1 ? 1 : 0;
+        $sarapan = isset($_POST['sarapan']) && $_POST['sarapan'] == 1 ? 1 : 0;
+        $membaca = isset($_POST['membaca']) && $_POST['membaca'] == 1 ? 1 : 0;
+        $membantu = isset($_POST['membantu']) && $_POST['membantu'] == 1 ? 1 : 0;
+        $menabung = isset($_POST['menabung']) && $_POST['menabung'] == 1 ? 1 : 0;
+        
+        $bangun_keterangan = trim($_POST['bangun_keterangan'] ?? '');
+        $membaca_judul = trim($_POST['membaca_judul'] ?? '');
+        $menabung_keterangan = trim($_POST['menabung_keterangan'] ?? '');
+        
+        if ($siswa_id > 0) {
+            try {
+                $stmt = $pdo->prepare("SELECT id FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
+                $stmt->execute([$siswa_id, $tanggal]);
+                $existing = $stmt->fetch();
+                
+                if ($existing) {
+                    $stmt = $pdo->prepare("UPDATE laporan_harian SET 
+                        bangun = ?, ibadah = ?, olahraga = ?, sarapan = ?, 
+                        membaca = ?, membantu = ?, menabung = ?,
+                        bangun_keterangan = ?, membaca_judul = ?, menabung_keterangan = ?,
+                        updated_at = NOW() 
+                        WHERE siswa_id = ? AND tanggal = ?");
+                    $stmt->execute([
+                        $bangun, $ibadah, $olahraga, $sarapan, 
+                        $membaca, $membantu, $menabung,
+                        $bangun_keterangan, $membaca_judul, $menabung_keterangan,
+                        $siswa_id, $tanggal
+                    ]);
+                    $message = '✅ Data KAIH berhasil diperbarui!';
+                    $message_type = 'success';
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO laporan_harian (
+                        siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
+                        bangun_keterangan, membaca_judul, menabung_keterangan,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+                    $stmt->execute([
+                        $siswa_id, $tanggal,
+                        $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
+                        $bangun_keterangan, $membaca_judul, $menabung_keterangan
+                    ]);
+                    $message = '✅ Data KAIH berhasil disimpan! Terus jaga kebiasaan baik ya! 🎉';
+                    $message_type = 'success';
+                }
+            } catch (PDOException $e) {
+                $message = '❌ Gagal menyimpan data: ' . $e->getMessage();
+                $message_type = 'error';
             }
-        } catch (PDOException $e) {
-            $message = '❌ Gagal menyimpan data: ' . $e->getMessage();
+        } else {
+            $message = '❌ Data siswa tidak ditemukan. Silakan login ulang.';
             $message_type = 'error';
         }
-    } else {
-        $message = '❌ Data siswa tidak ditemukan. Silakan login ulang.';
-        $message_type = 'error';
     }
 }
 
@@ -202,147 +237,194 @@ if ($total_terisi >= 7) {
         padding: 0 12px;
     }
 
+    /* ============================================================
+       HEADER + PROGRESS - MODERN & DEWASA (1 KOTAK)
+       ============================================================ */
     .kaih-header {
-        background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8);
-        border-radius: 24px;
-        padding: 30px 24px 24px;
+        background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+        border-radius: 20px;
+        padding: 28px 28px 24px;
         margin-bottom: 20px;
-        text-align: center;
         color: white;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(2, 132, 199, 0.3);
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.25);
+        border: 1px solid rgba(255,255,255,0.05);
     }
+
     .kaih-header::before {
         content: '';
         position: absolute;
-        top: -50%;
+        top: -60%;
         right: -20%;
-        width: 200px;
-        height: 200px;
-        background: rgba(255,255,255,0.08);
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.08), transparent 70%);
         border-radius: 50%;
+        pointer-events: none;
     }
+
     .kaih-header::after {
         content: '';
         position: absolute;
-        bottom: -30%;
+        bottom: -40%;
         left: -10%;
-        width: 150px;
-        height: 150px;
-        background: rgba(255,255,255,0.05);
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.06), transparent 70%);
         border-radius: 50%;
-    }
-    .kaih-header .header-emoji {
-        font-size: 40px;
-        display: block;
-        margin-bottom: 4px;
-        position: relative;
-        z-index: 1;
-    }
-    .kaih-header .title {
-        font-size: 22px;
-        font-weight: 800;
-        position: relative;
-        z-index: 1;
-        letter-spacing: -0.5px;
-    }
-    .kaih-header .subtitle {
-        font-size: 14px;
-        opacity: 0.9;
-        margin-top: 4px;
-        position: relative;
-        z-index: 1;
-        font-weight: 400;
-    }
-    .kaih-header .subtitle strong {
-        font-weight: 700;
+        pointer-events: none;
     }
 
-    .progress-card {
-        background: white;
-        border-radius: 20px;
-        padding: 20px 20px 18px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        border: 1px solid #f1f5f9;
-        text-align: center;
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
     }
-    .progress-card .label {
+
+    .header-greeting {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .greeting-emoji {
+        font-size: 32px;
+        line-height: 1;
+    }
+
+    .greeting-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .greeting-name {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        line-height: 1.2;
+    }
+
+    .greeting-sub {
         font-size: 13px;
-        color: #94a3b8;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        opacity: 0.7;
+        font-weight: 400;
+        letter-spacing: 0.2px;
     }
-    .progress-card .number-wrap {
+
+    .header-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(8px);
+        padding: 6px 16px 6px 12px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .badge-icon {
+        font-size: 14px;
+    }
+
+    .badge-text {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    .header-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+        margin: 16px 0 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ===== PROGRESS DI DALAM HEADER ===== */
+    .header-progress {
+        position: relative;
+        z-index: 1;
+    }
+
+    .progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 10px;
+    }
+
+    .progress-number {
         display: flex;
         align-items: baseline;
-        justify-content: center;
-        gap: 4px;
-        margin: 2px 0;
+        gap: 2px;
     }
-    .progress-card .number {
-        font-size: 52px;
+
+    .number-main {
+        font-size: 28px;
         font-weight: 800;
-        background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.1;
+        color: white;
+        line-height: 1;
+        letter-spacing: -0.5px;
     }
-    .progress-card .number span {
-        font-size: 24px;
-        color: #cbd5e1;
-        -webkit-text-fill-color: #cbd5e1;
+
+    .number-total {
+        font-size: 16px;
         font-weight: 600;
+        opacity: 0.5;
+        margin-left: 2px;
     }
+
+    .progress-percentage {
+        font-size: 18px;
+        font-weight: 700;
+        color: #38bdf8;
+        letter-spacing: -0.3px;
+    }
+
     .progress-bar-track {
         width: 100%;
-        height: 10px;
-        background: #f1f5f9;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
         border-radius: 10px;
-        margin-top: 12px;
         overflow: hidden;
+        margin-bottom: 12px;
     }
+
     .progress-bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, #38bdf8, #0284c7, #0369a1);
+        background: linear-gradient(90deg, #38bdf8, #0284c7, #6366f1);
         border-radius: 10px;
         transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         width: 0%;
     }
-    .progress-card .status-text {
-        font-size: 14px;
-        font-weight: 600;
-        margin-top: 10px;
-        padding: 8px 16px;
-        border-radius: 30px;
+
+    .progress-status {
+        font-size: 13px;
+        font-weight: 500;
+        opacity: 0.8;
         display: inline-block;
     }
-    .progress-card .status-text.done {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-    .progress-card .status-text.pending {
-        background: #e0f2fe;
-        color: #075985;
-    }
-    .progress-card .status-text.empty {
-        background: #f1f5f9;
-        color: #94a3b8;
-    }
-    .progress-card .motivation {
-        font-size: 13px;
-        color: #64748b;
-        margin-top: 8px;
-        font-weight: 500;
-    }
-    .progress-card .motivation .emoji-big {
-        font-size: 20px;
+
+    .progress-status.status-done {
+        color: #4ade80;
     }
 
-    /* ===== HABIT ITEMS - Perbaikan Tata Letak ===== */
+    .progress-status.status-pending {
+        color: #38bdf8;
+    }
+
+    .progress-status.status-empty {
+        color: rgba(255,255,255,0.4);
+    }
+
+    /* ============================================================
+       HABIT ITEMS - TIDAK DIUBAH (SESUAI PERMINTAAN)
+       ============================================================ */
     .habit-item {
         background: white;
         border-radius: 16px;
@@ -357,7 +439,6 @@ if ($total_terisi >= 7) {
         box-shadow: 0 6px 20px rgba(2, 132, 199, 0.08);
     }
 
-    /* HEADER: Judul di kiri, Opsi di kanan */
     .habit-item .habit-header {
         display: flex;
         justify-content: space-between;
@@ -406,7 +487,6 @@ if ($total_terisi >= 7) {
         line-height: 1.4;
     }
 
-    /* Opsi Ya/Tidak */
     .habit-item .options label {
         display: flex;
         align-items: center;
@@ -442,7 +522,6 @@ if ($total_terisi >= 7) {
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
     }
 
-    /* Keterangan di bawah */
     .habit-item .keterangan-wrapper {
         margin-top: 10px;
         padding-left: 42px;
@@ -538,12 +617,57 @@ if ($total_terisi >= 7) {
         border: 1px solid #fecaca;
     }
 
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
     @media (max-width: 500px) {
         .kaih-container { padding: 0 6px; }
-        .kaih-header { padding: 24px 16px 20px; }
-        .kaih-header .title { font-size: 19px; }
-        .kaih-header .subtitle { font-size: 13px; }
-        .progress-card .number { font-size: 42px; }
+        
+        .kaih-header {
+            padding: 20px 18px 18px;
+        }
+        
+        .header-top {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .header-badge {
+            align-self: flex-start;
+        }
+        
+        .greeting-name {
+            font-size: 18px;
+        }
+        
+        .greeting-sub {
+            font-size: 12px;
+        }
+        
+        .greeting-emoji {
+            font-size: 26px;
+        }
+        
+        .number-main {
+            font-size: 24px;
+        }
+        
+        .number-total {
+            font-size: 14px;
+        }
+        
+        .progress-percentage {
+            font-size: 16px;
+        }
+        
+        .progress-row {
+            margin-bottom: 8px;
+        }
+        
+        .progress-status {
+            font-size: 12px;
+        }
         
         .habit-item { padding: 12px 14px; }
         .habit-item .habit-header {
@@ -562,10 +686,49 @@ if ($total_terisi >= 7) {
         .habit-item .options label { padding: 4px 14px; font-size: 13px; }
         
         .btn-simpan { font-size: 15px; padding: 14px; }
-        .progress-card .status-text { font-size: 13px; }
     }
 
     @media (max-width: 400px) {
+        .kaih-header {
+            padding: 16px 14px 14px;
+        }
+        
+        .greeting-name {
+            font-size: 16px;
+        }
+        
+        .greeting-sub {
+            font-size: 11px;
+        }
+        
+        .greeting-emoji {
+            font-size: 22px;
+        }
+        
+        .header-badge {
+            padding: 4px 12px 4px 10px;
+        }
+        
+        .badge-text {
+            font-size: 10px;
+        }
+        
+        .number-main {
+            font-size: 20px;
+        }
+        
+        .number-total {
+            font-size: 13px;
+        }
+        
+        .progress-percentage {
+            font-size: 14px;
+        }
+        
+        .progress-status {
+            font-size: 11px;
+        }
+        
         .habit-item .options label { padding: 3px 10px; font-size: 12px; }
         .habit-item .label { font-size: 13px; }
         .habit-item .label .icon { width: 24px; height: 24px; font-size: 14px; }
@@ -577,11 +740,52 @@ if ($total_terisi >= 7) {
 
 <div class="kaih-container">
 
+    <!-- ============================================================
+         HEADER + PROGRESS - MODERN & DEWASA (1 KOTAK)
+         ============================================================ -->
     <div class="kaih-header">
-        <span class="header-emoji">🌟</span>
-        <div class="title">Hai, <?php echo htmlspecialchars($nama_siswa); ?>!</div>
-        <div class="subtitle">
-            Yuk catat <strong>7 Kebiasaan</strong> baikmu hari ini ✨
+        <div class="header-top">
+            <div class="header-greeting">
+                <span class="greeting-emoji">👋</span>
+                <div class="greeting-text">
+                    <div class="greeting-name">Halo, <?php echo htmlspecialchars($nama_siswa); ?></div>
+                    <div class="greeting-sub">Catat 7 kebiasaan baikmu hari ini</div>
+                </div>
+            </div>
+            <div class="header-badge">
+                <span class="badge-icon">📋</span>
+                <span class="badge-text">KAIH</span>
+            </div>
+        </div>
+        
+        <div class="header-divider"></div>
+        
+        <!-- Progress di dalam header -->
+        <div class="header-progress">
+            <div class="progress-row">
+                <div class="progress-number">
+                    <span class="number-main"><?php echo $total_terisi; ?></span>
+                    <span class="number-total">/ 7</span>
+                </div>
+                <div class="progress-percentage">
+                    <?php echo round(($total_terisi / 7) * 100); ?>%
+                </div>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: <?php echo ($total_terisi / 7) * 100; ?>%;"></div>
+            </div>
+            <div class="progress-status 
+                <?php echo $total_terisi >= 7 ? 'status-done' : ($total_terisi > 0 ? 'status-pending' : 'status-empty'); ?>">
+                <?php if ($total_terisi >= 7): ?>
+                    ✅ Selesai! Kamu hebat!
+                <?php elseif ($total_terisi >= 4): ?>
+                    ⏳ <?php echo $total_terisi; ?> dari 7 selesai
+                <?php elseif ($total_terisi > 0): ?>
+                    🌱 <?php echo $total_terisi; ?> dari 7 terisi
+                <?php else: ?>
+                    ✨ Belum ada yang dicatat
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -591,34 +795,9 @@ if ($total_terisi >= 7) {
         </div>
     <?php endif; ?>
 
-    <div class="progress-card">
-        <div class="label">🎯 Progress Hari Ini</div>
-        <div class="number-wrap">
-            <div class="number">
-                <?php echo $total_terisi; ?><span>/7</span>
-            </div>
-        </div>
-        <div class="progress-bar-track">
-            <div class="progress-bar-fill" style="width: <?php echo ($total_terisi / 7) * 100; ?>%;"></div>
-        </div>
-        <div class="status-text 
-            <?php echo $total_terisi >= 7 ? 'done' : ($total_terisi > 0 ? 'pending' : 'empty'); ?>">
-            <?php if ($total_terisi >= 7): ?>
-                🎉 Lengkap! Kamu Hebat!
-            <?php elseif ($total_terisi >= 4): ?>
-                💪 Semangat! <?php echo $total_terisi; ?>/7 selesai
-            <?php elseif ($total_terisi > 0): ?>
-                🚀 Mulai bagus! <?php echo $total_terisi; ?>/7
-            <?php else: ?>
-                🌱 Ayo mulai hari ini!
-            <?php endif; ?>
-        </div>
-        <div class="motivation">
-            <span class="emoji-big"><?php echo $emoji; ?></span>
-            <?php echo $motivation; ?>
-        </div>
-    </div>
-
+    <!-- ============================================================
+         FORM KAIH - TIDAK DIUBAH
+         ============================================================ -->
     <form method="POST" action="">
         <input type="hidden" name="simpan_kaih" value="1">
 

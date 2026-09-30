@@ -12,6 +12,34 @@ $siswa_id = $_SESSION['siswa_id'] ?? 0;
 // JANGAN DEKLARASIKAN ULANG!
 // ============================================================
 
+// ============================================================
+// CEK WAKTU & HARI UNTUK ABSENSI
+// ============================================================
+function cekWaktuAbsensi() {
+    // Set timezone ke WITA (Asia/Makassar)
+    date_default_timezone_set('Asia/Makassar');
+    
+    $hari = date('N'); // 1=Senin, 7=Minggu
+    $jam = date('H:i'); // Format 24 jam
+    
+    // Absensi hanya Senin-Jumat (1-5)
+    if ($hari < 1 || $hari > 5) {
+        return [
+            'status' => false,
+            'pesan' => '❌ Absensi hanya berlaku hari Senin - Jumat!'
+        ];
+    }
+    
+    if ($jam < '08:00' || $jam > '12:00') {
+        return [
+            'status' => false,
+            'pesan' => '❌ Absensi hanya berlaku pukul 08.00 - 12.00 WITA!'
+        ];
+    }
+    
+    return ['status' => true];
+}
+
 // Ambil nama siswa
 $nama_siswa = 'Siswa';
 if ($siswa_id > 0) {
@@ -102,39 +130,50 @@ cekDanCatatAbsenTerlewat($pdo, $siswa_id);
 // PROSES ABSENSI
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
-    $tanggal = $_POST['tanggal'] ?? date('Y-m-d');
-    $status = 'hadir';
-    $deskripsi = 'Sesi kelas reguler';
-    $catatan = 'Presensi mandiri';
     
-    if ($siswa_id > 0) {
-        try {
-            $stmt = $pdo->prepare("SELECT id FROM absensi WHERE siswa_id = ? AND tanggal = ?");
-            $stmt->execute([$siswa_id, $tanggal]);
-            $existing = $stmt->fetch();
-            
-            if ($existing) {
-                $stmt = $pdo->prepare("UPDATE absensi SET 
-                    status = ?, deskripsi = ?, catatan = ?, updated_at = NOW()
-                    WHERE siswa_id = ? AND tanggal = ?");
-                $stmt->execute([$status, $deskripsi, $catatan, $siswa_id, $tanggal]);
-                $message = '✅ Absensi berhasil diperbarui!';
-                $message_type = 'success';
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO absensi (
-                    siswa_id, tanggal, status, deskripsi, catatan, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
-                $stmt->execute([$siswa_id, $tanggal, $status, $deskripsi, $catatan]);
-                $message = '✅ Absensi berhasil! 🎉';
-                $message_type = 'success';
+    // ============================================================
+    // CEK WAKTU DAN HARI ABSENSI - TAMBAHKAN INI!
+    // ============================================================
+    $cek = cekWaktuAbsensi();
+    if (!$cek['status']) {
+        $message = $cek['pesan'];
+        $message_type = 'error';
+    } else {
+        // Lanjutkan proses absensi
+        $tanggal = $_POST['tanggal'] ?? date('Y-m-d');
+        $status = 'hadir';
+        $deskripsi = 'Sesi kelas reguler';
+        $catatan = 'Presensi mandiri';
+        
+        if ($siswa_id > 0) {
+            try {
+                $stmt = $pdo->prepare("SELECT id FROM absensi WHERE siswa_id = ? AND tanggal = ?");
+                $stmt->execute([$siswa_id, $tanggal]);
+                $existing = $stmt->fetch();
+                
+                if ($existing) {
+                    $stmt = $pdo->prepare("UPDATE absensi SET 
+                        status = ?, deskripsi = ?, catatan = ?, updated_at = NOW()
+                        WHERE siswa_id = ? AND tanggal = ?");
+                    $stmt->execute([$status, $deskripsi, $catatan, $siswa_id, $tanggal]);
+                    $message = '✅ Absensi berhasil diperbarui!';
+                    $message_type = 'success';
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO absensi (
+                        siswa_id, tanggal, status, deskripsi, catatan, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
+                    $stmt->execute([$siswa_id, $tanggal, $status, $deskripsi, $catatan]);
+                    $message = '✅ Absensi berhasil! 🎉';
+                    $message_type = 'success';
+                }
+            } catch (PDOException $e) {
+                $message = '❌ Gagal absen: ' . $e->getMessage();
+                $message_type = 'error';
             }
-        } catch (PDOException $e) {
-            $message = '❌ Gagal absen: ' . $e->getMessage();
+        } else {
+            $message = '❌ Data siswa tidak ditemukan. Silakan login ulang.';
             $message_type = 'error';
         }
-    } else {
-        $message = '❌ Data siswa tidak ditemukan. Silakan login ulang.';
-        $message_type = 'error';
     }
 }
 
