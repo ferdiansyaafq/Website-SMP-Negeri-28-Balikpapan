@@ -304,9 +304,6 @@ $sidebarLabel = match ($role) {
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
                 Monitoring Siswa
             </a>
-            <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
-                Rekap
-            </a>
         <?php elseif ($role === 'siswa'): ?>
             <!-- MENU SISWA -->
             <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
@@ -332,9 +329,6 @@ $sidebarLabel = match ($role) {
             </a>
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
                 Monitoring Anak
-            </a>
-            <a href="rekap.php" class="<?php echo ($current_page == 'rekap.php') ? 'active' : ''; ?>">
-                Rekap
             </a>
         <?php endif; ?>
 

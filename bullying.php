@@ -344,24 +344,28 @@ include 'header.php';
             </div>
 
             <div class="form-row">
-                <div class="form-group">
-                    <label>Nama Korban <span class="required">*</span></label>
-                    <input type="text" name="nama_korban" required placeholder="Nama siswa yang menjadi korban">
-                </div>
-                <div class="form-group">
-                    <label>Jenis Bullying <span class="required">*</span></label>
-                    <select name="jenis_bullying" required>
-                        <option value="">Pilih jenis bullying...</option>
-                        <option value="Fisik">Fisik (memukul, menendang, mendorong, dll.)</option>
-                        <option value="Verbal">Verbal (mengejek, menghina, mengancam, dll.)</option>
-                        <option value="Sosial">Sosial (mengucilkan, menyebarkan gossip, dll.)</option>
-                        <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
-                        <option value="Seksual">Pelecehan Seksual</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-            </div>
+    <div class="form-group">
+        <label>Nama Korban <span class="required">*</span></label>
+        <input type="text" name="nama_korban" required placeholder="Nama siswa yang menjadi korban">
+    </div>
+    <div class="form-group">
+        <label>Kelas Korban <span class="required">*</span></label>
+        <input type="text" name="kelas_korban" required placeholder="Contoh: 7A, 8B, 9C">
+    </div>
+</div>
 
+<div class="form-group">
+    <label>Jenis Bullying <span class="required">*</span></label>
+    <select name="jenis_bullying" required>
+        <option value="">Pilih jenis bullying...</option>
+        <option value="Fisik">Fisik (memukul, menendang, mendorong, dll.)</option>
+        <option value="Verbal">Verbal (mengejek, menghina, mengancam, dll.)</option>
+        <option value="Sosial">Sosial (mengucilkan, menyebarkan gossip, dll.)</option>
+        <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
+        <option value="Seksual">Pelecehan Seksual</option>
+        <option value="Lainnya">Lainnya</option>
+    </select>
+</div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Tanggal Kejadian <span class="required">*</span></label>

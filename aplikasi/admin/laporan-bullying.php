@@ -16,7 +16,7 @@ $offset = ($page - 1) * $perPage;
 
 $stmt = $pdo->prepare(
     'SELECT id, nama_pelapor, kontak, status_pelapor, nama_korban, kelas_korban,
-            jenis_bullying, tanggal_kejadian, deskripsi, lokasi, saksi, status, created_at
+            jenis_bullying, tanggal_kejadian, deskripsi, lokasi, status, created_at
      FROM laporan_bullying
      ORDER BY created_at DESC, id DESC
      LIMIT :limit OFFSET :offset'
@@ -72,11 +72,18 @@ require_once '../includes/header-kaih.php';
                     <?php foreach ($laporan as $item): ?>
                         <tr>
                             <td><?= htmlspecialchars(date('d M Y H:i', strtotime($item['created_at']))) ?></td>
-                            <td><?= htmlspecialchars($item['nama_pelapor']) ?><br><small><?= htmlspecialchars($item['kontak']) ?></small></td>
-                            <td><?= htmlspecialchars($item['nama_korban']) ?><br><small><?= htmlspecialchars($item['kelas_korban']) ?></small></td>
+                            <td>
+                                <?= htmlspecialchars($item['nama_pelapor']) ?><br>
+                                <small><?= htmlspecialchars($item['kontak']) ?></small><br>
+                                <small><em><?= htmlspecialchars($item['status_pelapor']) ?></em></small>
+                            </td>
+                            <td>
+                                <?= htmlspecialchars($item['nama_korban']) ?><br>
+                                <small><?= htmlspecialchars($item['kelas_korban']) ?></small>
+                            </td>
                             <td><?= htmlspecialchars($item['jenis_bullying']) ?></td>
                             <td><?= htmlspecialchars($item['lokasi']) ?></td>
-                            <td class="description"><?= htmlspecialchars($item['deskripsi']) ?><br><small>Saksi: <?= htmlspecialchars($item['saksi'] ?: '-') ?></small></td>
+                            <td class="description"><?= htmlspecialchars($item['deskripsi']) ?></td>
                             <td><span class="badge"><?= htmlspecialchars(ucfirst($item['status'])) ?></span></td>
                         </tr>
                     <?php endforeach; ?>
