@@ -7,20 +7,13 @@ $message_type = '';
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $nama_siswa = 'Siswa';
 
-// ============================================================
-// CEK WAKTU UNTUK KAIH
-// ============================================================
 function cekWaktuKAIH() {
     // Set timezone ke WITA (Asia/Makassar)
     date_default_timezone_set('Asia/Makassar');
     
-    $hari = date('N'); // 1=Senin, 7=Minggu
-    $jam = date('H:i'); // Format 24 jam
+    $hari = date('N'); 
+    $jam = date('H:i'); 
     
-    // KAIH bisa diisi Senin-Minggu (1-7) -> semua hari
-    // Tidak ada batasan hari, semua hari boleh
-    
-    // KAIH hanya pukul 08.00 - 21.00 WITA
     if ($jam < '08:00' || $jam > '21:00') {
         return [
             'status' => false,
@@ -43,9 +36,6 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// AUTO-CREATE TABEL
-// ============================================================
 function ensureLaporanHarianTable($pdo) {
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_harian` (

@@ -50,14 +50,18 @@ if (empty($slideshowPhotos)) {
 $beritaData = [];
 try {
     $stmtBerita = $pdo->query(
-        "SELECT id, tanggal, kategori, judul, ringkasan AS deskripsi, gambar
+        "SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
          FROM berita
          WHERE status = 'terbit'
          ORDER BY tanggal DESC, id DESC
          LIMIT 3"
     );
     while ($berita = $stmtBerita->fetch(PDO::FETCH_ASSOC)) {
-        $berita['tanggal'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
+        $berita['tanggal_formatted'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
+
+        $gambarPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $berita['gambar'] ?? '');
+        $berita['gambar_exists'] = !empty($berita['gambar']) && is_file($gambarPath);
+
         $beritaData[] = $berita;
     }
 } catch (PDOException $e) {
@@ -66,24 +70,34 @@ try {
 
 $fasilitasData = [
     [
-        'nama' => 'Ruang Kelas Adaptif',
-        'deskripsi' => '9 ruang kelas dengan fasilitas pendukung dan AC',
-        'gambar' => ''
+        'nama' => 'Ruang Kelas',
+        'deskripsi' => '9 ruang kelas dengan fasilitas pendukung',
+        'gambar' => 'assets/img/ruangkelas.png'
+    ],
+    [
+        'nama' => 'Laboratorium Komputer',
+        'deskripsi' => 'Lab komputer dengan 30 unit PC dan internet cepat',
+        'gambar' => 'assets/img/laboratoriumkomputer.png'
+    ],
+    [
+        'nama' => 'Perpustakaan',
+        'deskripsi' => 'Koleksi buku fisik dan digital dengan sudut baca nyaman',
+        'gambar' => 'assets/img/perpustakaan.png'
     ],
     [
         'nama' => 'Masjid Sekolah',
         'deskripsi' => 'Ruang ibadah yang nyaman untuk kegiatan keagamaan',
-        'gambar' => ''
+        'gambar' => 'assets/img/masjidsekolah.png'
     ],
     [
         'nama' => 'Lapangan Olahraga',
         'deskripsi' => 'Lapangan multifungsi untuk basket, futsal, dan voli',
-        'gambar' => ''
+        'gambar' => 'assets/img/lapangan.jpg'
     ],
     [
         'nama' => 'Kantin Sehat',
         'deskripsi' => 'Kantin dengan menu gizi seimbang dan bersih',
-        'gambar' => ''
+        'gambar' => 'assets/img/kantin.png'
     ]
 ];
 
@@ -92,37 +106,37 @@ $ekskulData = [
         'nama' => 'Pramuka',
         'jadwal' => 'Jumat, 14.00-16.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/pramuka.png'
     ],
     [
         'nama' => 'Futsal',
         'jadwal' => 'Selasa & Kamis, 15.00-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/futsal.png'
     ],
     [
         'nama' => 'Pencak Silat',
         'jadwal' => 'Selasa, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/pencaksilat.png'
     ],
     [
         'nama' => 'PMR',
         'jadwal' => 'Kamis, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/pmr.png'
     ],
     [
         'nama' => 'Memanah',
         'jadwal' => 'Senin, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/memanah.png'
     ],
     [
         'nama' => 'Kader Lingkungan',
         'jadwal' => 'Sabtu, 08.00-10.00',
         'pembina' => 'Pembimbing',
-        'gambar' => ''
+        'gambar' => 'assets/img/kaderlingkungan.png'
     ],
 ];
 
@@ -130,11 +144,7 @@ include 'header.php';
 ?>
 
 <style>
-.container {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 40px;
-}
+.container { max-width: 1200px; margin: 40px auto; padding: 0 40px; }
 
 .hero-section {
     display: grid;
@@ -143,8 +153,6 @@ include 'header.php';
     align-items: center;
     background: transparent;
     padding: 40px 0;
-    border-radius: 0;
-    box-shadow: none;
 }
 
 .text-content h2 {
@@ -156,10 +164,7 @@ include 'header.php';
     letter-spacing: -0.5px;
 }
 
-.text-content h2 span {
-    color: #1e6fbf;
-    display: inline;
-}
+.text-content h2 span { color: #1e6fbf; display: inline; }
 
 .tagline {
     font-size: 18px;
@@ -180,54 +185,24 @@ include 'header.php';
     font-weight: 400;
 }
 
-.image-section {
-    background: #0284c7;
-    padding: 20px;
-    border-radius: 20px;
-    position: relative;
-}
+.image-section { background: #0284c7; padding: 20px; border-radius: 20px; position: relative; }
 
-.carousel {
-    position: relative;
-    overflow: hidden;
-    border-radius: 15px;
-    background: white;
-}
-
-.carousel img {
-    width: 100%;
-    height: 450px;
-    object-fit: cover;
-    display: block;
-}
+.carousel { position: relative; overflow: hidden; border-radius: 15px; background: white; }
+.carousel img { width: 100%; height: 450px; object-fit: cover; display: block; }
 
 .carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255,255,255,0.9);
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    color: #0284c7;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.9); border: none;
+    width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+    font-size: 20px; color: #0284c7; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
 }
-
-.carousel-btn:hover {
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
+.carousel-btn:hover { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .carousel-btn.prev { left: 15px; }
 .carousel-btn.next { right: 15px; }
 
-.berita-section {
+.berita-section,
+.fasilitas-section {
     background: white;
     padding: 60px 0;
     margin-top: 40px;
@@ -235,28 +210,10 @@ include 'header.php';
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
 }
 
-.section-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.section-header h2 {
-    font-size: 32px;
-    color: #1e293b;
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.section-header h2 span {
-    color: #0284c7;
-}
-
-.section-header p {
-    font-size: 15px;
-    color: #64748b;
-    max-width: 600px;
-    margin: 0 auto;
-}
+.section-header { text-align: center; margin-bottom: 40px; }
+.section-header h2 { font-size: 32px; color: #1e293b; font-weight: 800; margin-bottom: 10px; }
+.section-header h2 span { color: #0284c7; }
+.section-header p { font-size: 15px; color: #64748b; max-width: 600px; margin: 0 auto; }
 
 .berita-grid {
     display: grid;
@@ -272,7 +229,6 @@ include 'header.php';
     transition: all 0.3s;
     border: 1px solid #e2e8f0;
 }
-
 .berita-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(2,132,199,0.15);
@@ -288,88 +244,37 @@ include 'header.php';
     align-items: center;
     justify-content: center;
 }
-
-.berita-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.berita-image .placeholder {
-    color: #94a3b8;
-    font-size: 14px;
-    font-weight: 600;
-}
+.berita-image img { width: 100%; height: 100%; object-fit: cover; }
+.berita-image .placeholder { color: #94a3b8; font-size: 14px; font-weight: 600; }
 
 .berita-date {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
+    position: absolute; top: 15px; right: 15px;
+    background: rgba(0,0,0,0.7); color: white;
+    padding: 8px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 700;
 }
 
-.berita-content {
-    padding: 20px;
-}
-
+.berita-content { padding: 20px; }
 .berita-category {
-    display: inline-block;
-    background: #e0f2fe;
-    color: #0284c7;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    text-transform: uppercase;
+    display: inline-block; background: #e0f2fe; color: #0284c7;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 10px; text-transform: uppercase;
 }
-
-.berita-content h3 {
-    font-size: 18px;
-    color: #1e293b;
-    margin-bottom: 10px;
-    font-weight: 700;
-    line-height: 1.4;
-}
-
-.berita-content p {
-    font-size: 14px;
-    color: #64748b;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
+.berita-content h3 { font-size: 18px; color: #1e293b; margin-bottom: 10px; font-weight: 700; line-height: 1.4; }
+.berita-content p { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 15px; }
 .berita-link {
-    color: #0284c7;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+    color: #0284c7; text-decoration: none;
+    font-weight: 600; font-size: 14px;
+    display: inline-flex; align-items: center; gap: 5px;
     transition: gap 0.3s;
 }
+.berita-link:hover { gap: 10px; }
 
-.berita-link:hover {
-    gap: 10px;
-}
-
-.fasilitas-section {
-    background: white;
-    padding: 60px 0;
-    margin-top: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-}
-
+/* FASILITAS */
 .fasilitas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     padding: 0 40px;
 }
@@ -382,7 +287,6 @@ include 'header.php';
     border: 1px solid #e2e8f0;
     text-align: center;
 }
-
 .fasilitas-card:hover {
     transform: translateY(-5px);
     border-color: #0284c7;
@@ -397,41 +301,20 @@ include 'header.php';
     align-items: center;
     justify-content: center;
 }
-
 .fasilitas-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s;
 }
+.fasilitas-image .placeholder { color: #94a3b8; font-size: 14px; font-weight: 600; }
+.fasilitas-card:hover .fasilitas-image img { transform: scale(1.05); }
 
-.fasilitas-image .placeholder {
-    color: #94a3b8;
-    font-size: 14px;
-    font-weight: 600;
-}
+.fasilitas-body { padding: 20px; }
+.fasilitas-body h4 { font-size: 16px; color: #1e293b; margin-bottom: 8px; font-weight: 700; }
+.fasilitas-body p { font-size: 13px; color: #64748b; line-height: 1.5; }
 
-.fasilitas-card:hover .fasilitas-image img {
-    transform: scale(1.05);
-}
-
-.fasilitas-body {
-    padding: 20px;
-}
-
-.fasilitas-body h4 {
-    font-size: 16px;
-    color: #1e293b;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.fasilitas-body p {
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.5;
-}
-
+/* EKSKUL */
 .ekskul-section {
     background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
     padding: 60px 0;
@@ -439,14 +322,8 @@ include 'header.php';
     border-radius: 20px;
     color: white;
 }
-
-.ekskul-section .section-header h2 {
-    color: white;
-}
-
-.ekskul-section .section-header p {
-    color: rgba(255,255,255,0.9);
-}
+.ekskul-section .section-header h2 { color: white; }
+.ekskul-section .section-header p { color: rgba(255,255,255,0.9); }
 
 .ekskul-grid {
     display: grid;
@@ -463,11 +340,7 @@ include 'header.php';
     transition: all 0.3s;
     border: 1px solid rgba(255,255,255,0.2);
 }
-
-.ekskul-card:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-5px);
-}
+.ekskul-card:hover { background: rgba(255,255,255,0.2); transform: translateY(-5px); }
 
 .ekskul-image {
     height: 160px;
@@ -477,52 +350,21 @@ include 'header.php';
     justify-content: center;
     background: rgba(255,255,255,0.05);
 }
-
 .ekskul-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s;
 }
+.ekskul-image .placeholder { color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 600; }
+.ekskul-card:hover .ekskul-image img { transform: scale(1.05); }
 
-.ekskul-image .placeholder {
-    color: rgba(255,255,255,0.6);
-    font-size: 14px;
-    font-weight: 600;
-}
+.ekskul-body { padding: 18px 20px 20px; text-align: center; }
+.ekskul-body h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.ekskul-body .jadwal { font-size: 12px; opacity: 0.9; margin-bottom: 5px; }
+.ekskul-body .pembina { font-size: 11px; opacity: 0.8; }
 
-.ekskul-card:hover .ekskul-image img {
-    transform: scale(1.05);
-}
-
-.ekskul-body {
-    padding: 18px 20px 20px;
-    text-align: center;
-}
-
-.ekskul-body h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.ekskul-body .jadwal {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 5px;
-}
-
-.ekskul-body .pembina {
-    font-size: 11px;
-    opacity: 0.8;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 30px;
-}
+.features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
 
 .feature-item {
     background: white;
@@ -534,93 +376,44 @@ include 'header.php';
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     transition: all 0.3s;
 }
+.feature-item:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+.feature-icon { font-size: 20px; flex-shrink: 0; }
+.feature-text { font-size: 14px; color: #1e293b; font-weight: 600; }
 
-.feature-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-.feature-icon {
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.feature-text {
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 600;
-}
-
-footer a:hover {
-    opacity: 1;
-    transform: translateY(-3px);
-}
-
-footer a[href*="wa.me"]:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(37,211,102,0.6);
-}
+footer a:hover { opacity: 1; transform: translateY(-3px); }
+footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(37,211,102,0.6); }
 
 @media (max-width: 968px) {
-    .hero-section {
-        grid-template-columns: 1fr;
-        padding: 30px;
-    }
-    .text-content h2 {
-        font-size: 28px;
-    }
-    .image-section {
-        order: -1;
-    }
-    .carousel img {
-        height: 300px;
-    }
+    .hero-section { grid-template-columns: 1fr; padding: 30px; }
+    .text-content h2 { font-size: 28px; }
+    .image-section { order: -1; }
+    .carousel img { height: 300px; }
+    .fasilitas-grid,
+    .ekskul-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-    .container {
-        padding: 0 20px;
-        margin: 20px auto;
-    }
-    .hero-section {
-        padding: 25px;
-    }
-    .text-content h2 {
-        font-size: 24px;
-    }
-    .tagline {
-        font-size: 15px;
-    }
-    .description {
-        font-size: 14px;
-    }
+    .container { padding: 0 20px; margin: 20px auto; }
+    .hero-section { padding: 25px; }
+    .text-content h2 { font-size: 24px; }
+    .tagline { font-size: 15px; }
+    .description { font-size: 14px; }
     .berita-grid,
     .fasilitas-grid,
-    .ekskul-grid {
-        grid-template-columns: 1fr;
-        padding: 0 20px;
-    }
-    .section-header h2 {
-        font-size: 24px;
-    }
+    .ekskul-grid { grid-template-columns: 1fr; padding: 0 20px; }
+    .section-header h2 { font-size: 24px; }
     .berita-section,
     .fasilitas-section,
-    .ekskul-section {
-        padding: 40px 0;
-    }
+    .ekskul-section { padding: 40px 0; }
 }
 
 @media (max-width: 480px) {
-    .hero-section {
-        padding: 20px;
-    }
-    .text-content h2 {
-        font-size: 22px;
-    }
+    .hero-section { padding: 20px; }
+    .text-content h2 { font-size: 22px; }
 }
 </style>
 
-<body> 
+<body>
 <div class="container">
     <div class="hero-section">
         <div class="text-content">
@@ -669,26 +462,36 @@ footer a[href*="wa.me"]:hover {
         <h2>Berita <span>Terkini</span></h2>
         <p>Informasi dan kabar terbaru dari SMP Negeri 28 Balikpapan</p>
     </div>
-    <div class="berita-grid">
-        <?php foreach ($beritaData as $item): ?>
-        <article class="berita-card">
-            <div class="berita-image">
-                <?php if (!empty($item['gambar'])): ?>
-                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" alt="<?php echo htmlspecialchars($item['judul']); ?>">
-                <?php else: ?>
-                    <span class="placeholder">Gambar Berita</span>
-                <?php endif; ?>
-                <span class="berita-date"><?php echo $item['tanggal']; ?></span>
-            </div>
-            <div class="berita-content">
-                <span class="berita-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
-                <h3><?php echo htmlspecialchars($item['judul']); ?></h3>
-                <p><?php echo htmlspecialchars($item['deskripsi']); ?></p>
-                <a href="berita-detail.php?id=<?php echo (int) $item['id']; ?>" class="berita-link">Baca Selengkapnya →</a>
-            </div>
-        </article>
-        <?php endforeach; ?>
-    </div>
+
+    <?php if (empty($beritaData)): ?>
+        <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+            <p style="font-size: 16px;">📭 Belum ada berita yang dipublikasikan.</p>
+        </div>
+    <?php else: ?>
+        <div class="berita-grid">
+            <?php foreach ($beritaData as $item): ?>
+            <article class="berita-card">
+                <div class="berita-image">
+                    <?php if ($item['gambar_exists']): ?>
+                        <img src="<?php echo htmlspecialchars($item['gambar']); ?>" 
+                             alt="<?php echo htmlspecialchars($item['judul']); ?>">
+                    <?php else: ?>
+                        <span class="placeholder">📷 Gambar Berita</span>
+                    <?php endif; ?>
+                    <span class="berita-date"><?php echo $item['tanggal_formatted']; ?></span>
+                </div>
+                <div class="berita-content">
+                    <span class="berita-category"><?php echo htmlspecialchars($item['kategori']); ?></span>
+                    <h3><?php echo htmlspecialchars($item['judul']); ?></h3>
+                    <p><?php echo htmlspecialchars($item['ringkasan']); ?></p>
+                    <a href="berita-detail.php?id=<?php echo (int) $item['id']; ?>" class="berita-link">
+                        Baca Selengkapnya →
+                    </a>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </section>
 
 <section class="fasilitas-section">
@@ -697,18 +500,22 @@ footer a[href*="wa.me"]:hover {
         <p>Sarana dan prasarana yang mendukung proses pembelajaran</p>
     </div>
     <div class="fasilitas-grid">
-        <?php foreach ($fasilitasData as $item): ?>
+        <?php foreach ($fasilitasData as $item): 
+            $gambarPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['gambar']);
+            $gambarExists = !empty($item['gambar']) && is_file($gambarPath);
+        ?>
         <div class="fasilitas-card">
             <div class="fasilitas-image">
-                <?php if (!empty($item['gambar'])): ?>
-                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" alt="<?php echo htmlspecialchars($item['nama']); ?>">
+                <?php if ($gambarExists): ?>
+                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" 
+                         alt="<?php echo htmlspecialchars($item['nama']); ?>">
                 <?php else: ?>
-                    <span class="placeholder">Gambar Fasilitas</span>
+                    <span class="placeholder">📷 Gambar Fasilitas</span>
                 <?php endif; ?>
             </div>
             <div class="fasilitas-body">
-                <h4><?php echo $item['nama']; ?></h4>
-                <p><?php echo $item['deskripsi']; ?></p>
+                <h4><?php echo htmlspecialchars($item['nama']); ?></h4>
+                <p><?php echo htmlspecialchars($item['deskripsi']); ?></p>
             </div>
         </div>
         <?php endforeach; ?>
@@ -721,19 +528,23 @@ footer a[href*="wa.me"]:hover {
         <p>Pengembangan minat dan bakat siswa melalui kegiatan pilihan</p>
     </div>
     <div class="ekskul-grid">
-        <?php foreach ($ekskulData as $item): ?>
+        <?php foreach ($ekskulData as $item): 
+            $gambarPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['gambar']);
+            $gambarExists = !empty($item['gambar']) && is_file($gambarPath);
+        ?>
         <div class="ekskul-card">
             <div class="ekskul-image">
-                <?php if (!empty($item['gambar'])): ?>
-                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" alt="<?php echo htmlspecialchars($item['nama']); ?>">
+                <?php if ($gambarExists): ?>
+                    <img src="<?php echo htmlspecialchars($item['gambar']); ?>" 
+                         alt="<?php echo htmlspecialchars($item['nama']); ?>">
                 <?php else: ?>
-                    <span class="placeholder">Gambar Ekskul</span>
+                    <span class="placeholder">📷 Gambar Ekskul</span>
                 <?php endif; ?>
             </div>
             <div class="ekskul-body">
-                <h4><?php echo $item['nama']; ?></h4>
-                <div class="jadwal">📅 <?php echo $item['jadwal']; ?></div>
-                <div class="pembina">👨 <?php echo $item['pembina']; ?></div>
+                <h4><?php echo htmlspecialchars($item['nama']); ?></h4>
+                <div class="jadwal">📅 <?php echo htmlspecialchars($item['jadwal']); ?></div>
+                <div class="pembina">👨 <?php echo htmlspecialchars($item['pembina']); ?></div>
             </div>
         </div>
         <?php endforeach; ?>

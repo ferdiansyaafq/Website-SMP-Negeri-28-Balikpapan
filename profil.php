@@ -35,12 +35,12 @@ $teachers = [
 ];
 
 $ekskulData = [
-    ['nama' => 'Pramuka', 'gambar' => 'assets/img/', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
-    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Futsal', 'gambar' => 'assets/img/', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
-    ['nama' => 'PMR', 'gambar' => 'assets/img/', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
-    ['nama' => 'Memanah', 'gambar' => 'assets/img/', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
+    ['nama' => 'Pramuka', 'gambar' => 'assets/img/pramuka.png', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
+    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/pencaksilat.png', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Futsal', 'gambar' => 'assets/img/futsal.png', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
+    ['nama' => 'PMR', 'gambar' => 'assets/img/pmr.png', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
+    ['nama' => 'Memanah', 'gambar' => 'assets/img/memanah.png', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/kaderlingkungan.png', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
 ];
 ?>
 
@@ -938,84 +938,78 @@ $ekskulData = [
     <p class="text-content">Sebagai satuan pendidikan yang baru beroperasi, SMP Negeri 28 Balikpapan sedang berada dalam fase krusial penataan sarana prasarana. Saat ini, aktivitas pembelajaran berpusat pada sembilan ruang kelas yang didesain secara adaptif untuk mendukung model pembelajaran kolaboratif dan berdiferensiasi.</p>
     
     <div class="fasilitas-gallery">
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/ruang-kelas.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Ruang Kelas</h4>
-                <p>9 ruang kelas modern dengan fasilitas multimedia dan AC yang mendukung pembelajaran kolaboratif dan berdiferensiasi.</p>
-                <a href="#" class="btn-foto">Lihat Foto →</a>
-            </div>
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/ruangkelas.png" alt="Ruang Kelas">
+            <div class="fasilitas-overlay"></div>
         </div>
-
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/laboratorium.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Laboratorium Komputer</h4>
-                <p>Lab komputer dengan 30 unit PC dan koneksi internet cepat untuk mendukung pembelajaran TIK dan literasi digital.</p>
-                <a href="#" class="btn-foto">Lihat Foto →</a>
-            </div>
-        </div>
-
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/perpus.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Perpustakaan</h4>
-                <p>Koleksi buku fisik dan digital dengan akses online serta sudut baca yang nyaman untuk menumbuhkan budaya literasi.</p>
-                <a href="#" class="btn-foto">Lihat Foto →</a>
-            </div>
-        </div>
-
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/masjid.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Masjid Sekolah</h4>
-                <p>Ruang ibadah yang nyaman dan representatif untuk kegiatan keagamaan dan pembentukan karakter religius siswa.</p>
-                <a href="#" class="btn-foto">Lihat 6 Foto →</a>
-            </div>
-        </div>
-
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/olahraga.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Lapangan</h4>
-                <p>Lapangan serbaguna untuk berbagai kegiatan olahraga seperti basket, futsal, voli, serta upacara dan kegiatan sekolah.</p>
-                <a href="#" class="btn-foto">Lihat Foto →</a>
-            </div>
-        </div>
-
-        <div class="fasilitas-item">
-            <div class="fasilitas-thumb">
-                <img src="assets/img/fasilitas/kantin.jpg">
-                <div class="fasilitas-overlay">
-                </div>
-            </div>
-            <div class="fasilitas-info">
-                <h4>Kantin Sekolah</h4>
-                <p>Kantin dengan menu gizi seimbang, bersih, dan higienis yang mendukung pola makan sehat bagi seluruh warga sekolah.</p>
-                <a href="#" class="btn-foto">Lihat Foto →</a>
-            </div>
+        <div class="fasilitas-info">
+            <h4>Ruang Kelas</h4>
+            <p>9 ruang kelas modern dengan fasilitas multimedia dan AC yang mendukung pembelajaran kolaboratif dan berdiferensiasi.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
         </div>
     </div>
+
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/laboratoriumkomputer.png" alt="Laboratorium Komputer">
+            <div class="fasilitas-overlay"></div>
+        </div>
+        <div class="fasilitas-info">
+            <h4>Laboratorium Komputer</h4>
+            <p>Lab komputer dengan 30 unit PC dan koneksi internet cepat untuk mendukung pembelajaran TIK dan literasi digital.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
+        </div>
+    </div>
+
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/perpustakaan.png" alt="Perpustakaan">
+            <div class="fasilitas-overlay"></div>
+        </div>
+        <div class="fasilitas-info">
+            <h4>Perpustakaan</h4>
+            <p>Koleksi buku fisik dan digital dengan akses online serta sudut baca yang nyaman untuk menumbuhkan budaya literasi.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
+        </div>
+    </div>
+
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/masjidsekolah.png" alt="Masjid Sekolah">
+            <div class="fasilitas-overlay"></div>
+        </div>
+        <div class="fasilitas-info">
+            <h4>Masjid Sekolah</h4>
+            <p>Ruang ibadah yang nyaman dan representatif untuk kegiatan keagamaan dan pembentukan karakter religius siswa.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
+        </div>
+    </div>
+
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/lapangan.jpg" alt="Lapangan Olahraga">
+            <div class="fasilitas-overlay"></div>
+        </div>
+        <div class="fasilitas-info">
+            <h4>Lapangan</h4>
+            <p>Lapangan serbaguna untuk berbagai kegiatan olahraga seperti basket, futsal, voli, serta upacara dan kegiatan sekolah.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
+        </div>
+    </div>
+
+    <div class="fasilitas-item">
+        <div class="fasilitas-thumb">
+            <img src="assets/img/kantin.png" alt="Kantin Sekolah">
+            <div class="fasilitas-overlay"></div>
+        </div>
+        <div class="fasilitas-info">
+            <h4>Kantin Sekolah</h4>
+            <p>Kantin dengan menu gizi seimbang, bersih, dan higienis yang mendukung pola makan sehat bagi seluruh warga sekolah.</p>
+            <a href="#" class="btn-foto">Lihat Foto →</a>
+        </div>
+    </div>
+</div>
 </div>
     <div class="section" id="ekskul">
         <h2 class="section-title">Ekstrakurikuler</h2>

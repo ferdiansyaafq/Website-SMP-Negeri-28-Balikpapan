@@ -381,3 +381,29 @@ FROM siswa s
 LEFT JOIN kaih_kelas k ON s.wali_kelas_id = k.id
 LEFT JOIN laporan_harian lh ON s.id = lh.siswa_id
 GROUP BY s.id, s.nama_siswa, k.nama_kelas;
+
+TRUNCATE TABLE `berita`;
+
+INSERT INTO `berita` 
+  (`jenis`, `tanggal`, `kategori`, `judul`, `ringkasan`, `isi`, `gambar`, `status`) 
+VALUES
+  ('pengumuman', '2026-07-10', 'Pengumuman',
+   'PPDB Tahun Ajaran 2026/2027 Resmi Dibuka',
+   'Penerimaan Peserta Didik Baru untuk tahun ajaran 2026/2027 telah resmi dibuka.',
+   'Penerimaan Peserta Didik Baru (PPDB) Tahun Ajaran 2026/2027 telah resmi dibuka. Informasi jadwal, persyaratan, dan tahapan pendaftaran dapat diperoleh melalui kanal resmi sekolah atau datang langsung ke SMP Negeri 28 Balikpapan.',
+   'assets/img/berita1.png',
+   'terbit'),
+
+  ('berita', '2026-07-05', 'Akademik',
+   'Implementasi Kurikulum Merdeka dengan Deep Learning',
+   'SMPN 28 Balikpapan resmi menerapkan pendekatan Pembelajaran Mendalam untuk meningkatkan kualitas pendidikan.',
+   'SMP Negeri 28 Balikpapan menerapkan pendekatan Pembelajaran Mendalam (Deep Learning) untuk memperkuat proses belajar yang bermakna, kontekstual, dan berpusat pada siswa.',
+   'assets/img/berita2.jpg',
+   'terbit'),
+
+  ('berita', '2026-07-01', 'Prestasi',
+   'Program 7 Kebiasaan Anak Indonesia Hebat Diluncurkan',
+   'Program KAIH resmi diluncurkan untuk membentuk karakter dan kebiasaan positif siswa setiap hari.',
+   'Program 7 Kebiasaan Anak Indonesia Hebat (KAIH) diluncurkan sebagai bagian dari pembiasaan positif siswa di lingkungan sekolah dan keluarga.',
+   'assets/img/berita3.png',
+   'terbit');
