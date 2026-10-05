@@ -181,7 +181,7 @@ CREATE TABLE `laporan_bullying` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nama_pelapor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `kontak` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status_pelapor` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status_pelapor` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `nama_korban` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `kelas_korban` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `jenis_bullying` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -200,9 +200,26 @@ CREATE TABLE `laporan_bullying` (
 CREATE TABLE `survei` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nama_pengisi` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `peran` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `peran` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rating` tinyint(1) NOT NULL,
   `ulasan` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2.8b Buku Tamu
+CREATE TABLE `buku_tamu` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nama` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `instansi` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kontak` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tujuan_bertemu` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `keperluan` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tanggal_kunjungan` date NOT NULL,
+  `jam_kunjungan` time DEFAULT NULL,
+  `jumlah_orang` int DEFAULT 1,
+  `status` enum('menunggu','diterima','selesai') COLLATE utf8mb4_unicode_ci DEFAULT 'menunggu',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

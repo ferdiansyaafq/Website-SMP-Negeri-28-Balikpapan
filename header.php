@@ -399,13 +399,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             Lainnya <span class="arrow">▾</span>
         </button>
         <div class="mobile-submenu" id="submenu-lainnya">
-                    <a href="profil.php#identitas-sekolah">Identitas</a>
-                    <a href="profil.php#visi-misi">Visi & Misi</a>
-                    <a href="profil.php#tenaga-pendidik">Tenaga Pendidik</a>
-                    <a href="profil.php#fasilitas">Fasilitas</a>
-                    <a href="profil.php#ekskul">Ekstrakurikuler</a>
-                    <a href="profil.php#lokasi">Lokasi</a>
-                </div>
+            <a href="lainnya.php#faq">FAQ</a>
+            <a href="login.php">Login</a>
+            <a href="jurnal_guru.php">Jurnal Guru</a>
+            <a href="buku_tamu.php">Buku Tamu</a>
+            <a href="bullying.php">Ruang Peduli (Anti-Perundunga</a>
+            <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
         </div>
     </div>
 </div>
@@ -448,18 +447,18 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
                 </div>
             </div>
             
-           <div class="nav-item">
-    <a href="lainnya.php" class="<?php echo in_array($current_page, ['lainnya.php', 'bullying.php', 'jurnal_kelas.php', 'jurnal_guru.php', 'kepuasan.php']) ? 'active' : ''; ?>">
-        Lainnya <span class="arrow">▾</span>
-    </a>
-    <div class="dropdown-menu">
-        <a href="lainnya.php#faq">FAQ</a>
-        <a href="login.php">Login</a>
-        <a href="jurnal_guru.php">Jurnal Guru</a>
-        <a href="bullying.php">Laporan Bullying</a>
-        <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
-    </div>
-</div>
+            <div class="nav-item">
+                <a href="lainnya.php" class="<?php echo in_array($current_page, ['lainnya.php', 'bullying.php', 'buku_tamu.php', 'survey.php', 'jurnal_kelas.php', 'jurnal_guru.php', 'kepuasan.php']) ? 'active' : ''; ?>">
+                    Lainnya <span class="arrow">▾</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="lainnya.php#faq">FAQ</a>
+                    <a href="login.php">Login</a>
+                    <a href="jurnal_guru.php">Jurnal Guru</a>
+                    <a href="buku_tamu.php">Buku Tamu</a>
+                    <a href="bullying.php">Ruang Peduli (Anti-Perundungan)</a>
+                    <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+                </div>
             </div>
         </nav>
         
