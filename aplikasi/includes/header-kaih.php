@@ -290,6 +290,10 @@ $sidebarLabel = match ($role) {
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
                 Laporan
             </a>
+            <!-- MENU TAMBAHAN JENDELA LITERASI -->
+            <a href="literasi.php" class="<?php echo ($current_page == 'literasi.php') ? 'active' : ''; ?>">
+                Jendela Literasi
+            </a>
             <a href="laporan-bullying.php" class="<?php echo ($current_page == 'laporan-bullying.php') ? 'active' : ''; ?>">
                 Laporan Bullying
             </a>

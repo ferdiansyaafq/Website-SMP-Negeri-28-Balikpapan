@@ -1,5 +1,5 @@
 <?php
-$page_title = "Pelaporan Bullying - SMP Negeri 28 Balikpapan";
+$page_title = "MERCUSUAR - SMP Negeri 28 Balikpapan";
 include 'header.php';
 ?>
 
@@ -119,7 +119,7 @@ include 'header.php';
     gap: 16px;
 }
 
-/* Trust Badge */
+/* Trust Badge / Formal Reminder */
 .trust-badge {
     display: flex;
     align-items: flex-start;
@@ -201,7 +201,7 @@ include 'header.php';
     transform: translateY(0);
 }
 
-/* Contact Emergency */
+/* Contact Emergency / PIC Update */
 .emergency-contact {
     margin-top: 20px;
     padding: 16px 20px;
@@ -228,107 +228,56 @@ include 'header.php';
     text-decoration: underline;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-    .page-header {
-        padding: 40px 20px;
-    }
-    .page-header h1 {
-        font-size: 26px;
-    }
-    .page-header::before {
-        font-size: 60px;
-        right: 15px;
-    }
-    .container {
-        padding: 0 20px;
-        margin: 20px auto;
-    }
-    .bullying-form {
-        padding: 24px;
-    }
-    .bullying-form .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-}
-
-@media (max-width: 480px) {
-    .bullying-form {
-        padding: 16px;
-    }
-    .bullying-form .form-group input,
-    .bullying-form .form-group select,
-    .bullying-form .form-group textarea {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-    .btn-submit {
-        padding: 14px 18px;
-        font-size: 15px;
-    }
-    .trust-badge {
-        padding: 12px 14px;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    .trust-badge .icon {
-        font-size: 32px;
-    }
-    .bullying-form .form-title {
-        font-size: 20px;
-    }
-    .emergency-contact p {
-        font-size: 13px;
-    }
+    .page-header { padding: 40px 20px; }
+    .page-header h1 { font-size: 26px; }
+    .container { padding: 0 20px; margin: 20px auto; }
+    .bullying-form { padding: 24px; }
+    .bullying-form .form-row { grid-template-columns: 1fr; gap: 0; }
 }
 </style>
 
 <div class="page-header">
-    <h1>🛡️ Pelaporan Bullying</h1>
-    <p>Laporkan perundungan dengan aman dan rahasia</p>
+    <h1>🛡️ MERCUSUAR</h1>
+    <p>Media Rekap Raport dan Catatan Untuk Suara Aman Remaja</p>
 </div>
 
 <div class="container">
-
     <div class="bullying-form">
         <h2 class="form-title">Form Laporan Perundungan</h2>
-        <p class="form-subtitle">Isi data dengan lengkap agar kami bisa segera menindaklanjuti laporan Anda.</p>
+        <p class="form-subtitle">Isi data dengan lengkap untuk memproses dan kami menjamin kerahasiaan data Anda.</p>
 
         <div class="trust-badge">
             <span class="icon">🔒</span>
             <div class="text">
-                <strong>Laporan Anda aman dan rahasia.</strong> 
-                Identitas pelapor akan dilindungi sesuai dengan kebijakan perlindungan anak. 
-                Semua data hanya akan diakses oleh tim penanganan khusus sekolah.
+                <strong>Informasi Keamanan & Kerahasiaan:</strong> 
+                Harap isi data dengan lengkap dan teliti agar proses penanganan berjalan optimal. 
+                Kami menjamin kerahasiaan data Anda sepenuhnya; identitas pelapor dilindungi ketat dan hanya diakses oleh tim khusus sekolah.
             </div>
         </div>
 
         <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
             <div class="alert alert-success">
-                ✅ Laporan bullying berhasil dikirim! Tim kami akan segera menindaklanjuti dan menghubungi Anda dalam waktu 2x24 jam.
+                ✅ Laporan berhasil dikirim! Tim MERCUSUAR sekolah akan segera menindaklanjuti.
             </div>
         <?php endif; ?>
 
         <?php if (isset($_GET['status']) && $_GET['status'] == 'error'): ?>
             <div class="alert alert-error">
-                ❌ Gagal mengirim laporan. Silakan coba lagi atau hubungi pihak sekolah langsung di nomor darurat di bawah.
+                ❌ Gagal mengirim laporan. Silakan periksa kembali isian form Anda.
             </div>
         <?php endif; ?>
 
         <form action="proses_bullying.php" method="POST">
-
             <div class="form-group">
                 <label>Nama Pelapor <span class="required">*</span></label>
-                <input type="text" name="nama_pelapor" required placeholder="Masukkan nama Anda (bisa anonim jika diisi dengan 'Anonim')">
-                <span class="hint">Anda bisa menulis "Anonim" jika ingin melaporkan secara rahasia.</span>
+                <input type="text" name="nama_pelapor" required placeholder="Nama Anda (atau tulis 'Anonim')">
+                <span class="hint">Anda dapat menuliskan "Anonim" jika ingin melapor secara rahasia.</span>
             </div>
 
             <div class="form-group">
                 <label>Email atau No HP <span class="required">*</span></label>
-                <input type="text" name="kontak" required placeholder="Masukkan email atau nomor HP untuk konfirmasi">
-                <span class="hint">Kami akan menghubungi Anda untuk konfirmasi laporan dan perkembangan penanganan.</span>
+                <input type="text" name="kontak" required placeholder="Nomor HP / Email aktif untuk konfirmasi">
             </div>
 
             <div class="form-group">
@@ -338,34 +287,40 @@ include 'header.php';
                     <option value="Siswa">Siswa</option>
                     <option value="Orang Tua">Orang Tua / Wali Murid</option>
                     <option value="Guru">Guru</option>
-                    <option value="Masyarakat">Masyarakat Umum</option>
                     <option value="Lainnya">Lainnya</option>
                 </select>
             </div>
 
             <div class="form-row">
-    <div class="form-group">
-        <label>Nama Korban <span class="required">*</span></label>
-        <input type="text" name="nama_korban" required placeholder="Nama siswa yang menjadi korban">
-    </div>
-    <div class="form-group">
-        <label>Kelas Korban <span class="required">*</span></label>
-        <input type="text" name="kelas_korban" required placeholder="Contoh: 7A, 8B, 9C">
-    </div>
-</div>
+                <div class="form-group">
+                    <label>Nama Korban <span class="required">*</span></label>
+                    <input type="text" name="nama_korban" required placeholder="Nama siswa korban">
+                </div>
+                <div class="form-group">
+                    <label>Kelas Korban <span class="required">*</span></label>
+                    <input type="text" name="kelas_korban" required placeholder="Contoh: 7A, 8B">
+                </div>
+            </div>
 
-<div class="form-group">
-    <label>Jenis Bullying <span class="required">*</span></label>
-    <select name="jenis_bullying" required>
-        <option value="">Pilih jenis bullying...</option>
-        <option value="Fisik">Fisik (memukul, menendang, mendorong, dll.)</option>
-        <option value="Verbal">Verbal (mengejek, menghina, mengancam, dll.)</option>
-        <option value="Sosial">Sosial (mengucilkan, menyebarkan gossip, dll.)</option>
-        <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
-        <option value="Seksual">Pelecehan Seksual</option>
-        <option value="Lainnya">Lainnya</option>
-    </select>
-</div>
+            <div class="form-group">
+                <label>Jenis Bullying <span class="required">*</span></label>
+                <select name="jenis_bullying" id="selectJenis" required onchange="toggleLainnya(this)">
+                    <option value="">Pilih jenis bullying...</option>
+                    <option value="Fisik">Fisik (memukul, menendang, dll.)</option>
+                    <option value="Verbal">Verbal (mengejek, menghina, dll.)</option>
+                    <option value="Sosial">Sosial (mengucilkan, menyebarkan gosip, dll.)</option>
+                    <option value="Cyber">Cyber Bullying (media sosial, pesan, dll.)</option>
+                    <option value="Seksual">Pelecehan Seksual</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
+            </div>
+
+            <!-- Keterangan Tambahan jika memilih Lainnya -->
+            <div class="form-group" id="inputLainnya" style="display: none;">
+                <label>Keterangan Jenis Lainnya <span class="required">*</span></label>
+                <input type="text" name="jenis_bullying_lainnya" placeholder="Jelaskan bentuk bullying lainnya...">
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Tanggal Kejadian <span class="required">*</span></label>
@@ -373,32 +328,40 @@ include 'header.php';
                 </div>
                 <div class="form-group">
                     <label>Lokasi Kejadian <span class="required">*</span></label>
-                    <input type="text" name="lokasi" required placeholder="Contoh: Halaman sekolah, Kelas 7A, Kantin, dll.">
+                    <input type="text" name="lokasi" required placeholder="Contoh: Kantin, Kelas, dll.">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Deskripsi Kejadian <span class="required">*</span></label>
-                <textarea name="deskripsi" rows="5" required placeholder="Ceritakan secara detail kejadian yang dialami atau dilihat..."></textarea>
-                <span class="hint">Semakin detail laporan Anda, semakin cepat kami bisa menindaklanjutinya.</span>
+                <textarea name="deskripsi" rows="5" required placeholder="Ceritakan detail kejadian..."></textarea>
             </div>
 
             <button type="submit" class="btn-submit">
-                🛡️ Kirim Laporan Bullying
+                🛡️ Kirim Laporan MERCUSUAR
             </button>
-
         </form>
 
+        <!-- Update Kontak PIC -->
         <div class="emergency-contact">
             <p>
-                📞 <strong>Butuh bantuan segera?</strong> Hubungi layanan bantuan: 
-                <a href="tel:08123456789">0812-3456-7890</a> 
-                (Konseling Sekolah)
+                📞 <strong>PIC Konseling & Layanan Darurat:</strong> Hubungi PIC Sekolah di 
+                <a href="https://wa.me/6285349310534" target="_blank">Nomer Sekolahan (Nunggu Ingfo)</a> 
+                (Tim BK / Konseling SMPN 28 Balikpapan)
             </p>
         </div>
-
     </div>
-
 </div>
+
+<script>
+function toggleLainnya(select) {
+    const inputLainnya = document.getElementById('inputLainnya');
+    if (select.value === 'Lainnya') {
+        inputLainnya.style.display = 'block';
+    } else {
+        inputLainnya.style.display = 'none';
+    }
+}
+</script>
 
 <?php include 'footer.php'; ?>
