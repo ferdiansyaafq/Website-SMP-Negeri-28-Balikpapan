@@ -301,9 +301,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="">
             <!-- Nama -->
             <div class="form-group">
-                <label>Nama Lengkap <span class="required">*</span></label>
+                <label>Nama<span class="required">*</span></label>
                 <input type="text" name="nama" required placeholder="Masukkan nama Anda..." value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>">
-                <span class="hint">Nama Anda akan dijaga kerahasiaannya.</span>
             </div>
 
             <!-- Status -->
