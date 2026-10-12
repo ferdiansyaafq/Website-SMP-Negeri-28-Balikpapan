@@ -250,10 +250,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn-login">Masuk</button>
         </form>
 
-        <div class="login-footer">
-            <a href="lupa-password.php">Lupa password?</a>
-        </div>
-
         <a href="index.php" class="btn-back-home">
             🏠 Kembali ke Halaman Utama
         </a>

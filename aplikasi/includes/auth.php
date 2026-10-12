@@ -4,9 +4,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+$applicationPathPosition = strpos($scriptPath, '/aplikasi/');
+$basePath = $applicationPathPosition === false ? '' : substr($scriptPath, 0, $applicationPathPosition);
+$loginUrl = $basePath . '/login.php';
+
 // Cek login
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
+    header('Location: ' . $loginUrl);
     exit;
 }
 
@@ -15,7 +20,7 @@ $allowed_roles = ['admin', 'guru', 'siswa', 'orang_tua'];
 
 if (!in_array($role, $allowed_roles)) {
     session_destroy();
-    header('Location: ../login.php');
+    header('Location: ' . $loginUrl);
     exit;
 }
 
@@ -52,6 +57,6 @@ try {
 }
 
 // Konstanta path
-define('BASE_URL', '/Website-SMP-Negeri-28/');
+define('BASE_URL', $basePath . '/');
 define('KAIH_URL', BASE_URL . 'aplikasi/');
 ?>

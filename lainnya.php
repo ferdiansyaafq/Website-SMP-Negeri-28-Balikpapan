@@ -118,13 +118,6 @@ include 'header.php';
 
     </div>
 
-    <!-- CTA Card untuk Survey -->
-    <div class="cta-card">
-        <h3>📝 Punya Masukan untuk Sekolah?</h3>
-        <p>Suara Anda sangat berarti untuk peningkatan kualitas pendidikan di SMP Negeri 28 Balikpapan.</p>
-        <a href="survey.php" class="btn-cta">Isi Survei Pelayanan →</a>
-    </div>
-
 </div>
 
 <script src="assets/js/faq.js"></script>

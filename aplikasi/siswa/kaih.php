@@ -1,5 +1,12 @@
 <?php
 // aplikasi/siswa/kaih.php
+require_once '../includes/auth.php';
+
+if ($role !== 'siswa') {
+    header('Location: ../index.php');
+    exit;
+}
+
 require_once '../includes/header-kaih.php';
 
 $message = '';
@@ -7,12 +14,9 @@ $message_type = '';
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $nama_siswa = 'Siswa';
 
-function cekWaktuKAIH() {
-    // Set timezone ke WITA (Asia/Makassar)
-    date_default_timezone_set('Asia/Makassar');
-    
-    $hari = date('N'); 
-    $jam = date('H:i'); 
+function cekWaktuKAIH(): array
+{
+    $jam = date('H:i');
     
     if ($jam < '08:00' || $jam > '21:00') {
         return [
@@ -36,74 +40,83 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-function ensureLaporanHarianTable($pdo) {
-    try {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_harian` (
+function ensureLaporanHarianTable(PDO $pdo): void
+{
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_harian` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `siswa_id` INT NOT NULL,
+            `siswa_id` BIGINT UNSIGNED NOT NULL,
             `tanggal` DATE NOT NULL,
             `bangun` TINYINT(1) NOT NULL DEFAULT 0,
             `bangun_keterangan` VARCHAR(255) NULL,
             `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
             `ibadah_catatan` VARCHAR(255) NULL,
             `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
-            `olahraga_jenis` VARCHAR(50) NULL,
+            `olahraga_jenis` VARCHAR(255) NULL,
             `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
             `sarapan_menu` VARCHAR(50) NULL,
             `membaca` TINYINT(1) NOT NULL DEFAULT 0,
             `membaca_judul` VARCHAR(255) NULL,
             `membaca_menit` INT NULL,
             `membantu` TINYINT(1) NOT NULL DEFAULT 0,
-            `membantu_jenis` VARCHAR(50) NULL,
+            `membantu_jenis` VARCHAR(255) NULL,
             `menabung` TINYINT(1) NOT NULL DEFAULT 0,
             `menabung_keterangan` VARCHAR(255) NULL,
+            `menabung_nominal` INT NULL,
             `orang_tua_validated_at` DATETIME NULL,
             `guru_validated_at` DATETIME NULL,
             `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
-            INDEX `idx_tanggal` (`tanggal`)
+            INDEX `idx_tanggal` (`tanggal`),
+            CONSTRAINT `laporan_harian_siswa_id_foreign`
+                FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`)
+                ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-        return true;
-    } catch (PDOException $e) {
-        return false;
-    }
 }
-ensureLaporanHarianTable($pdo);
 
-// ============================================================
-// ============================================================
-// CEK & TAMBAHKAN KOLOM KETERANGAN
-// ============================================================
-function ensureKeteranganColumns($pdo) {
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'bangun_keterangan'");
-        if (!$stmt->fetch()) {
-            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN bangun_keterangan VARCHAR(255) NULL AFTER bangun");
+function ensureKeteranganColumns(PDO $pdo): void
+{
+    $columns = [];
+    foreach ($pdo->query('SHOW COLUMNS FROM laporan_harian') as $column) {
+        $columns[$column['Field']] = strtolower($column['Type']);
+    }
+
+    $missingColumns = [
+        'bangun_keterangan' => 'VARCHAR(255) NULL AFTER bangun',
+        'menabung_keterangan' => 'VARCHAR(255) NULL AFTER menabung',
+        'sarapan_menu' => 'VARCHAR(50) NULL AFTER sarapan',
+        'membaca_judul' => 'VARCHAR(255) NULL AFTER membaca',
+        'menabung_nominal' => 'INT NULL AFTER menabung_keterangan',
+    ];
+
+    foreach ($missingColumns as $name => $definition) {
+        if (!isset($columns[$name])) {
+            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN `$name` $definition");
         }
-        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'menabung_keterangan'");
-        if (!$stmt->fetch()) {
-            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN menabung_keterangan VARCHAR(255) NULL AFTER menabung");
+    }
+
+    foreach (['olahraga_jenis', 'membantu_jenis', 'ibadah_catatan'] as $name) {
+        if (($columns[$name] ?? '') !== 'varchar(255)') {
+            $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN `$name` VARCHAR(255) NULL");
         }
-        $stmt = $pdo->query("SHOW COLUMNS FROM laporan_harian LIKE 'membaca_judul'");
-        if (!$stmt->fetch()) {
-            $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN membaca_judul VARCHAR(255) NULL AFTER membaca");
-        }
-        // Pastikan kolom jenis olahraga, ibadah catatan, dan membantu jenis berukuran cukup
-        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN olahraga_jenis VARCHAR(255) NULL");
-        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN membantu_jenis VARCHAR(255) NULL");
-        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN ibadah_catatan VARCHAR(255) NULL");
-        return true;
-    } catch (PDOException $e) {
-        return false;
     }
 }
-ensureKeteranganColumns($pdo);
+
+$databaseReady = false;
+try {
+    ensureLaporanHarianTable($pdo);
+    ensureKeteranganColumns($pdo);
+    $databaseReady = true;
+} catch (PDOException $e) {
+    error_log('KAIH schema initialization failed: ' . $e->getMessage());
+    $message = 'Data KAIH belum dapat diakses. Silakan hubungi administrator sekolah.';
+    $message_type = 'error';
+}
 
 // ============================================================
 // PROSES SIMPAN KAIH
 // ============================================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
+if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
     
     // ============================================================
     // CEK WAKTU KAIH
@@ -179,45 +192,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
         
         if ($siswa_id > 0) {
             try {
-                $stmt = $pdo->prepare("SELECT id FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
-                $stmt->execute([$siswa_id, $tanggal]);
-                $existing = $stmt->fetch();
-                
-                if ($existing) {
-                    $stmt = $pdo->prepare("UPDATE laporan_harian SET 
-                        bangun = ?, ibadah = ?, olahraga = ?, sarapan = ?, 
-                        membaca = ?, membantu = ?, menabung = ?,
-                        bangun_keterangan = ?, ibadah_catatan = ?, olahraga_jenis = ?,
-                        membaca_judul = ?, membantu_jenis = ?, menabung_keterangan = ?,
-                        updated_at = NOW() 
-                        WHERE siswa_id = ? AND tanggal = ?");
-                    $stmt->execute([
-                        $bangun, $ibadah, $olahraga, $sarapan, 
-                        $membaca, $membantu, $menabung,
-                        $bangun_keterangan, $ibadah_catatan, $olahraga_jenis,
-                        $membaca_judul, $membantu_jenis, $menabung_keterangan,
-                        $siswa_id, $tanggal
-                    ]);
-                    $message = '✅ Data KAIH berhasil diperbarui!';
-                    $message_type = 'success';
-                } else {
-                    $stmt = $pdo->prepare("INSERT INTO laporan_harian (
-                        siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
-                        bangun_keterangan, ibadah_catatan, olahraga_jenis,
-                        membaca_judul, membantu_jenis, menabung_keterangan,
-                        created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
-                    $stmt->execute([
-                        $siswa_id, $tanggal,
-                        $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
-                        $bangun_keterangan, $ibadah_catatan, $olahraga_jenis,
-                        $membaca_judul, $membantu_jenis, $menabung_keterangan
-                    ]);
-                    $message = '✅ Data KAIH berhasil disimpan! Terus jaga kebiasaan baik ya! 🎉';
-                    $message_type = 'success';
-                }
+                $stmt = $pdo->prepare("INSERT INTO laporan_harian (
+                    siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
+                    bangun_keterangan, ibadah_catatan, olahraga_jenis,
+                    membaca_judul, membantu_jenis, menabung_keterangan,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                ON DUPLICATE KEY UPDATE
+                    bangun = VALUES(bangun),
+                    ibadah = VALUES(ibadah),
+                    olahraga = VALUES(olahraga),
+                    sarapan = VALUES(sarapan),
+                    membaca = VALUES(membaca),
+                    membantu = VALUES(membantu),
+                    menabung = VALUES(menabung),
+                    bangun_keterangan = VALUES(bangun_keterangan),
+                    ibadah_catatan = VALUES(ibadah_catatan),
+                    olahraga_jenis = VALUES(olahraga_jenis),
+                    membaca_judul = VALUES(membaca_judul),
+                    membantu_jenis = VALUES(membantu_jenis),
+                    menabung_keterangan = VALUES(menabung_keterangan),
+                    updated_at = NOW()");
+                $stmt->execute([
+                    $siswa_id, $tanggal,
+                    $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
+                    $bangun_keterangan, $ibadah_catatan, $olahraga_jenis,
+                    $membaca_judul, $membantu_jenis, $menabung_keterangan
+                ]);
+                $message = '✅ Data KAIH berhasil disimpan atau diperbarui! Terus jaga kebiasaan baik ya! 🎉';
+                $message_type = 'success';
             } catch (PDOException $e) {
-                $message = '❌ Gagal menyimpan data: ' . $e->getMessage();
+                error_log('KAIH save failed: ' . $e->getMessage());
+                $message = '❌ Data KAIH gagal disimpan. Silakan coba lagi atau hubungi administrator.';
                 $message_type = 'error';
             }
         } else {
@@ -229,12 +235,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
 
 // Ambil data hari ini
 $data_hari_ini = null;
-if ($siswa_id > 0) {
+if ($databaseReady && $siswa_id > 0) {
     try {
         $stmt = $pdo->prepare("SELECT * FROM laporan_harian WHERE siswa_id = ? AND tanggal = ?");
         $stmt->execute([$siswa_id, date('Y-m-d')]);
         $data_hari_ini = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {}
+    } catch (PDOException $e) {
+        error_log('KAIH daily report lookup failed: ' . $e->getMessage());
+        $message = 'Data KAIH gagal dimuat. Silakan muat ulang halaman atau hubungi administrator.';
+        $message_type = 'error';
+    }
 }
 
 // Ekstraksi data Ibadah untuk form hari ini
@@ -883,7 +893,7 @@ if ($total_terisi >= 7) {
 
     <?php if ($message): ?>
         <div class="alert alert-<?php echo $message_type; ?>">
-            <?php echo $message; ?>
+            <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>
         </div>
     <?php endif; ?>
 
@@ -915,7 +925,7 @@ if ($total_terisi >= 7) {
             </div>
             <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['bangun'] == 1) ? 'show' : ''; ?>">
                 <span class="label-keterangan">📝 Ceritakan pengalaman bangun pagimu:</span>
-                <textarea name="bangun_keterangan" placeholder="Contoh: Saya bangun pukul 05.00, langsung sholat subuh dan bersiap ke sekolah..."><?php echo $data_hari_ini['bangun_keterangan'] ?? ''; ?></textarea>
+                <textarea name="bangun_keterangan" placeholder="Contoh: Saya bangun pukul 05.00, langsung sholat subuh dan bersiap ke sekolah..."><?php echo htmlspecialchars($data_hari_ini['bangun_keterangan'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
         </div>
 
@@ -1114,7 +1124,7 @@ if ($total_terisi >= 7) {
             </div>
             <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['menabung'] == 1) ? 'show' : ''; ?>">
                 <span class="label-keterangan">💰 Ceritakan pengalaman menabungmu:</span>
-                <textarea name="menabung_keterangan" placeholder="Contoh: Hari ini saya menabung Rp5.000 dari uang saku, rencana mau ditabung untuk membeli buku..."><?php echo $data_hari_ini['menabung_keterangan'] ?? ''; ?></textarea>
+                <textarea name="menabung_keterangan" placeholder="Contoh: Hari ini saya menabung Rp5.000 dari uang saku, rencana mau ditabung untuk membeli buku..."><?php echo htmlspecialchars($data_hari_ini['menabung_keterangan'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
         </div>
 

@@ -28,7 +28,7 @@ function ensureRefleksiTable($pdo) {
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS `refleksi` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `siswa_id` INT NOT NULL,
+            `siswa_id` BIGINT UNSIGNED NOT NULL,
             `tanggal` DATE NOT NULL,
             `bulan` VARCHAR(20) NULL,
             `semester` VARCHAR(20) NOT NULL DEFAULT 'Ganjil',
@@ -42,7 +42,10 @@ function ensureRefleksiTable($pdo) {
             `target_kedepan` TEXT NULL,
             `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX `idx_siswa_tanggal` (`siswa_id`, `tanggal`)
+            INDEX `idx_siswa_tanggal` (`siswa_id`, `tanggal`),
+            CONSTRAINT `refleksi_siswa_id_foreign`
+                FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`)
+                ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
         // Pastikan kolom bulan sudah ada di tabel refleksi
@@ -66,9 +69,6 @@ $bulan_list = [
 $bulan_sekarang = $bulan_list[date('m')] ?? 'Januari';
 $auto_semester = in_array((int)date('n'), [1, 2, 3, 4, 5, 6]) ? 'Genap' : 'Ganjil';
 
-// ============================================================
-// PROSES SIMPAN REFLEKSI BULANAN
-// ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     $tanggal = date('Y-m-d');
     $bulan = trim($_POST['bulan'] ?? $bulan_sekarang);
@@ -120,7 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
                 $message_type = 'success';
             }
         } catch (PDOException $e) {
-            $message = '❌ Gagal menyimpan refleksi: ' . $e->getMessage();
+            error_log('Student reflection save failed: ' . $e->getMessage());
+            $message = '❌ Refleksi gagal disimpan. Silakan coba lagi atau hubungi administrator.';
             $message_type = 'error';
         }
     } else {
@@ -405,7 +406,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
     <!-- Alert -->
     <?php if ($message): ?>
         <div class="alert alert-<?php echo $message_type; ?>">
-            <?php echo $message; ?>
+            <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>
         </div>
     <?php endif; ?>
 

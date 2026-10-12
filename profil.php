@@ -32,6 +32,10 @@ $teachers = [
     ['name' => 'Jenni Roslianthi', 'position' => 'Guru Matematika', 'initials' => 'JR'],
     ['name' => 'Nurhabibah', 'position' => 'Guru TIK', 'initials' => 'NH'],
     ['name' => 'Ana', 'position' => 'Guru PAK', 'initials' => 'AN'],
+     ['name' => 'Petugas Keamanan 1', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
+    ['name' => 'Petugas Keamanan 2', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
+    ['name' => 'Petugas Kebersihan 1', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
+    ['name' => 'Petugas Kebersihan 2', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
 ];
 
 $ekskulData = [
@@ -1040,7 +1044,7 @@ $ekskulData = [
             <h2 style="text-align: center; font-size: 32px; color: #1e293b; margin-bottom: 40px; font-weight: 800; padding-top: 20px;">Lokasi Sekolah</h2>
             <div style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.xxx!2d116.9685572!3d-1.1991462!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df14f7e778cf3a1%3A0x7264a9c9bc664794!2sSMP%20Negeri%2028%20Balikpapan!5e0!3m2!1sid!2sid!4v1234567890!5m2!1sid!2sid" 
+                    src="https://www.google.com/maps?q=SMP%20Negeri%2028%20Balikpapan&amp;output=embed"
                     width="100%" 
                     height="400px" 
                     style="border:0;" 

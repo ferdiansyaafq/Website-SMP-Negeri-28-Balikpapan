@@ -21,10 +21,8 @@ $logoSekolah = pickFirstExistingImage([
 
 $slideshowPhotos = [];
 try {
-    $dbSlide = new mysqli('localhost', 'root', '', 'kaih');
-    $dbSlide->set_charset('utf8mb4');
-    $res = $dbSlide->query("SELECT filename, judul FROM foto_slideshow ORDER BY urutan ASC, id ASC");
-    while ($row = $res->fetch_assoc()) {
+    $stmtSlide = $pdo->query("SELECT filename, judul FROM foto_slideshow ORDER BY urutan ASC, id ASC");
+    while ($row = $stmtSlide->fetch(PDO::FETCH_ASSOC)) {
         $fPath = 'assets/img/slideshow/' . $row['filename'];
         $fsPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $fPath);
         if (is_file($fsPath)) {
@@ -34,8 +32,8 @@ try {
             ];
         }
     }
-    $dbSlide->close();
-} catch (Throwable $e) {
+} catch (PDOException $e) {
+    error_log('Homepage slideshow query failed: ' . $e->getMessage());
 }
 
 if (empty($slideshowPhotos)) {
@@ -65,6 +63,7 @@ try {
         $beritaData[] = $berita;
     }
 } catch (PDOException $e) {
+    error_log('Homepage news query failed: ' . $e->getMessage());
     $beritaData = [];
 }
 
@@ -556,7 +555,7 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
         <h2 style="text-align: center; font-size: 32px; color: #1e293b; margin-bottom: 40px; font-weight: 800;">Lokasi Sekolah</h2>
         <div style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.xxx!2d116.9685572!3d-1.1991462!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df14f7e778cf3a1%3A0x7264a9c9bc664794!2sSMP%20Negeri%2028%20Balikpapan!5e0!3m2!1sid!2sid!4v1234567890!5m2!1sid!2sid" 
+                src="https://www.google.com/maps?q=SMP%20Negeri%2028%20Balikpapan&amp;output=embed"
                 width="100%" 
                 height="100%" 
                 style="border:0; min-height: 350px;" 
@@ -568,7 +567,7 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
     </div>
 </section>
 <script>
-const images = <?php echo json_encode($slideshowPhotos); ?>;
+const images = <?php echo json_encode($slideshowPhotos, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 let currentIndex = 0;
 
 function changeImage(direction) {

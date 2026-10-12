@@ -1,12 +1,8 @@
 <?php
-// aplikasi/includes/header-kaih.php
 require_once __DIR__ . '/auth.php';
 
-date_default_timezone_set('Asia/Jakarta');
+date_default_timezone_set('Asia/Makassar');
 
-// ============================================================
-// FUNGSI TANGGAL INDONESIA (LENGKAP) - DEKLARASI DI SINI
-// ============================================================
 function hariIndo($day) {
     $hari = [
         'Monday' => 'Senin',
@@ -310,6 +306,9 @@ $sidebarLabel = match ($role) {
             </a>
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
                 Monitoring Siswa
+            </a>
+            <a href="jurnal_guru.php" class="<?php echo ($current_page == 'jurnal_guru.php') ? 'active' : ''; ?>">
+                Jurnal Guru
             </a>
         <?php elseif ($role === 'siswa'): ?>
             <!-- MENU SISWA -->

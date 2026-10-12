@@ -3,108 +3,19 @@
 session_start();
 require_once '../../config/database.php';
 
-if (isset($_GET['aksi']) && isset($_GET['id'])) {
-    $id_laporan = (int)$_GET['id'];
-    $aksi = $_GET['aksi'];
-    
-    try {
-        if ($aksi === 'setuju') {
-            $sql = "UPDATE laporan_harian SET orang_tua_validated_at = NOW() WHERE id = :id";
-        } elseif ($aksi === 'batal') {
-            // BATAL SETUJU MERESET KEDUANYA AGAR KEMBALI PENDING
-            $sql = "UPDATE laporan_harian SET guru_validated_at = NULL, orang_tua_validated_at = NULL WHERE id = :id";
-        }
-        
-        if (isset($sql)) {
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([':id' => $id_laporan]);
-        }
-        
-        $nisn_param = isset($_GET['nisn']) ? '&nisn=' . urlencode($_GET['nisn']) : '';
-        header("Location: monitoring.php?bulan=" . urlencode($_GET['bulan'] ?? date('Y-m')) . $nisn_param);
-        exit;
-    } catch (PDOException $e) {}
-}
-
-require_once '../includes/header-kaih.php';
-
-// Halaman khusus untuk role orang_tua
-if (($_SESSION['role'] ?? '') !== 'orang_tua') {
-    header('Location: ../index.php');
-    exit;
-}
-
-$siswa_id = (int) ($_SESSION['siswa_id'] ?? 0);
-
 // ============================================================
-// PASTIKAN TABEL laporan_harian ADA
-// ============================================================
-function ensureLaporanHarianTableOrtu(PDO $pdo): void
-{
-    try {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_harian` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `siswa_id` INT NOT NULL,
-            `tanggal` DATE NOT NULL,
-            `bangun` TINYINT(1) NOT NULL DEFAULT 0,
-            `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
-            `ibadah_catatan` VARCHAR(255) NULL,
-            `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
-            `olahraga_jenis` VARCHAR(50) NULL,
-            `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
-            `sarapan_menu` VARCHAR(50) NULL,
-            `membaca` TINYINT(1) NOT NULL DEFAULT 0,
-            `membaca_judul` VARCHAR(255) NULL,
-            `membaca_menit` INT NULL,
-            `membantu` TINYINT(1) NOT NULL DEFAULT 0,
-            `membantu_jenis` VARCHAR(50) NULL,
-            `menabung` TINYINT(1) NOT NULL DEFAULT 0,
-            `menabung_nominal` INT NULL,
-            `orang_tua_validated_at` DATETIME NULL,
-            `guru_validated_at` DATETIME NULL,
-            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
-            INDEX `idx_tanggal` (`tanggal`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    } catch (PDOException $e) {
-        // Abaikan, akan gagal halus di query berikutnya
-    }
-}
-ensureLaporanHarianTableOrtu($pdo);
-
-// Data anak
-$anak = null;
-if ($siswa_id > 0) {
-    try {
-        $stmt = $pdo->prepare("SELECT id, nisn, nama_siswa, kelas FROM siswa WHERE id = ?");
-        $stmt->execute([$siswa_id]);
-        $anak = $stmt->fetch();
-    } catch (PDOException $e) {
-        $anak = null;
-    }
-}
-
-// ============================================================
-// FLASH MESSAGE (dari redirect setelah aksi POST)
-// ============================================================
-$flash = $_SESSION['flash_ortu_msg'] ?? '';
-$flashType = $_SESSION['flash_ortu_type'] ?? 'success';
-unset($_SESSION['flash_ortu_msg'], $_SESSION['flash_ortu_type']);
-
-// ============================================================
-// PROSES AKSI: VALIDASI / BATAL SETUJU
+// 1. PROSES AKSI: VALIDASI / BATAL SETUJU (SEBELUM HEADER)
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
     $laporanId = (int) ($_POST['laporan_id'] ?? 0);
+    $siswa_id = (int) ($_SESSION['siswa_id'] ?? 0);
 
     if ($siswa_id <= 0) {
         $_SESSION['flash_ortu_msg'] = 'Akun orang tua belum terhubung ke data siswa.';
         $_SESSION['flash_ortu_type'] = 'error';
     } elseif ($laporanId > 0 && in_array($action, ['validate_ortu', 'batal_ortu'], true)) {
         try {
-            // Pastikan laporan ini memang milik anak dari akun ortu yang sedang login
             $chk = $pdo->prepare('SELECT id FROM laporan_harian WHERE id = ? AND siswa_id = ?');
             $chk->execute([$laporanId, $siswa_id]);
 
@@ -136,7 +47,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ============================================================
-// FILTER BULAN
+// 2. PROSES AKSI GET (LAMA): VALIDASI / BATAL SETUJU
+// ============================================================
+if (isset($_GET['aksi']) && isset($_GET['id'])) {
+    $id_laporan = (int)$_GET['id'];
+    $aksi = $_GET['aksi'];
+
+    try {
+        if ($aksi === 'setuju') {
+            $sql = "UPDATE laporan_harian SET orang_tua_validated_at = NOW() WHERE id = :id";
+        } elseif ($aksi === 'batal') {
+            $sql = "UPDATE laporan_harian SET guru_validated_at = NULL, orang_tua_validated_at = NULL WHERE id = :id";
+        }
+
+        if (isset($sql)) {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $id_laporan]);
+        }
+
+        $nisn_param = isset($_GET['nisn']) ? '&nisn=' . urlencode($_GET['nisn']) : '';
+        header("Location: monitoring.php?bulan=" . urlencode($_GET['bulan'] ?? date('Y-m')) . $nisn_param);
+        exit;
+    } catch (PDOException $e) {}
+}
+
+// ============================================================
+// 3. CEK ROLE SEBELUM HEADER
+// ============================================================
+if (($_SESSION['role'] ?? '') !== 'orang_tua') {
+    header('Location: ../index.php');
+    exit;
+}
+
+// ============================================================
+// 4. PASTIKAN TABEL laporan_harian ADA
+// ============================================================
+function ensureLaporanHarianTableOrtu(PDO $pdo): void
+{
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_harian` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `siswa_id` INT NOT NULL,
+            `tanggal` DATE NOT NULL,
+            `bangun` TINYINT(1) NOT NULL DEFAULT 0,
+            `ibadah` TINYINT(1) NOT NULL DEFAULT 0,
+            `ibadah_catatan` VARCHAR(255) NULL,
+            `olahraga` TINYINT(1) NOT NULL DEFAULT 0,
+            `olahraga_jenis` VARCHAR(50) NULL,
+            `sarapan` TINYINT(1) NOT NULL DEFAULT 0,
+            `sarapan_menu` VARCHAR(50) NULL,
+            `membaca` TINYINT(1) NOT NULL DEFAULT 0,
+            `membaca_judul` VARCHAR(255) NULL,
+            `membaca_menit` INT NULL,
+            `membantu` TINYINT(1) NOT NULL DEFAULT 0,
+            `membantu_jenis` VARCHAR(50) NULL,
+            `menabung` TINYINT(1) NOT NULL DEFAULT 0,
+            `menabung_nominal` INT NULL,
+            `orang_tua_validated_at` DATETIME NULL,
+            `guru_validated_at` DATETIME NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY `unique_siswa_tanggal` (`siswa_id`, `tanggal`),
+            INDEX `idx_tanggal` (`tanggal`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // Abaikan
+    }
+}
+ensureLaporanHarianTableOrtu($pdo);
+
+// ============================================================
+// 5. AMBIL DATA ANAK
+// ============================================================
+$siswa_id = (int) ($_SESSION['siswa_id'] ?? 0);
+$anak = null;
+if ($siswa_id > 0) {
+    try {
+        $stmt = $pdo->prepare("SELECT id, nisn, nama_siswa, kelas FROM siswa WHERE id = ?");
+        $stmt->execute([$siswa_id]);
+        $anak = $stmt->fetch();
+    } catch (PDOException $e) {
+        $anak = null;
+    }
+}
+
+// ============================================================
+// 6. FLASH MESSAGE
+// ============================================================
+$flash = $_SESSION['flash_ortu_msg'] ?? '';
+$flashType = $_SESSION['flash_ortu_type'] ?? 'success';
+unset($_SESSION['flash_ortu_msg'], $_SESSION['flash_ortu_type']);
+
+// ============================================================
+// 7. FILTER BULAN
 // ============================================================
 $filterBulan = trim((string) ($_GET['bulan'] ?? date('Y-m')));
 if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
@@ -145,7 +148,7 @@ if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
 $redirectQs = http_build_query(['bulan' => $filterBulan]);
 
 // ============================================================
-// AMBIL DATA KEGIATAN SEBULAN
+// 8. AMBIL DATA KEGIATAN SEBULAN
 // ============================================================
 $laporanList = [];
 $statTotal = 0;
@@ -204,6 +207,8 @@ function skorHarianOrtu(array $lh): int
         + (int) ($lh['membantu'] ?? 0)
         + (int) ($lh['menabung'] ?? 0);
 }
+
+require_once '../includes/header-kaih.php';
 ?>
 
 <style>

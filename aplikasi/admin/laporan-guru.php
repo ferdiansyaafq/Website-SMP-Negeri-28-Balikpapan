@@ -3,7 +3,9 @@
 session_start();
 
 // Cek hak akses admin
-if (!isset($_SESSION['user_id']) && (string)($_SESSION['portal_role'] ?? '') !== 'admin') {
+$isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
+    || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
+if (!$isAdminSession) {
     header('Location: ../../login.php');
     exit;
 }

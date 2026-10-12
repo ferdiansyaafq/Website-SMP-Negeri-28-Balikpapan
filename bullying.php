@@ -72,101 +72,6 @@ include 'header.php';
     margin: 0;
 }
 
-/* PIC Section */
-.pic-section {
-    background: #fef2f2;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    border: 1px solid #fecaca;
-}
-.pic-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-.pic-section-title {
-    color: #991b1b;
-    font-size: 17px;
-    font-weight: 800;
-    margin-bottom: 6px;
-}
-.pic-section-subtitle {
-    color: #991b1b;
-    font-size: 13.5px;
-    margin: 0;
-}
-.pic-grid {
-    display: flex;
-    justify-content: center;
-}
-.pic-card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 15px rgba(220,38,38,0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.pic-role-badge {
-    display: inline-block;
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-.pic-name {
-    font-size: 18px;
-    color: #1e293b;
-    margin-bottom: 4px;
-    font-weight: 800;
-}
-.pic-title {
-    color: #64748b;
-    font-size: 13px;
-    margin: 0;
-}
-.pic-contact-action {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.btn-contact {
-    flex: 1;
-    min-width: 140px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 14px;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.3s;
-}
-.btn-wa {
-    background: #25D366;
-    color: white;
-}
-.btn-wa:hover {
-    background: #1eb955;
-    transform: translateY(-2px);
-}
-.btn-phone {
-    background: #dc2626;
-    color: white;
-}
-.btn-phone:hover {
-    background: #b91c1c;
-    transform: translateY(-2px);
-}
-
 /* Form */
 .bullying-form {
     background: white;
@@ -218,6 +123,7 @@ include 'header.php';
     font-family: inherit;
     font-size: 14px;
     color: #1e293b;
+    box-sizing: border-box;
 }
 
 .bullying-form .form-group input:focus,
@@ -299,17 +205,176 @@ include 'header.php';
     transform: translateY(0);
 }
 
+/* ============================================================
+   PIC SECTION - ESTETIK MINIMALIS
+   ============================================================ */
+.pic-elegant {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px dashed #e2e8f0;
+}
+
+.pic-elegant-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #991b1b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+}
+
+.pic-elegant-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #fecaca, transparent);
+}
+
+.pic-elegant-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #ffffff, #fef2f2);
+    border: 1.5px solid #fecaca;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.04);
+}
+
+.pic-elegant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.12);
+    border-color: #fca5a5;
+}
+
+.pic-elegant-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    letter-spacing: -0.5px;
+}
+
+.pic-elegant-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pic-elegant-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pic-elegant-role {
+    font-size: 12px;
+    color: #991b1b;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.pic-elegant-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #25D366, #1eb955);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    white-space: nowrap;
+}
+
+.pic-elegant-wa:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.45);
+    filter: brightness(1.05);
+}
+
+.pic-elegant-wa svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.pic-elegant-wa .wa-text {
+    font-size: 13px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .page-header { padding: 40px 20px; }
     .page-header h1 { font-size: 26px; }
+    .page-header::before { font-size: 60px; right: 15px; }
     .container { padding: 0 20px; margin: 20px auto; }
     .bullying-form { padding: 24px; }
     .bullying-form .form-row { grid-template-columns: 1fr; gap: 0; }
     .confidentiality-banner { flex-direction: column; align-items: center; text-align: center; }
-    .pic-section { padding: 20px 16px; }
-    .pic-contact-action { flex-direction: column; }
-    .btn-contact { min-width: 100%; }
+}
+
+@media (max-width: 600px) {
+    .pic-elegant-card {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .pic-elegant-info {
+        flex: 1;
+        min-width: calc(100% - 60px);
+    }
+    .pic-elegant-wa {
+        width: 100%;
+        justify-content: center;
+        padding: 11px 16px;
+    }
+    .pic-elegant-name {
+        white-space: normal;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bullying-form { padding: 18px; }
+    .bullying-form .form-title { font-size: 20px; }
+    .btn-submit { font-size: 15px; padding: 14px 18px; }
+    .pic-elegant-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 17px;
+    }
+    .pic-elegant-name {
+        font-size: 13px;
+    }
+    .pic-elegant-role {
+        font-size: 11px;
+    }
+    .pic-elegant-wa {
+        font-size: 12px;
+        padding: 10px 14px;
+    }
 }
 </style>
 
@@ -325,35 +390,7 @@ include 'header.php';
         <div class="confidentiality-icon">🔒</div>
         <div class="confidentiality-text">
             <h3>Jaminan Kerahasiaan 100% Terlindungi</h3>
-            <p><strong>Kami jamin menjaga kerahasiaan identitas dan laporan Anda.</strong> Seluruh informasi yang masuk hanya diakses langsung oleh Satgas Pencegahan &amp; Penanganan Kekerasan (TPPK) / Guru BK untuk perlindungan dan penanganan terbaik.</p>
-        </div>
-    </div>
-
-    <!-- Kontak PIC -->
-    <div class="pic-section">
-        <div class="pic-section-header">
-            <div>
-                <h3 class="pic-section-title">📞 Kontak Layanan Cepat (PIC / Tim Pendamping)</h3>
-                <p class="pic-section-subtitle">Jika Anda atau rekan Anda membutuhkan bantuan segera atau pendampingan darurat:</p>
-            </div>
-        </div>
-
-        <div class="pic-grid">
-            <div class="pic-card" style="max-width: 500px; margin: 0 auto; width: 100%;">
-                <div>
-                    <span class="pic-role-badge">Tim Satgas TPPK &amp; Guru BK</span>
-                    <h4 class="pic-name">Ibu Siti Rahmawati, S.Pd</h4>
-                    <p class="pic-title">Koordinator Layanan Konseling &amp; Tim Satgas Pencegahan Kekerasan</p>
-                </div>
-                <div class="pic-contact-action">
-                    <a href="https://wa.me/6281234567890?text=Halo%20Ibu%20Siti%2C%20saya%20butuh%20konseling%20atau%20ingin%20berbicara%20terkait%20situasi%20di%20sekolah." target="_blank" rel="noopener noreferrer" class="btn-contact btn-wa">
-                        💬 WhatsApp (0812-3456-7890)
-                    </a>
-                    <a href="tel:081234567890" class="btn-contact btn-phone">
-                        📞 Telepon
-                    </a>
-                </div>
-            </div>
+            <p><strong>Kami jamin menjaga kerahasiaan identitas dan laporan Anda.</strong> Seluruh informasi yang masuk hanya diakses langsung oleh Guru BK untuk perlindungan dan penanganan terbaik.</p>
         </div>
     </div>
 
@@ -364,13 +401,13 @@ include 'header.php';
 
         <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
             <div class="alert alert-success">
-                ✅ Laporan Anda telah kami terima dengan aman. Tim Satgas / Guru BK akan segera menindaklanjuti dengan kerahasiaan penuh.
+                ✅ Laporan Anda telah kami terima dengan aman. Guru BK akan segera menindaklanjuti dengan kerahasiaan penuh.
             </div>
         <?php endif; ?>
 
         <?php if (isset($_GET['status']) && $_GET['status'] == 'error'): ?>
             <div class="alert alert-error">
-                ❌ Gagal mengirim laporan. Pastikan seluruh kolom wajib telah diisi atau hubungi nomor PIC di atas secara langsung.
+                ❌ Gagal mengirim laporan. Pastikan seluruh kolom wajib telah diisi atau hubungi nomor PIC di bawah secara langsung.
             </div>
         <?php endif; ?>
 
@@ -464,6 +501,29 @@ include 'header.php';
                 🛡️ Kirim Laporan ke Ruang Peduli
             </button>
         </form>
+
+        <div class="pic-elegant">
+            <div class="pic-elegant-label">📞 Kontak Layanan Cepat (PIC)</div>
+
+            <div class="pic-elegant-card">
+                <div class="pic-elegant-avatar">AB</div>
+                <div class="pic-elegant-info">
+                    <div class="pic-elegant-name">Bapak Aris Broto, S.Pd</div>
+                    <div class="pic-elegant-role">Kepala Sekolah</div>
+                </div>
+                <a href="https://wa.me/6281256781945" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="pic-elegant-wa"
+                   aria-label="Hubungi via WhatsApp">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span class="wa-text">WhatsApp</span>
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
 

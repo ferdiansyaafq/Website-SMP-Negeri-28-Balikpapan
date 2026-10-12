@@ -1,6 +1,6 @@
 <?php
 // 1. Panggil file database.php milikmu
-include 'config/database.php';
+require_once __DIR__ . '/database.php';
 
 // 2. Cek apakah ada data yang dikirim dari form (metode POST)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // 6. Jika berhasil, munculkan pop-up sukses dan kembalikan user ke form
         echo "<script>
                 alert('Terima kasih! Ulasan Anda berhasil dikirim.');
-                window.location.href = 'lainnya.php#kontak';
+                window.location.href = '../survey.php';
               </script>";
         exit();
 
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } else {
     // Jika ada yang mencoba akses file ini secara langsung lewat URL, lempar balik ke lainnya.php
-    header("Location: lainnya.php");
+    header("Location: ../survey.php");
     exit();
 }
 ?>

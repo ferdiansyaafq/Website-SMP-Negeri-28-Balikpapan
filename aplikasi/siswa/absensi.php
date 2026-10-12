@@ -7,14 +7,6 @@ $message = '';
 $message_type = '';
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 
-// ============================================================
-// FUNGSI SUDAH ADA DI HEADER-KAIH.PHP
-// JANGAN DEKLARASIKAN ULANG!
-// ============================================================
-
-// ============================================================
-// CEK WAKTU & HARI UNTUK ABSENSI
-// ============================================================
 function cekWaktuAbsensi() {
     // Set timezone ke WITA (Asia/Makassar)
     date_default_timezone_set('Asia/Makassar');
@@ -53,9 +45,6 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// CEK & TAMBAHKAN KOLOM TABEL
-// ============================================================
 function ensureAbsensiColumns($pdo) {
     try {
         $stmt = $pdo->query("SHOW COLUMNS FROM absensi LIKE 'deskripsi'");
@@ -77,9 +66,6 @@ function ensureAbsensiColumns($pdo) {
 }
 ensureAbsensiColumns($pdo);
 
-// ============================================================
-// CEK & CATAT ABSENSI TERLEWAT (ALPHA)
-// ============================================================
 function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
     if ($siswa_id <= 0) return;
     
@@ -140,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
         $message_type = 'error';
     } else {
         // Lanjutkan proses absensi
-        $tanggal = $_POST['tanggal'] ?? date('Y-m-d');
+        $tanggal = date('Y-m-d');
         $status = 'hadir';
         $deskripsi = 'Sesi kelas reguler';
         $catatan = 'Presensi mandiri';
@@ -167,7 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
                     $message_type = 'success';
                 }
             } catch (PDOException $e) {
-                $message = '❌ Gagal absen: ' . $e->getMessage();
+                error_log('Student attendance save failed: ' . $e->getMessage());
+                $message = '❌ Absensi gagal disimpan. Silakan coba lagi atau hubungi administrator.';
                 $message_type = 'error';
             }
         } else {
@@ -370,7 +357,7 @@ foreach ($tanggal_minggu as $tgl) {
 <div class="absensi-container">
 
     <?php if ($message): ?>
-        <div class="alert alert-<?php echo $message_type; ?>"><?php echo $message; ?></div>
+        <div class="alert alert-<?php echo htmlspecialchars($message_type, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
     <div class="absensi-card">

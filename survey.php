@@ -33,6 +33,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <link rel="stylesheet" href="assets/css/survey.css">
 
+<link rel="stylesheet" href="assets/css/survey.css?v=<?= time() ?>">
+
+<style>
+/* Paksa layout vertikal — override apapun */
+.emoji-rating-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 12px !important;
+}
+.emoji-rating-label {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    min-height: 138px !important;
+    padding: 20px 12px 18px !important;
+    text-align: center !important;
+}
+.emoji-icon {
+    font-size: 42px !important;
+    line-height: 1 !important;
+    display: block !important;
+}
+.emoji-text {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    min-height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1.35 !important;
+}
+@media (max-width: 768px) {
+    .emoji-rating-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    .emoji-icon { font-size: 32px !important; }
+}
+@media (max-width: 480px) {
+    .emoji-rating-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+</style>
 <!-- PAGE HEADER -->
 <div class="page-header" id="Survei-Pelayanan">
     <h1>📝 Survei Pelayanan</h1>
