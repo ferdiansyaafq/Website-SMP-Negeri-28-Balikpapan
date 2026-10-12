@@ -22,10 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$nama, $agenda_kunjungan, $rating, $kritik_saran]);
             $pesan = 'Terima kasih banyak! Penilaian, kritik, dan saran Anda berhasil dikirim untuk evaluasi layanan kami.';
-            // Reset POST values on success
             $_POST = [];
         } catch (PDOException $e) {
-            $pesan = 'Gagal menyimpan data: ' . $e->getMessage();
+            $pesan = 'Gagal menyimpan survei: ' . $e->getMessage();
             $tipe_pesan = 'error';
         }
     }
@@ -40,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p>Bantu kami meningkatkan mutu dan kualitas layanan pendidikan di SMP Negeri 28 Balikpapan</p>
 </div>
 
-<!-- CONTAINER -->
 <div class="container">
 
     <a href="lainnya.php" class="btn-back">← Kembali ke FAQ / Menu Lainnya</a>
@@ -58,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" action="" class="survey-form-tag">
+
             <!-- Nama -->
             <div class="form-group">
                 <label>Nama Lengkap <span class="required">*</span></label>
@@ -65,14 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="hint">Nama Anda akan disimpan dengan aman untuk keperluan dokumentasi survei.</span>
             </div>
 
-            <!-- Agenda Kunjungan (Sebelumnya Status Pengguna) -->
+            <!-- Agenda Kunjungan -->
             <div class="form-group">
                 <label>Agenda Kunjungan <span class="required">*</span></label>
                 <textarea name="agenda_kunjungan" rows="3" required placeholder="Tuliskan tujuan atau agenda kunjungan Anda ke sekolah (contoh: Mengurus surat keterangan, konsultasi akademik siswa, kunjungan dinas, dll.)..."><?= htmlspecialchars($_POST['agenda_kunjungan'] ?? '') ?></textarea>
                 <span class="hint">Tuliskan agenda atau keperluan kedatangan Anda secara jelas.</span>
             </div>
 
-            <!-- Penilaian Berdasarkan Emot Kepuasan (1-5) -->
+            <!-- Penilaian Berdasarkan Emoji Kepuasan (1-5) -->
             <div class="form-group">
                 <label>Tingkat Kepuasan Pelayanan <span class="required">*</span></label>
                 <div class="emoji-rating-wrapper">
@@ -130,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="hint">Klik salah satu ekspresi emotikon yang paling menggambarkan pengalaman pelayanan Anda.</span>
             </div>
 
-            <!-- Kritik dan Saran (Sebelumnya Ulasan dan Saran) -->
+            <!-- Kritik dan Saran -->
             <div class="form-group">
                 <label>Kritik dan Saran <span class="required">*</span></label>
                 <textarea name="kritik_saran" rows="5" required placeholder="Tuliskan kritik yang membangun dan saran perbaikan untuk pelayanan SMP Negeri 28 Balikpapan..."><?= htmlspecialchars($_POST['kritik_saran'] ?? '') ?></textarea>
@@ -143,7 +142,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
     </div>
-
 </div>
 
 <script src="assets/js/survey.js"></script>

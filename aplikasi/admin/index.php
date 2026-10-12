@@ -57,10 +57,29 @@ $stmtAktivitas = $pdo->prepare("
 $stmtAktivitas->execute([$tanggal_hari_ini]);
 $aktivitas_terbaru = $stmtAktivitas->fetchAll(PDO::FETCH_ASSOC);
 
+// =======================================================
+// 4. DATA GRAFIK 7 KAIH GLOBAL HARI INI
+// =======================================================
+$stmtGrafik = $pdo->prepare("
+    SELECT 
+        COALESCE(SUM(bangun), 0) as tot_bangun,
+        COALESCE(SUM(ibadah), 0) as tot_ibadah,
+        COALESCE(SUM(olahraga), 0) as tot_olahraga,
+        COALESCE(SUM(sarapan), 0) as tot_sarapan,
+        COALESCE(SUM(membaca), 0) as tot_membaca,
+        COALESCE(SUM(membantu), 0) as tot_membantu,
+        COALESCE(SUM(menabung), 0) as tot_menabung
+    FROM laporan_harian 
+    WHERE tanggal = ?
+");
+$stmtGrafik->execute([$tanggal_hari_ini]);
+$dataGrafik = $stmtGrafik->fetch(PDO::FETCH_ASSOC);
+
 // Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     body { background-color: #f8fafc; }
     .dashboard-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
@@ -115,32 +134,40 @@ require_once '../includes/header-kaih.php';
     <!-- Bagian Kartu Statistik Utama -->
     <div class="stats-grid">
         <div class="stat-card card-siswa">
-            <div class="stat-icon">🎓</div>
+            <div class="stat-icon">👥</div>
             <div class="stat-details">
                 <h3><?= $total_siswa ?></h3>
                 <p>Total Siswa</p>
             </div>
         </div>
         <div class="stat-card card-sudah">
-            <div class="stat-icon">✔️</div>
+            <div class="stat-icon">✅</div>
             <div class="stat-details">
                 <h3><?= $laporan_hari_ini ?></h3>
                 <p>Sudah Lapor Hari Ini</p>
             </div>
         </div>
         <div class="stat-card card-belum">
-            <div class="stat-icon">❌</div>
+            <div class="stat-icon">⏳</div>
             <div class="stat-details">
                 <h3><?= $belum_lapor ?></h3>
                 <p>Belum Lapor</p>
             </div>
         </div>
         <div class="stat-card card-valid">
-            <div class="stat-icon">⭐</div>
+            <div class="stat-icon">🛡️</div>
             <div class="stat-details">
                 <h3><?= $tervalidasi_hari_ini ?></h3>
                 <p>Tervalidasi Hari Ini</p>
             </div>
+        </div>
+    </div>
+
+    <!-- GRAFIK KAIH GLOBAL HARI INI -->
+    <div class="activity-section" style="margin-bottom: 25px;">
+        <div class="activity-header">📊 Grafik Pelaksanaan 7 KAIH (<?= date('d M Y') ?>)</div>
+        <div style="position: relative; height: 280px; width: 100%;">
+            <canvas id="globalKaihChart"></canvas>
         </div>
     </div>
 
@@ -149,7 +176,7 @@ require_once '../includes/header-kaih.php';
         
         <!-- Tabel Rekap Kelas Hari Ini -->
         <div class="activity-section" style="overflow-x: auto;">
-            <div class="activity-header">📊 Rekap Kelas Hari Ini (<?= date('d M Y') ?>)</div>
+            <div class="activity-header">🏫 Rekap Kelas Hari Ini</div>
             <table class="table-modern">
                 <thead>
                     <tr>
@@ -185,7 +212,7 @@ require_once '../includes/header-kaih.php';
                                style="padding: 6px 12px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block; transition: 0.2s;"
                                onmouseover="this.style.background='#0284c7'" 
                                onmouseout="this.style.background='#0ea5e9'">
-                                Detail ➡️
+                                Detail 🔎
                             </a>
                         </td>
                     </tr>
@@ -224,6 +251,46 @@ require_once '../includes/header-kaih.php';
                 </ul>
             <?php endif; ?>
         </div>
-
     </div>
 </div>
+
+<!-- SCRIPT RENDER GRAFIK CHART.JS -->
+<script>
+    const ctxGlobal = document.getElementById('globalKaihChart').getContext('2d');
+    new Chart(ctxGlobal, {
+        type: 'bar',
+        data: {
+            labels: ['Bangun Pagi', 'Ibadah', 'Olahraga', 'Sarapan', 'Membaca', 'Membantu', 'Menabung'],
+            datasets: [{
+                label: 'Jumlah Siswa Mengerjakan',
+                data: [
+                    <?= (int)($dataGrafik['tot_bangun'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_ibadah'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_olahraga'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_sarapan'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_membaca'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_membantu'] ?? 0) ?>, 
+                    <?= (int)($dataGrafik['tot_menabung'] ?? 0) ?>
+                ],
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#14b8a6'
+                ],
+                borderWidth: 0,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>

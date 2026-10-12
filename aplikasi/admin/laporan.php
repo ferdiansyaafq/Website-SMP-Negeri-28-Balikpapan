@@ -203,10 +203,15 @@ function iconCheck(bool $status) {
 
 <div class="content-area" style="padding: 20px;">
     
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div>
         <h2 style="margin:0; color:#1e293b;">Laporan Aktivitas Siswa & Monitoring Admin</h2>
         <p style="margin:5px 0 0; color:#64748b;">Pantau kegiatan harian, cek 7 indikator, dan lihat grafik kinerja kelas.</p>
     </div>
+    <button onclick="openModalExport()" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        📥 Download Rekap Bulanan
+    </button>
+</div>
 
     <!-- TABS -->
     <div class="nav-tabs">
@@ -485,6 +490,48 @@ function iconCheck(bool $status) {
     <?php endif; ?>
     <?php endif; ?>
 
+<!-- Modal Form Export Bulanan -->
+<div id="modalExport" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; width: 100%; max-width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #1e293b;">Download Rekap Bulanan</h3>
+        
+        <form action="export_rekapan_bulanan.php" method="GET">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Pilih Bulan</label>
+                <select name="bulan" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <option value="01">Januari</option>
+                    <option value="02">Februari</option>
+                    <option value="03">Maret</option>
+                    <option value="04">April</option>
+                    <option value="05">Mei</option>
+                    <option value="06">Juni</option>
+                    <option value="07">Juli</option>
+                    <option value="08">Agustus</option>
+                    <option value="09">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Pilih Tahun</label>
+                <select name="tahun" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <?php 
+                    $tahun_ini = date('Y');
+                    for($i = $tahun_ini; $i >= $tahun_ini - 2; $i--) {
+                        echo "<option value='$i'>$i</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="flex: 1; padding: 10px; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Download Excel</button>
+                <button type="button" onclick="closeModalExport()" style="flex: 1; padding: 10px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </div>
 
 <script>
@@ -500,4 +547,8 @@ document.getElementById('selGuru')?.addEventListener('change', function() {
         }
     }
 });
+
+function openModalExport() { document.getElementById('modalExport').style.display = 'flex'; }
+function closeModalExport() { document.getElementById('modalExport').style.display = 'none'; }
+
 </script>
