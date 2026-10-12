@@ -178,6 +178,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-decoration: underline;
         }
 
+        .btn-back-home {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back-home:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
         .error-message {
             background: #fee2e2;
             color: #dc2626;
@@ -203,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="assets/img/logo1.jpeg" alt="Logo Sekolah" class="logo">
+            <img src="assets/img/logo-sekolah1.jpeg" alt="Logo Sekolah" class="logo">
             <h1>Sistem KAIH</h1>
             <p>SMP Negeri 28 Balikpapan</p>
         </div>
@@ -229,6 +253,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-footer">
             <a href="lupa-password.php">Lupa password?</a>
         </div>
+
+        <a href="index.php" class="btn-back-home">
+            🏠 Kembali ke Halaman Utama
+        </a>
 
         <div class="copyright">
             Copyright &copy; <?php echo date('Y'); ?> <span>SMP Negeri 28 Balikpapan x Vastaruna ITK.</span>

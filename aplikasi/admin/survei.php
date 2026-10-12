@@ -59,19 +59,35 @@ require_once '../includes/header-kaih.php';
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Nama</th>
-                        <th>Peran</th>
-                        <th>Rating</th>
-                        <th>Ulasan</th>
+                        <th>Nama Pengisi</th>
+                        <th>Agenda Kunjungan</th>
+                        <th>Kepuasan</th>
+                        <th>Kritik & Saran</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($survei as $item): ?>
+                    <?php 
+                    $emojiMap = [
+                        1 => ['icon' => '😡', 'text' => 'Sangat Tidak Puas'],
+                        2 => ['icon' => '🙁', 'text' => 'Tidak Puas'],
+                        3 => ['icon' => '😐', 'text' => 'Cukup'],
+                        4 => ['icon' => '🙂', 'text' => 'Puas'],
+                        5 => ['icon' => '🤩', 'text' => 'Sangat Puas']
+                    ];
+                    foreach ($survei as $item): 
+                        $rate = (int) $item['rating'];
+                        $ratingInfo = $emojiMap[$rate] ?? ['icon' => '⭐', 'text' => $rate . '/5'];
+                    ?>
                         <tr>
                             <td><?= htmlspecialchars(date('d M Y H:i', strtotime($item['created_at']))) ?></td>
-                            <td><?= htmlspecialchars($item['nama_pengisi']) ?></td>
+                            <td><strong><?= htmlspecialchars($item['nama_pengisi']) ?></strong></td>
                             <td><?= htmlspecialchars($item['peran']) ?></td>
-                            <td class="rating"><?= str_repeat('★', min(5, max(0, (int) $item['rating']))) ?></td>
+                            <td class="rating">
+                                <span title="<?= htmlspecialchars($ratingInfo['text']) ?>" style="font-size: 20px; vertical-align: middle;">
+                                    <?= $ratingInfo['icon'] ?>
+                                </span>
+                                <span style="font-size: 12px; color: #64748b; margin-left: 4px;"><?= htmlspecialchars($ratingInfo['text']) ?></span>
+                            </td>
                             <td class="review"><?= htmlspecialchars($item['ulasan']) ?></td>
                         </tr>
                     <?php endforeach; ?>

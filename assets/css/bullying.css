@@ -1,0 +1,394 @@
+/* ===================================================
+   RUANG PEDULI (LAPORAN PERUNDUNGAN / BULLYING) STYLES
+   SMP Negeri 28 Balikpapan
+   =================================================== */
+
+.page-header {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '🛡️';
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 130px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+}
+
+.page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 24px;
+}
+
+/* Jaminan Kerahasiaan - Trust Badge */
+.confidentiality-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid #86efac;
+    padding: 20px 24px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(22, 101, 52, 0.08);
+}
+
+.confidentiality-icon {
+    font-size: 38px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.confidentiality-text h3 {
+    margin: 0 0 6px 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: #166534;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.confidentiality-text p {
+    margin: 0;
+    font-size: 14px;
+    color: #15803d;
+    line-height: 1.55;
+    font-weight: 500;
+}
+
+/* PIC Contacts Section */
+.pic-section {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+    border: 1px solid #fee2e2;
+}
+
+.pic-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 1px solid #fecaca;
+    padding-bottom: 14px;
+}
+
+.pic-section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #991b1b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.pic-section-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.pic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+}
+
+.pic-card {
+    background: #fff5f5;
+    border: 1.5px solid #fecaca;
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.pic-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.12);
+    border-color: #f87171;
+}
+
+.pic-role-badge {
+    display: inline-block;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    align-self: flex-start;
+}
+
+.pic-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+}
+
+.pic-title {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 14px 0;
+}
+
+.pic-contact-action {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.btn-contact {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-wa {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-wa:hover {
+    background: #15803d;
+    color: white;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.btn-phone {
+    background: white;
+    color: #b91c1c;
+    border: 1.5px solid #fca5a5;
+}
+
+.btn-phone:hover {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.pic-note {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+}
+
+/* Bullying Form Container */
+.bullying-form {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.bullying-form .form-title {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 8px;
+    font-weight: 800;
+}
+
+.bullying-form .form-subtitle {
+    color: #64748b;
+    font-size: 15px;
+    margin-bottom: 25px;
+}
+
+.bullying-form .form-group {
+    margin-bottom: 20px;
+}
+
+.bullying-form .form-group label {
+    font-weight: 600;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.bullying-form .form-group label .required {
+    color: #dc2626;
+    margin-left: 2px;
+}
+
+.bullying-form .form-group input,
+.bullying-form .form-group select,
+.bullying-form .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s;
+    background-color: #fafafa;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1e293b;
+    box-sizing: border-box;
+}
+
+.bullying-form .form-group input:focus,
+.bullying-form .form-group select:focus,
+.bullying-form .form-group textarea:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    background-color: white;
+}
+
+.bullying-form .form-group textarea {
+    resize: vertical;
+    min-height: 110px;
+}
+
+.bullying-form .form-group .hint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+    display: block;
+}
+
+.bullying-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Alert Notification */
+.alert {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Submit Button */
+.btn-submit {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    width: 100%;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 40px 20px;
+    }
+    .page-header h1 {
+        font-size: 26px;
+    }
+    .page-header::before {
+        font-size: 60px;
+        right: 15px;
+    }
+    .container {
+        padding: 0 16px;
+        margin: 20px auto;
+    }
+    .pic-section {
+        padding: 20px;
+    }
+    .pic-grid {
+        grid-template-columns: 1fr;
+    }
+    .bullying-form {
+        padding: 24px;
+    }
+    .bullying-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    .confidentiality-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+    }
+}

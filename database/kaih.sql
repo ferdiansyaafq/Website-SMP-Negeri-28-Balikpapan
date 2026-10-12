@@ -85,6 +85,27 @@ INSERT INTO `berita` (`id`, `jenis`, `tanggal`, `kategori`, `judul`, `ringkasan`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `buku_tamu`
+--
+
+CREATE TABLE `buku_tamu` (
+  `id` int NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `instansi` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kontak` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tujuan_bertemu` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `keperluan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tanggal_kunjungan` date NOT NULL,
+  `jam_kunjungan` time DEFAULT NULL,
+  `jumlah_orang` int DEFAULT '1',
+  `status` enum('menunggu','diterima','selesai') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'menunggu',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `foto_slideshow`
 --
 
@@ -393,7 +414,7 @@ INSERT INTO `siswa` (`id`, `nisn`, `nama_siswa`, `kelas`, `jenis_kelamin`, `wali
 CREATE TABLE `survei` (
   `id` int NOT NULL,
   `nama_pengisi` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `peran` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `peran` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `rating` tinyint(1) NOT NULL,
   `ulasan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -479,6 +500,12 @@ ALTER TABLE `berita`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_berita_tanggal_judul` (`tanggal`,`judul`),
   ADD KEY `idx_berita_publikasi` (`status`,`jenis`,`tanggal`);
+
+--
+-- Indexes for table `buku_tamu`
+--
+ALTER TABLE `buku_tamu`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `foto_slideshow`
@@ -603,6 +630,12 @@ ALTER TABLE `absensi`
 --
 ALTER TABLE `berita`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `buku_tamu`
+--
+ALTER TABLE `buku_tamu`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `foto_slideshow`

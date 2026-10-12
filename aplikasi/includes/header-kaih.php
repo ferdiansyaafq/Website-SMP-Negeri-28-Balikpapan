@@ -295,10 +295,13 @@ $sidebarLabel = match ($role) {
                 Jendela Literasi
             </a>
             <a href="laporan-bullying.php" class="<?php echo ($current_page == 'laporan-bullying.php') ? 'active' : ''; ?>">
-                Laporan Bullying
+                Ruang Peduli (Bullying)
             </a>
             <a href="survei.php" class="<?php echo ($current_page == 'survei.php') ? 'active' : ''; ?>">
                 Survei Pelayanan
+            </a>
+            <a href="buku_tamu.php" class="<?php echo ($current_page == 'buku_tamu.php') ? 'active' : ''; ?>">
+                Buku Tamu
             </a>
         <?php elseif ($role === 'guru'): ?>
             <!-- MENU GURU -->

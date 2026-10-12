@@ -30,7 +30,8 @@ function ensureRefleksiTable($pdo) {
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `siswa_id` INT NOT NULL,
             `tanggal` DATE NOT NULL,
-            `semester` VARCHAR(20) NOT NULL,
+            `bulan` VARCHAR(20) NULL,
+            `semester` VARCHAR(20) NOT NULL DEFAULT 'Ganjil',
             `tahun_ajaran` VARCHAR(20) NOT NULL,
             `pelajaran_favorit` TEXT NULL,
             `pelajaran_sulit` TEXT NULL,
@@ -43,6 +44,12 @@ function ensureRefleksiTable($pdo) {
             `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX `idx_siswa_tanggal` (`siswa_id`, `tanggal`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // Pastikan kolom bulan sudah ada di tabel refleksi
+        $stmt = $pdo->query("SHOW COLUMNS FROM refleksi LIKE 'bulan'");
+        if (!$stmt->fetch()) {
+            $pdo->exec("ALTER TABLE refleksi ADD COLUMN bulan VARCHAR(20) NULL AFTER tanggal");
+        }
         return true;
     } catch (PDOException $e) {
         return false;
@@ -50,13 +57,23 @@ function ensureRefleksiTable($pdo) {
 }
 ensureRefleksiTable($pdo);
 
+// Daftar Bulan Indonesia
+$bulan_list = [
+    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+    '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+    '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+];
+$bulan_sekarang = $bulan_list[date('m')] ?? 'Januari';
+$auto_semester = in_array((int)date('n'), [1, 2, 3, 4, 5, 6]) ? 'Genap' : 'Ganjil';
+
 // ============================================================
-// PROSES SIMPAN REFLEKSI
+// PROSES SIMPAN REFLEKSI BULANAN
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     $tanggal = date('Y-m-d');
-    $semester = $_POST['semester'] ?? 'Ganjil';
-    $tahun_ajaran = $_POST['tahun_ajaran'] ?? date('Y') . '/' . (date('Y') + 1);
+    $bulan = trim($_POST['bulan'] ?? $bulan_sekarang);
+    $semester = in_array((int)date('n'), [1, 2, 3, 4, 5, 6]) ? 'Genap' : 'Ganjil';
+    $tahun_ajaran = trim($_POST['tahun_ajaran'] ?? (date('Y') . '/' . (date('Y') + 1)));
     $pelajaran_favorit = trim($_POST['pelajaran_favorit'] ?? '');
     $pelajaran_sulit = trim($_POST['pelajaran_sulit'] ?? '');
     $pencapaian = trim($_POST['pencapaian'] ?? '');
@@ -67,38 +84,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     
     if ($siswa_id > 0) {
         try {
-            $stmt = $pdo->prepare("SELECT id FROM refleksi WHERE siswa_id = ? AND tanggal = ?");
-            $stmt->execute([$siswa_id, $tanggal]);
+            // Cek apakah sudah ada refleksi untuk siswa pada bulan & tahun ajaran ini
+            $stmt = $pdo->prepare("SELECT id FROM refleksi WHERE siswa_id = ? AND (bulan = ? OR (bulan IS NULL AND semester = ?)) AND tahun_ajaran = ?");
+            $stmt->execute([$siswa_id, $bulan, $bulan, $tahun_ajaran]);
             $existing = $stmt->fetch();
             
             if ($existing) {
                 $stmt = $pdo->prepare("UPDATE refleksi SET 
-                    semester = ?, tahun_ajaran = ?, pelajaran_favorit = ?, 
+                    bulan = ?, semester = ?, tahun_ajaran = ?, pelajaran_favorit = ?, 
                     pelajaran_sulit = ?, pencapaian = ?, kendala = ?, 
                     pengalaman_berkesan = ?, saran = ?, target_kedepan = ?,
                     updated_at = NOW()
-                    WHERE siswa_id = ? AND tanggal = ?");
+                    WHERE id = ?");
                 $stmt->execute([
-                    $semester, $tahun_ajaran, $pelajaran_favorit,
+                    $bulan, $semester, $tahun_ajaran, $pelajaran_favorit,
                     $pelajaran_sulit, $pencapaian, $kendala,
                     $pengalaman_berkesan, $saran, $target_kedepan,
-                    $siswa_id, $tanggal
+                    $existing['id']
                 ]);
-                $message = '✅ Refleksi berhasil diperbarui!';
+                $message = "✅ Refleksi bulan $bulan berhasil diperbarui!";
                 $message_type = 'success';
             } else {
                 $stmt = $pdo->prepare("INSERT INTO refleksi (
-                    siswa_id, tanggal, semester, tahun_ajaran,
+                    siswa_id, tanggal, bulan, semester, tahun_ajaran,
                     pelajaran_favorit, pelajaran_sulit, pencapaian,
                     kendala, pengalaman_berkesan, saran, target_kedepan,
                     created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
                 $stmt->execute([
-                    $siswa_id, $tanggal, $semester, $tahun_ajaran,
+                    $siswa_id, $tanggal, $bulan, $semester, $tahun_ajaran,
                     $pelajaran_favorit, $pelajaran_sulit, $pencapaian,
                     $kendala, $pengalaman_berkesan, $saran, $target_kedepan
                 ]);
-                $message = '✅ Refleksi berhasil disimpan! Terus refleksikan pembelajaranmu! 🎉';
+                $message = "✅ Refleksi bulan $bulan berhasil disimpan! Terus refleksikan pembelajaranmu! 🎉";
                 $message_type = 'success';
             }
         } catch (PDOException $e) {
@@ -111,13 +129,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     }
 }
 
-// Ambil data refleksi hari ini
+// Ambil data refleksi untuk bulan terpilih atau terakhir
 $data_refleksi = null;
 if ($siswa_id > 0) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM refleksi WHERE siswa_id = ? ORDER BY tanggal DESC LIMIT 1");
-        $stmt->execute([$siswa_id]);
+        $stmt = $pdo->prepare("SELECT * FROM refleksi WHERE siswa_id = ? AND (bulan = ? OR tanggal LIKE ?) ORDER BY tanggal DESC LIMIT 1");
+        $stmt->execute([$siswa_id, $bulan_sekarang, date('Y-m') . '%']);
         $data_refleksi = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$data_refleksi) {
+            $stmt = $pdo->prepare("SELECT * FROM refleksi WHERE siswa_id = ? ORDER BY tanggal DESC LIMIT 1");
+            $stmt->execute([$siswa_id]);
+            $data_refleksi = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
     } catch (PDOException $e) {}
 }
 
@@ -131,8 +154,7 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// Semester options
-$semester_options = ['Ganjil', 'Genap'];
+$bulan_options = array_values($bulan_list);
 $tahun_ajaran_options = [];
 for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
     $tahun_ajaran_options[] = $i . '/' . ($i + 1);
@@ -371,7 +393,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
 
     <!-- Header -->
     <div class="refleksi-card" style="text-align: center; background: linear-gradient(135deg, #0284c7, #0369a1); color: white;">
-        <h3 style="color: white; justify-content: center;">📝 Refleksi Pembelajaran</h3>
+        <h3 style="color: white; justify-content: center;">📝 Refleksi Bulanan Pembelajaran</h3>
         <div style="font-size: 14px; opacity: 0.9;">
             <?php echo htmlspecialchars($nama_siswa); ?> - <?php echo htmlspecialchars($kelas); ?>
         </div>
@@ -389,9 +411,9 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
 
     <!-- Form Refleksi -->
     <div class="refleksi-card">
-        <h3>✍️ Tulis Refleksimu</h3>
+        <h3>✍️ Tulis Refleksi Bulanan</h3>
         <div class="subtitle">
-            Ceritakan pengalaman, pembelajaran, dan pencapaianmu selama satu semester.
+            Ceritakan pengalaman, pembelajaran, dan pencapaianmu selama satu bulan ini.
         </div>
 
         <form method="POST" action="">
@@ -399,10 +421,17 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Semester <span class="required">*</span></label>
-                    <select name="semester" required>
-                        <?php foreach ($semester_options as $opt): ?>
-                            <option value="<?php echo $opt; ?>" <?php echo ($data_refleksi && $data_refleksi['semester'] == $opt) ? 'selected' : ''; ?>>
+                    <label>Bulan Refleksi <span class="required">*</span></label>
+                    <select name="bulan" required>
+                        <?php foreach ($bulan_options as $opt): 
+                            $isSelected = false;
+                            if ($data_refleksi) {
+                                $isSelected = (($data_refleksi['bulan'] ?? '') === $opt || ($data_refleksi['semester'] ?? '') === $opt);
+                            } else {
+                                $isSelected = ($opt === $bulan_sekarang);
+                            }
+                        ?>
+                            <option value="<?php echo $opt; ?>" <?php echo $isSelected ? 'selected' : ''; ?>>
                                 <?php echo $opt; ?>
                             </option>
                         <?php endforeach; ?>
@@ -412,7 +441,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
                     <label>Tahun Ajaran <span class="required">*</span></label>
                     <select name="tahun_ajaran" required>
                         <?php foreach ($tahun_ajaran_options as $opt): ?>
-                            <option value="<?php echo $opt; ?>" <?php echo ($data_refleksi && $data_refleksi['tahun_ajaran'] == $opt) ? 'selected' : ''; ?>>
+                            <option value="<?php echo $opt; ?>" <?php echo ($data_refleksi && ($data_refleksi['tahun_ajaran'] ?? '') == $opt) ? 'selected' : ''; ?>>
                                 <?php echo $opt; ?>
                             </option>
                         <?php endforeach; ?>
@@ -423,7 +452,7 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
             <div class="form-group">
                 <label>📖 Pelajaran Favorit</label>
                 <textarea name="pelajaran_favorit" placeholder="Contoh: Saya sangat suka pelajaran IPA karena ..."><?php echo $data_refleksi['pelajaran_favorit'] ?? ''; ?></textarea>
-                <span class="hint">Tulis mata pelajaran yang paling kamu sukai dan alasannya.</span>
+                <span class="hint">Tulis mata pelajaran yang paling kamu sukai bulan ini dan alasannya.</span>
             </div>
 
             <div class="form-group">
@@ -433,37 +462,37 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
             </div>
 
             <div class="form-group">
-                <label>🏆 Pencapaian Selama Semester Ini</label>
-                <textarea name="pencapaian" placeholder="Contoh: Nilai saya meningkat, saya bisa menghafal ..."><?php echo $data_refleksi['pencapaian'] ?? ''; ?></textarea>
-                <span class="hint">Apa saja hal baik yang sudah kamu capai?</span>
+                <label>🏆 Pencapaian Selama Bulan Ini</label>
+                <textarea name="pencapaian" placeholder="Contoh: Nilai ulangan saya meningkat, saya bisa memahami bab baru ..."><?php echo $data_refleksi['pencapaian'] ?? ''; ?></textarea>
+                <span class="hint">Apa saja hal baik yang sudah kamu capai bulan ini?</span>
             </div>
 
             <div class="form-group">
                 <label>🤔 Kendala yang Dihadapi</label>
                 <textarea name="kendala" placeholder="Contoh: Saya kesulitan fokus saat belajar di rumah karena ..."><?php echo $data_refleksi['kendala'] ?? ''; ?></textarea>
-                <span class="hint">Apa saja kesulitan yang kamu hadapi selama belajar?</span>
+                <span class="hint">Apa saja kesulitan yang kamu hadapi selama belajar di bulan ini?</span>
             </div>
 
             <div class="form-group">
-                <label>💫 Pengalaman Paling Berkesan</label>
-                <textarea name="pengalaman_berkesan" placeholder="Contoh: Pengalaman paling berkesan adalah saat ..."><?php echo $data_refleksi['pengalaman_berkesan'] ?? ''; ?></textarea>
-                <span class="hint">Ceritakan momen yang paling berkesan selama semester ini.</span>
+                <label>💫 Pengalaman Paling Berkesan Bulan Ini</label>
+                <textarea name="pengalaman_berkesan" placeholder="Contoh: Pengalaman paling berkesan adalah saat praktikum bersama teman..."><?php echo $data_refleksi['pengalaman_berkesan'] ?? ''; ?></textarea>
+                <span class="hint">Ceritakan momen yang paling berkesan selama bulan ini.</span>
             </div>
 
             <div class="form-group">
                 <label>💡 Saran untuk Guru / Sekolah</label>
-                <textarea name="saran" placeholder="Contoh: Saya berharap pembelajaran lebih ..."><?php echo $data_refleksi['saran'] ?? ''; ?></textarea>
+                <textarea name="saran" placeholder="Contoh: Saya berharap pembelajaran lebih interaktif dan ada sesi tanya jawab ..."><?php echo $data_refleksi['saran'] ?? ''; ?></textarea>
                 <span class="hint">Tulis saran atau masukan untuk guru atau sekolah.</span>
             </div>
 
             <div class="form-group">
-                <label>🎯 Target untuk Semester Depan</label>
-                <textarea name="target_kedepan" placeholder="Contoh: Saya ingin lebih giat belajar dan ..."><?php echo $data_refleksi['target_kedepan'] ?? ''; ?></textarea>
-                <span class="hint">Apa target yang ingin kamu capai di semester berikutnya?</span>
+                <label>🎯 Target untuk Bulan Depan</label>
+                <textarea name="target_kedepan" placeholder="Contoh: Saya ingin lebih aktif bertanya di kelas dan menyelesaikan tugas tepat waktu ..."><?php echo $data_refleksi['target_kedepan'] ?? ''; ?></textarea>
+                <span class="hint">Apa target yang ingin kamu capai di bulan berikutnya?</span>
             </div>
 
             <button type="submit" class="btn-simpan">
-                💾 <?php echo ($data_refleksi) ? 'Update Refleksi' : 'Simpan Refleksi'; ?>
+                💾 <?php echo ($data_refleksi) ? 'Update Refleksi Bulanan' : 'Simpan Refleksi Bulanan'; ?>
             </button>
         </form>
     </div>
@@ -476,15 +505,17 @@ for ($i = date('Y') - 2; $i <= date('Y') + 1; $i++) {
             <div class="empty-state">
                 <div class="icon">📝</div>
                 <p>Belum ada refleksi yang ditulis.</p>
-                <p style="font-size: 12px; color: #cbd5e1;">Mulai tulis refleksi pembelajaranmu sekarang!</p>
+                <p style="font-size: 12px; color: #cbd5e1;">Mulai tulis refleksi pembelajaran bulananmu sekarang!</p>
             </div>
         <?php else: ?>
-            <?php foreach ($riwayat_refleksi as $row): ?>
+            <?php foreach ($riwayat_refleksi as $row): 
+                $label_periode = !empty($row['bulan']) ? 'Bulan ' . $row['bulan'] : ($row['semester'] ?? 'Ganjil');
+            ?>
                 <div class="riwayat-item">
                     <div class="date">
                         <?php echo formatTanggalIndo($row['tanggal']); ?> 
-                        <span class="badge-semester"><?php echo $row['semester'] ?? 'Ganjil'; ?></span>
-                        <span class="badge-semester" style="background: #dbeafe; color: #1d4ed8;"><?php echo $row['tahun_ajaran'] ?? ''; ?></span>
+                        <span class="badge-semester"><?php echo htmlspecialchars($label_periode); ?></span>
+                        <span class="badge-semester" style="background: #dbeafe; color: #1d4ed8;"><?php echo htmlspecialchars($row['tahun_ajaran'] ?? ''); ?></span>
                     </div>
                     <div class="content">
                         <?php if (!empty($row['pelajaran_favorit'])): ?>

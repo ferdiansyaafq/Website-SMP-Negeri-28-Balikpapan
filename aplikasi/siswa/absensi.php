@@ -30,10 +30,10 @@ function cekWaktuAbsensi() {
         ];
     }
     
-    if ($jam < '08:00' || $jam > '12:00') {
+    if ($jam < '07:15' || $jam > '07:30') {
         return [
             'status' => false,
-            'pesan' => '❌ Absensi hanya berlaku pukul 08.00 - 12.00 WITA!'
+            'pesan' => '❌ Absensi hanya berlaku pukul 07.15 - 07.30 WITA!'
         ];
     }
     
@@ -374,6 +374,10 @@ foreach ($tanggal_minggu as $tgl) {
     <?php endif; ?>
 
     <div class="absensi-card">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 10px 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #166534;">
+            <span style="font-size: 18px;">⏰</span>
+            <div><strong>Jadwal Presensi:</strong> Hari Senin - Jumat pukul <strong>07.15 - 07.30 WITA</strong>. Pastikan absen tepat waktu.</div>
+        </div>
         <h3>📊 Absensi Minggu Ini (<?php echo formatTanggalIndo($monday->format('Y-m-d')); ?> - <?php echo formatTanggalIndo($friday->format('Y-m-d')); ?>)</h3>
         
         <div class="stat-rekap">

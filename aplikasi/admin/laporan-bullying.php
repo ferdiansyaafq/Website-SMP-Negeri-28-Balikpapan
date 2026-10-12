@@ -73,9 +73,9 @@ require_once '../includes/header-kaih.php';
                         <tr>
                             <td><?= htmlspecialchars(date('d M Y H:i', strtotime($item['created_at']))) ?></td>
                             <td>
-                                <?= htmlspecialchars($item['nama_pelapor']) ?><br>
-                                <small><?= htmlspecialchars($item['kontak']) ?></small><br>
-                                <small><em><?= htmlspecialchars($item['status_pelapor']) ?></em></small>
+                                <strong><?= htmlspecialchars($item['nama_pelapor']) ?></strong><br>
+                                <small>📞 <?= htmlspecialchars($item['kontak']) ?></small><br>
+                                <small style="color: #64748b;"><strong>Agenda:</strong> <?= htmlspecialchars($item['status_pelapor']) ?></small>
                             </td>
                             <td>
                                 <?= htmlspecialchars($item['nama_korban']) ?><br>

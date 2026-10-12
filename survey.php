@@ -3,145 +3,147 @@ $page_title = "Survei Pelayanan - SMP Negeri 28 Balikpapan";
 include 'header.php';
 require_once 'config/database.php';
 
-$success = false;
-$error = '';
+$pesan = '';
+$tipe_pesan = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_pengisi = trim($_POST['nama_pengisi'] ?? '');
-    $agenda_kunjungan = trim($_POST['agenda_kunjungan'] ?? ''); // Menyimpan keterangan agenda kunjungan
-    $rating = (int)($_POST['rating'] ?? 5);
-    $ulasan = trim($_POST['ulasan'] ?? ''); // Kritik & Saran
+    $nama = trim($_POST['nama'] ?? '');
+    $agenda_kunjungan = trim($_POST['agenda_kunjungan'] ?? '');
+    $rating = (int)($_POST['rating'] ?? 0);
+    $kritik_saran = trim($_POST['kritik_saran'] ?? '');
 
-    if ($nama_pengisi !== '' && $ulasan !== '') {
-        try {
-            // Kolom 'peran' di database digunakan untuk menyimpan keterangan Agenda Kunjungan
-            $stmt = $pdo->prepare("INSERT INTO survei (nama_pengisi, peran, rating, ulasan, created_at) VALUES (?, ?, ?, ?, NOW())");
-            $stmt->execute([$nama_pengisi, $agenda_kunjungan, $rating, $ulasan]);
-            $success = true;
-        } catch (PDOException $e) {
-            $error = "Gagal menyimpan survei: " . $e->getMessage();
-        }
+    if ($nama === '' || $agenda_kunjungan === '' || $rating === 0 || $kritik_saran === '') {
+        $pesan = 'Mohon lengkapi semua kolom terlebih dahulu.';
+        $tipe_pesan = 'error';
     } else {
-        $error = "Mohon lengkapi nama dan kritik & saran!";
+        try {
+            $sql = "INSERT INTO survei (nama_pengisi, peran, rating, ulasan, created_at) 
+                    VALUES (?, ?, ?, ?, NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$nama, $agenda_kunjungan, $rating, $kritik_saran]);
+            $pesan = 'Terima kasih banyak! Penilaian, kritik, dan saran Anda berhasil dikirim untuk evaluasi layanan kami.';
+            $_POST = [];
+        } catch (PDOException $e) {
+            $pesan = 'Gagal menyimpan survei: ' . $e->getMessage();
+            $tipe_pesan = 'error';
+        }
     }
 }
 ?>
 
-<style>
-.page-header {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    color: white;
-    padding: 60px 40px;
-    text-align: center;
-}
-.page-header h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
-.container { max-width: 800px; margin: 40px auto; padding: 0 40px; }
-.survey-form { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-.form-group { margin-bottom: 20px; }
-.form-group label { font-weight: 600; color: #1e293b; display: block; margin-bottom: 6px; font-size: 14px; }
-.form-group input, .form-group textarea {
-    width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; font-family: inherit; font-size: 14px; background: #fafafa;
-}
-.form-group input:focus, .form-group textarea:focus { border-color: #0284c7; background: white; }
-.form-group textarea { resize: vertical; min-height: 120px; }
+<link rel="stylesheet" href="assets/css/survey.css">
 
-/* Styling Emotikon Rating */
-.emoji-rating {
-    display: flex;
-    gap: 15px;
-    justify-content: space-between;
-    margin-top: 8px;
-}
-.emoji-option {
-    flex: 1;
-    text-align: center;
-    padding: 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #fafafa;
-    font-size: 14px;
-    font-weight: 600;
-}
-.emoji-option input { display: none; }
-.emoji-option:hover, .emoji-option input:checked + span {
-    border-color: #0284c7;
-    background: #e0f2fe;
-    color: #0284c7;
-}
-
-.btn-submit {
-    background: #0284c7; color: white; border: none; padding: 14px 24px; width: 100%; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s;
-}
-.btn-submit:hover { background: #0369a1; }
-</style>
-
+<!-- PAGE HEADER -->
 <div class="page-header" id="Survei-Pelayanan">
-    <h1>⭐ Survei Pelayanan</h1>
-    <p>Berikan penilaian dan masukan untuk kemajuan sekolah</p>
+    <h1>📝 Survei Pelayanan</h1>
+    <p>Bantu kami meningkatkan mutu dan kualitas layanan pendidikan di SMP Negeri 28 Balikpapan</p>
 </div>
 
 <div class="container">
+
+    <a href="lainnya.php" class="btn-back">← Kembali ke FAQ / Menu Lainnya</a>
+
     <div class="survey-form">
-        <h2 style="font-size: 22px; color: #1e293b; margin-bottom: 20px; font-weight: 800;">Formulir Kepuasan & Masukan</h2>
+        <h2 class="form-title">Formulir Kepuasan Pelayanan</h2>
+        <p class="form-subtitle">Masukan Anda sangat berharga bagi kami dalam mewujudkan pelayanan sekolah yang transparan, ramah, dan profesional.</p>
 
-        <?php if ($success): ?>
-            <div style="background: #dcfce7; color: #166534; padding: 14px; border-radius: 10px; margin-bottom: 20px; font-weight: 600;">
-                ✅ Terima kasih! Kritik & saran Anda berhasil dikirim.
+        <!-- Notifikasi -->
+        <?php if ($pesan): ?>
+            <div class="alert alert-<?= $tipe_pesan ?>">
+                <?= $tipe_pesan === 'success' ? '✅' : '❌' ?> 
+                <?= htmlspecialchars($pesan) ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($error): ?>
-            <div style="background: #fee2e2; color: #991b1b; padding: 14px; border-radius: 10px; margin-bottom: 20px; font-weight: 600;">
-                ❌ <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
+        <form method="POST" action="" class="survey-form-tag">
 
-        <form method="POST" action="">
+            <!-- Nama -->
             <div class="form-group">
-                <label>Nama Pengisi</label>
-                <input type="text" name="nama_pengisi" required placeholder="Masukkan nama Anda">
+                <label>Nama Lengkap <span class="required">*</span></label>
+                <input type="text" name="nama" required placeholder="Masukkan nama lengkap Anda..." value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>">
+                <span class="hint">Nama Anda akan disimpan dengan aman untuk keperluan dokumentasi survei.</span>
             </div>
 
-            <!-- Status diubah jadi Agenda Kunjungan (berupa input teks keterangan, bukan dropdown) -->
+            <!-- Agenda Kunjungan -->
             <div class="form-group">
-                <label>Agenda Kunjungan</label>
-                <input type="text" name="agenda_kunjungan" required placeholder="Contoh: Konsultasi Layanan Siswa / Kunjungan Rutin">
+                <label>Agenda Kunjungan <span class="required">*</span></label>
+                <textarea name="agenda_kunjungan" rows="3" required placeholder="Tuliskan tujuan atau agenda kunjungan Anda ke sekolah (contoh: Mengurus surat keterangan, konsultasi akademik siswa, kunjungan dinas, dll.)..."><?= htmlspecialchars($_POST['agenda_kunjungan'] ?? '') ?></textarea>
+                <span class="hint">Tuliskan agenda atau keperluan kedatangan Anda secara jelas.</span>
             </div>
 
-            <!-- Menu Rating Emotikon -->
+            <!-- Penilaian Berdasarkan Emoji Kepuasan (1-5) -->
             <div class="form-group">
-                <label>Penilaian Kepuasan (Rating)</label>
-                <div class="emoji-rating">
-                    <label class="emoji-option">
-                        <input type="radio" name="rating" value="5" checked>
-                        <span>🤩 Sangat Baik</span>
-                    </label>
-                    <label class="emoji-option">
-                        <input type="radio" name="rating" value="4">
-                        <span>😊 Baik</span>
-                    </label>
-                    <label class="emoji-option">
-                        <input type="radio" name="rating" value="3">
-                        <span>😐 Cukup</span>
-                    </label>
-                    <label class="emoji-option">
-                        <input type="radio" name="rating" value="2">
-                        <span>😞 Kurang</span>
-                    </label>
+                <label>Tingkat Kepuasan Pelayanan <span class="required">*</span></label>
+                <div class="emoji-rating-wrapper">
+                    <div class="emoji-rating-grid">
+                        <!-- 1 - Sangat Tidak Puas -->
+                        <div class="emoji-rating-item" data-rate="1">
+                            <input type="radio" id="emoji1" name="rating" value="1" required <?= (($_POST['rating'] ?? '') == 1) ? 'checked' : '' ?> />
+                            <label for="emoji1" class="emoji-rating-label">
+                                <span class="emoji-icon">😡</span>
+                                <span class="emoji-text">Sangat Tidak Puas</span>
+                            </label>
+                        </div>
+
+                        <!-- 2 - Tidak Puas -->
+                        <div class="emoji-rating-item" data-rate="2">
+                            <input type="radio" id="emoji2" name="rating" value="2" <?= (($_POST['rating'] ?? '') == 2) ? 'checked' : '' ?> />
+                            <label for="emoji2" class="emoji-rating-label">
+                                <span class="emoji-icon">🙁</span>
+                                <span class="emoji-text">Tidak Puas</span>
+                            </label>
+                        </div>
+
+                        <!-- 3 - Cukup -->
+                        <div class="emoji-rating-item" data-rate="3">
+                            <input type="radio" id="emoji3" name="rating" value="3" <?= (($_POST['rating'] ?? '') == 3) ? 'checked' : '' ?> />
+                            <label for="emoji3" class="emoji-rating-label">
+                                <span class="emoji-icon">😐</span>
+                                <span class="emoji-text">Cukup</span>
+                            </label>
+                        </div>
+
+                        <!-- 4 - Puas -->
+                        <div class="emoji-rating-item" data-rate="4">
+                            <input type="radio" id="emoji4" name="rating" value="4" <?= (($_POST['rating'] ?? '') == 4) ? 'checked' : '' ?> />
+                            <label for="emoji4" class="emoji-rating-label">
+                                <span class="emoji-icon">🙂</span>
+                                <span class="emoji-text">Puas</span>
+                            </label>
+                        </div>
+
+                        <!-- 5 - Sangat Puas -->
+                        <div class="emoji-rating-item" data-rate="5">
+                            <input type="radio" id="emoji5" name="rating" value="5" <?= (($_POST['rating'] ?? '') == 5) ? 'checked' : '' ?> />
+                            <label for="emoji5" class="emoji-rating-label">
+                                <span class="emoji-icon">🤩</span>
+                                <span class="emoji-text">Sangat Puas</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="selectedRatingFeedback" class="selected-feedback-text">
+                        Pilih salah satu ekspresi kepuasan di atas.
+                    </div>
                 </div>
+                <span class="hint">Klik salah satu ekspresi emotikon yang paling menggambarkan pengalaman pelayanan Anda.</span>
             </div>
 
-            <!-- Ulasan diubah jadi Kritik & Saran -->
+            <!-- Kritik dan Saran -->
             <div class="form-group">
-                <label>Kritik & Saran</label>
-                <textarea name="ulasan" required placeholder="Tuliskan kritik, saran, atau masukan membangun untuk pelayanan sekolah..."></textarea>
+                <label>Kritik dan Saran <span class="required">*</span></label>
+                <textarea name="kritik_saran" rows="5" required placeholder="Tuliskan kritik yang membangun dan saran perbaikan untuk pelayanan SMP Negeri 28 Balikpapan..."><?= htmlspecialchars($_POST['kritik_saran'] ?? '') ?></textarea>
+                <span class="hint">Setiap kritik dan saran Anda menjadi bahan perbaikan mutu layanan kami ke depan.</span>
             </div>
 
-            <button type="submit" class="btn-submit">Kirim Kritik & Saran</button>
+            <!-- Submit -->
+            <button type="submit" class="btn-submit">
+                📩 Kirim Penilaian, Kritik & Saran
+            </button>
         </form>
     </div>
 </div>
+
+<script src="assets/js/survey.js"></script>
 
 <?php include 'footer.php'; ?>

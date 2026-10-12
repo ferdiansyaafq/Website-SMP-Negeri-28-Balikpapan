@@ -72,6 +72,7 @@ function ensureLaporanHarianTable($pdo) {
 ensureLaporanHarianTable($pdo);
 
 // ============================================================
+// ============================================================
 // CEK & TAMBAHKAN KOLOM KETERANGAN
 // ============================================================
 function ensureKeteranganColumns($pdo) {
@@ -88,6 +89,10 @@ function ensureKeteranganColumns($pdo) {
         if (!$stmt->fetch()) {
             $pdo->exec("ALTER TABLE laporan_harian ADD COLUMN membaca_judul VARCHAR(255) NULL AFTER membaca");
         }
+        // Pastikan kolom jenis olahraga, ibadah catatan, dan membantu jenis berukuran cukup
+        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN olahraga_jenis VARCHAR(255) NULL");
+        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN membantu_jenis VARCHAR(255) NULL");
+        $pdo->exec("ALTER TABLE laporan_harian MODIFY COLUMN ibadah_catatan VARCHAR(255) NULL");
         return true;
     } catch (PDOException $e) {
         return false;
@@ -119,9 +124,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
         $membantu = isset($_POST['membantu']) && $_POST['membantu'] == 1 ? 1 : 0;
         $menabung = isset($_POST['menabung']) && $_POST['menabung'] == 1 ? 1 : 0;
         
-        $bangun_keterangan = trim($_POST['bangun_keterangan'] ?? '');
-        $membaca_judul = trim($_POST['membaca_judul'] ?? '');
-        $menabung_keterangan = trim($_POST['menabung_keterangan'] ?? '');
+        // 1. Bangun Pagi
+        $bangun_keterangan = ($bangun == 1) ? trim($_POST['bangun_keterangan'] ?? '') : '';
+        
+        // 2. Beribadah (Sholat 5 Waktu & Kegiatan Lainnya)
+        $ibadah_catatan = '';
+        if ($ibadah == 1) {
+            $sholat_post = $_POST['sholat'] ?? [];
+            if (!is_array($sholat_post)) $sholat_post = [];
+            $valid_sholat = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+            $sholat_terpilih = array_intersect($valid_sholat, $sholat_post);
+            
+            $ibadah_lainnya = trim($_POST['ibadah_lainnya'] ?? '');
+            
+            $ibadah_parts = [];
+            if (!empty($sholat_terpilih)) {
+                $count_sholat = count($sholat_terpilih);
+                $status_lengkap = ($count_sholat === 5) ? ' (5/5 Lengkap)' : " ($count_sholat/5 Waktu)";
+                $ibadah_parts[] = 'Sholat: ' . implode(', ', $sholat_terpilih) . $status_lengkap;
+            }
+            if (!empty($ibadah_lainnya)) {
+                $ibadah_parts[] = 'Kegiatan Lain: ' . $ibadah_lainnya;
+            }
+            $ibadah_catatan = implode(' | ', $ibadah_parts);
+        }
+        
+        // 3. Berolahraga
+        $olahraga_jenis = ($olahraga == 1) ? trim($_POST['olahraga_jenis'] ?? '') : '';
+        
+        // 4. Gemar Membaca (Fiksi & Non Fiksi)
+        $membaca_judul = '';
+        if ($membaca == 1) {
+            $baca_parts = [];
+            $baca_fiksi = isset($_POST['baca_fiksi']) && $_POST['baca_fiksi'] == 1;
+            $judul_fiksi = trim($_POST['judul_fiksi'] ?? '');
+            if ($baca_fiksi || !empty($judul_fiksi)) {
+                $baca_parts[] = '[Fiksi] ' . ($judul_fiksi !== '' ? $judul_fiksi : '-');
+            }
+            
+            $baca_nonfiksi = isset($_POST['baca_nonfiksi']) && $_POST['baca_nonfiksi'] == 1;
+            $judul_nonfiksi = trim($_POST['judul_nonfiksi'] ?? '');
+            if ($baca_nonfiksi || !empty($judul_nonfiksi)) {
+                $baca_parts[] = '[Non Fiksi] ' . ($judul_nonfiksi !== '' ? $judul_nonfiksi : '-');
+            }
+            
+            $membaca_judul = implode(' ; ', $baca_parts);
+        }
+        
+        // 5. Membantu Orang Tua
+        $membantu_jenis = ($membantu == 1) ? trim($_POST['membantu_jenis'] ?? '') : '';
+        
+        // 6. Menabung
+        $menabung_keterangan = ($menabung == 1) ? trim($_POST['menabung_keterangan'] ?? '') : '';
         
         if ($siswa_id > 0) {
             try {
@@ -133,13 +187,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
                     $stmt = $pdo->prepare("UPDATE laporan_harian SET 
                         bangun = ?, ibadah = ?, olahraga = ?, sarapan = ?, 
                         membaca = ?, membantu = ?, menabung = ?,
-                        bangun_keterangan = ?, membaca_judul = ?, menabung_keterangan = ?,
+                        bangun_keterangan = ?, ibadah_catatan = ?, olahraga_jenis = ?,
+                        membaca_judul = ?, membantu_jenis = ?, menabung_keterangan = ?,
                         updated_at = NOW() 
                         WHERE siswa_id = ? AND tanggal = ?");
                     $stmt->execute([
                         $bangun, $ibadah, $olahraga, $sarapan, 
                         $membaca, $membantu, $menabung,
-                        $bangun_keterangan, $membaca_judul, $menabung_keterangan,
+                        $bangun_keterangan, $ibadah_catatan, $olahraga_jenis,
+                        $membaca_judul, $membantu_jenis, $menabung_keterangan,
                         $siswa_id, $tanggal
                     ]);
                     $message = '✅ Data KAIH berhasil diperbarui!';
@@ -147,13 +203,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
                 } else {
                     $stmt = $pdo->prepare("INSERT INTO laporan_harian (
                         siswa_id, tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung,
-                        bangun_keterangan, membaca_judul, menabung_keterangan,
+                        bangun_keterangan, ibadah_catatan, olahraga_jenis,
+                        membaca_judul, membantu_jenis, menabung_keterangan,
                         created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
                     $stmt->execute([
                         $siswa_id, $tanggal,
                         $bangun, $ibadah, $olahraga, $sarapan, $membaca, $membantu, $menabung,
-                        $bangun_keterangan, $membaca_judul, $menabung_keterangan
+                        $bangun_keterangan, $ibadah_catatan, $olahraga_jenis,
+                        $membaca_judul, $membantu_jenis, $menabung_keterangan
                     ]);
                     $message = '✅ Data KAIH berhasil disimpan! Terus jaga kebiasaan baik ya! 🎉';
                     $message_type = 'success';
@@ -178,6 +236,50 @@ if ($siswa_id > 0) {
         $data_hari_ini = $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 }
+
+// Ekstraksi data Ibadah untuk form hari ini
+$saved_ibadah_catatan = $data_hari_ini['ibadah_catatan'] ?? '';
+$sholat_checked = [
+    'Subuh' => (stripos($saved_ibadah_catatan, 'Subuh') !== false),
+    'Dzuhur' => (stripos($saved_ibadah_catatan, 'Dzuhur') !== false),
+    'Ashar' => (stripos($saved_ibadah_catatan, 'Ashar') !== false),
+    'Maghrib' => (stripos($saved_ibadah_catatan, 'Maghrib') !== false),
+    'Isya' => (stripos($saved_ibadah_catatan, 'Isya') !== false),
+];
+$saved_ibadah_lainnya = '';
+if (preg_match('/Kegiatan Lain:\s*(.*?)(?:\||$)/i', $saved_ibadah_catatan, $m_lain)) {
+    $saved_ibadah_lainnya = trim($m_lain[1]);
+} elseif (!empty($saved_ibadah_catatan) && !preg_match('/Sholat:/i', $saved_ibadah_catatan)) {
+    $saved_ibadah_lainnya = $saved_ibadah_catatan;
+}
+
+// Ekstraksi data Olahraga
+$saved_olahraga_jenis = $data_hari_ini['olahraga_jenis'] ?? '';
+
+// Ekstraksi data Membaca (Fiksi & Non Fiksi)
+$saved_membaca_judul = $data_hari_ini['membaca_judul'] ?? '';
+$is_fiksi_checked = (stripos($saved_membaca_judul, '[Fiksi]') !== false);
+$is_nonfiksi_checked = (stripos($saved_membaca_judul, '[Non Fiksi]') !== false);
+$saved_judul_fiksi = '';
+$saved_judul_nonfiksi = '';
+
+if (preg_match('/\[Fiksi\]\s*([^;]+)/i', $saved_membaca_judul, $mf)) {
+    $saved_judul_fiksi = trim($mf[1]);
+    if ($saved_judul_fiksi === '-') $saved_judul_fiksi = '';
+    $is_fiksi_checked = true;
+}
+if (preg_match('/\[Non\s*Fiksi\]\s*([^;]+)/i', $saved_membaca_judul, $mnf)) {
+    $saved_judul_nonfiksi = trim($mnf[1]);
+    if ($saved_judul_nonfiksi === '-') $saved_judul_nonfiksi = '';
+    $is_nonfiksi_checked = true;
+}
+if (!$is_fiksi_checked && !$is_nonfiksi_checked && !empty($saved_membaca_judul)) {
+    $is_nonfiksi_checked = true;
+    $saved_judul_nonfiksi = $saved_membaca_judul;
+}
+
+// Ekstraksi data Membantu Orang Tua
+$saved_membantu_jenis = $data_hari_ini['membantu_jenis'] ?? '';
 
 $total_terisi = 0;
 if ($data_hari_ini) {
@@ -837,6 +939,28 @@ if ($total_terisi >= 7) {
                     </div>
                 </div>
             </div>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['ibadah'] == 1) ? 'show' : ''; ?>" style="margin-top: 14px;">
+                <span class="label-keterangan" style="display:block; margin-bottom:10px; font-weight: 600; font-size: 14px; color: #1e293b;">🕌 Untuk yang beragama Islam, tandai sholat 5 waktu yang dikerjakan:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 18px;">
+                    <?php
+                        $sholat_list = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+                        $ibadah_catatan = $data_hari_ini['ibadah_catatan'] ?? '';
+                        foreach ($sholat_list as $s) {
+                            $checked = (strpos($ibadah_catatan, $s) !== false) ? 'checked' : '';
+                            echo "<label style='display:inline-flex; align-items:center; gap:8px; padding:10px 16px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#334155; cursor:pointer; transition:all 0.2s;'>
+                                    <input type='checkbox' name='sholat[]' value='$s' $checked style='width:18px; height:18px; accent-color:#059669; cursor:pointer;'> $s
+                                  </label>";
+                        }
+                    ?>
+                </div>
+                <span class="label-keterangan" style="display:block; margin-bottom:8px; font-weight: 600; font-size: 14px; color: #1e293b;">🙏 Untuk yang non-Islam (Kegiatan Lainnya):</span>
+                <textarea name="ibadah_lainnya" placeholder="Jelaskan kegiatan ibadah/keagamaan yang dilakukan..."><?php 
+                    if (strpos($ibadah_catatan, 'Kegiatan Lain: ') !== false) {
+                        $parts = explode('Kegiatan Lain: ', $ibadah_catatan);
+                        echo htmlspecialchars($parts[1]);
+                    }
+                ?></textarea>
+            </div>
         </div>
 
         <!-- 3. Berolahraga -->
@@ -858,6 +982,10 @@ if ($total_terisi >= 7) {
                         </label>
                     </div>
                 </div>
+            </div>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['olahraga'] == 1) ? 'show' : ''; ?>">
+                <span class="label-keterangan">🏃 Apa minat atau jenis olahraga yang kamu lakukan?</span>
+                <textarea name="olahraga_jenis" placeholder="Contoh: Bermain sepak bola, lari pagi, senam, dll..."><?php echo htmlspecialchars($data_hari_ini['olahraga_jenis'] ?? ''); ?></textarea>
             </div>
         </div>
 
@@ -904,8 +1032,37 @@ if ($total_terisi >= 7) {
                 </div>
             </div>
             <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['membaca'] == 1) ? 'show' : ''; ?>">
-                <span class="label-keterangan">📖 Apa yang kamu pelajari / baca hari ini?</span>
-                <textarea name="membaca_judul" placeholder="Contoh: Saya membaca buku IPA tentang tata surya dan belajar 5 kosakata baru..."><?php echo $data_hari_ini['membaca_judul'] ?? ''; ?></textarea>
+                <span class="label-keterangan" style="display:block; margin-bottom:5px;">📖 Apa yang kamu pelajari / baca hari ini?</span>
+                
+                <?php
+                    $baca_judul = $data_hari_ini['membaca_judul'] ?? '';
+                    $is_fiksi = strpos($baca_judul, '[Fiksi]') !== false;
+                    $is_nonfiksi = strpos($baca_judul, '[Non Fiksi]') !== false;
+                    
+                    $judul_fiksi = '';
+                    $judul_nonfiksi = '';
+                    
+                    if ($is_fiksi) {
+                        preg_match('/\[Fiksi\](.*?)(;|$)/', $baca_judul, $matches);
+                        $judul_fiksi = trim($matches[1] ?? '');
+                        if ($judul_fiksi == '-') $judul_fiksi = '';
+                    }
+                    if ($is_nonfiksi) {
+                        preg_match('/\[Non Fiksi\](.*?)(;|$)/', $baca_judul, $matches);
+                        $judul_nonfiksi = trim($matches[1] ?? '');
+                        if ($judul_nonfiksi == '-') $judul_nonfiksi = '';
+                    }
+                ?>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size:12px; cursor:pointer;"><input type="checkbox" name="baca_fiksi" value="1" <?php echo $is_fiksi ? 'checked' : ''; ?>> Fiksi</label>
+                    <input type="text" name="judul_fiksi" placeholder="Judul buku fiksi..." value="<?php echo htmlspecialchars($judul_fiksi); ?>" style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                </div>
+                
+                <div>
+                    <label style="font-size:12px; cursor:pointer;"><input type="checkbox" name="baca_nonfiksi" value="1" <?php echo $is_nonfiksi ? 'checked' : ''; ?>> Non Fiksi</label>
+                    <input type="text" name="judul_nonfiksi" placeholder="Judul buku / materi non fiksi..." value="<?php echo htmlspecialchars($judul_nonfiksi); ?>" style="width:100%; padding:8px; margin-top:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                </div>
             </div>
         </div>
 
@@ -928,6 +1085,10 @@ if ($total_terisi >= 7) {
                         </label>
                     </div>
                 </div>
+            </div>
+            <div class="keterangan-wrapper <?php echo ($data_hari_ini && $data_hari_ini['membantu'] == 1) ? 'show' : ''; ?>">
+                <span class="label-keterangan">🧹 Apa yang kamu lakukan untuk membantu orang tua?</span>
+                <textarea name="membantu_jenis" placeholder="Contoh: Menyapu rumah, mencuci piring, menjaga adik..."><?php echo htmlspecialchars($data_hari_ini['membantu_jenis'] ?? ''); ?></textarea>
             </div>
         </div>
 
