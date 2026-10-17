@@ -53,9 +53,11 @@ include 'header.php';
     }
 
     .detail-image img {
+        display: block;
         width: 100%;
-        height: 320px;
-        object-fit: cover;
+        height: auto;
+        max-height: 520px;
+        object-fit: contain;
     }
 
     .detail-content {
@@ -120,7 +122,7 @@ include 'header.php';
         }
 
         .detail-image img {
-            height: 220px;
+            max-height: 360px;
         }
     }
 </style>

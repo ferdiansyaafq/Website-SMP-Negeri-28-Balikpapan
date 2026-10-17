@@ -279,7 +279,7 @@ CREATE TABLE `users` (
   `id` bigint UNSIGNED NOT NULL,
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role` enum('admin','guru','siswa','orang_tua') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'siswa',
+  `role` enum('admin','guru','siswa','orang_tua','kepsek') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'siswa',
   `guru_id` bigint UNSIGNED DEFAULT NULL,
   `siswa_id` bigint UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,

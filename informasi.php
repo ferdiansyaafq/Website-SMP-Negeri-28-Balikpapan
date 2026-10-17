@@ -130,12 +130,7 @@ include 'header.php';
 .berita-thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.berita-item:hover .berita-thumb img {
-    transform: scale(1.08);
+    object-fit: contain;
 }
 
 .thumb-placeholder {

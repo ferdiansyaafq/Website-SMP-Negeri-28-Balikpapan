@@ -129,7 +129,7 @@ require_once '../includes/header-kaih.php';
                     <option value="admin" <?php echo $filterRole == 'admin' ? 'selected' : ''; ?>>Admin</option>
                     <option value="guru" <?php echo $filterRole == 'guru' ? 'selected' : ''; ?>>Guru</option>
                     <option value="siswa" <?php echo $filterRole == 'siswa' ? 'selected' : ''; ?>>Siswa</option>
-                    <option value="orang tua" <?php echo $filterRole == 'orang tua' ? 'selected' : ''; ?>>Orang Tua</option>
+                    <option value="orang_tua" <?php echo $filterRole === 'orang_tua' ? 'selected' : ''; ?>>Orang Tua</option>
                     <option value="kepsek" <?php echo $filterRole == 'kepsek' ? 'selected' : ''; ?>>Kepala Sekolah</option>
                 </select>
                 

@@ -292,7 +292,7 @@ include 'header.php';
     align-items: center;
     justify-content: center;
 }
-.berita-image img { width: 100%; height: 100%; object-fit: cover; }
+.berita-image img { width: 100%; height: 100%; object-fit: contain; }
 .berita-image .placeholder { color: #94a3b8; font-size: 14px; font-weight: 600; }
 
 .berita-date {
