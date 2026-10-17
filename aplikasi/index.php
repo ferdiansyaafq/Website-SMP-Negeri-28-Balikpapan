@@ -17,6 +17,9 @@ switch ($role) {
     case 'orang_tua':
         header('Location: ortu/index.php');
         break;
+    case 'kepsek':
+        header('Location: kepsek/index.php');
+        break;
     default:
         header('Location: ../index.php');
 }

@@ -90,6 +90,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 $sidebarLabel = match ($role) {
     'admin' => 'Admin',
     'orang_tua' => 'Orang Tua',
+    'kepsek' => 'Kepala Sekolah',
     default => ucfirst($role),
 };
 ?>
@@ -260,7 +261,7 @@ $sidebarLabel = match ($role) {
     </div>
 
     <div class="user-info">
-        <?php if (in_array($role, ['siswa', 'guru'], true)): ?>
+        <?php if (in_array($role, ['siswa', 'guru', 'kepsek'], true)): ?>
             <div class="name"><?php echo htmlspecialchars($nama); ?></div>
             <div class="role"><?php echo htmlspecialchars($sidebarLabel); ?></div>
         <?php else: ?>
@@ -336,6 +337,21 @@ $sidebarLabel = match ($role) {
             <a href="monitoring.php" class="<?php echo ($current_page == 'monitoring.php') ? 'active' : ''; ?>">
                 Monitoring Anak
             </a>
+
+        <?php elseif ($role === 'kepsek'): ?>
+            <!-- MENU KEPALA SEKOLAH -->
+            <a href="index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">
+                Dashboard
+            </a>
+            <a href="supervisi.php" class="<?php echo ($current_page == 'supervisi.php') ? 'active' : ''; ?>">
+                Observasi & Supervisi
+            </a>
+            <a href="penilaian.php" class="<?php echo ($current_page == 'penilaian.php') ? 'active' : ''; ?>">
+                Penilaian Guru
+            </a>
+            <a href="analisis.php" class="<?php echo ($current_page == 'analisis.php') ? 'active' : ''; ?>">
+                Analisis & Grafik
+            </a>
         <?php endif; ?>
 
         <div class="logout">
@@ -353,7 +369,7 @@ $sidebarLabel = match ($role) {
                 <span></span>
                 <span></span>
             </button>
-            <h1><?php echo ucfirst($role); ?> Dashboard</h1>
+            <h1><?php echo ($role === 'kepsek') ? 'Dashboard Kepala Sekolah' : ucfirst($role) . ' Dashboard'; ?></h1>
         </div>
         <span class="date"><?php echo tanggalIndo(); ?></span>
     </div>
