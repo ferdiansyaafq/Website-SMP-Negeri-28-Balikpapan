@@ -35,6 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     case 'orang_tua':
                         header('Location: aplikasi/ortu/index.php');
                         break;
+                    case 'kepsek':
+                        header('Location: aplikasi/kepsek/index.php');
+                        break;
                     default:
                         header('Location: index.php');
                 }

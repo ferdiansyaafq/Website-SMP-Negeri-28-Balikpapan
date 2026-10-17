@@ -84,6 +84,7 @@ require_once '../includes/header-kaih.php';
     .role-guru { background: #f3e8ff; color: #a855f7; }
     .role-siswa { background: #e0f2fe; color: #0284c7; }
     .role-orangtua { background: #dcfce7; color: #166534; }
+    .role-kepsek { background: #fef3c7; color: #b45309; }
     
     /* Tombol Aksi */
     .btn-reset {
@@ -129,6 +130,7 @@ require_once '../includes/header-kaih.php';
                     <option value="guru" <?php echo $filterRole == 'guru' ? 'selected' : ''; ?>>Guru</option>
                     <option value="siswa" <?php echo $filterRole == 'siswa' ? 'selected' : ''; ?>>Siswa</option>
                     <option value="orang tua" <?php echo $filterRole == 'orang tua' ? 'selected' : ''; ?>>Orang Tua</option>
+                    <option value="kepsek" <?php echo $filterRole == 'kepsek' ? 'selected' : ''; ?>>Kepala Sekolah</option>
                 </select>
                 
                 <!-- Input Cari Nama/Username -->
@@ -168,6 +170,7 @@ require_once '../includes/header-kaih.php';
                         if ($roleText === 'admin') $roleClass = 'role-admin';
                         elseif ($roleText === 'guru') $roleClass = 'role-guru';
                         elseif (strpos($roleText, 'orang') !== false) $roleClass = 'role-orangtua';
+                        elseif ($roleText === 'kepsek') $roleClass = 'role-kepsek';
                     ?>
                     <tr>
                         <td><?php echo htmlspecialchars($u['username']); ?></td>

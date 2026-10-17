@@ -31,14 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nisn, $nama_siswa, $kelas]);
                 $siswa_id = $pdo->lastInsertId();
 
-                // 2. Buat akun login Siswa otomatis (password default: 123456)
-                $pass_siswa = password_hash('123456', PASSWORD_DEFAULT);
+                // 2. Buat akun login Siswa otomatis (password default: smpn28bpp)
+                $pass_siswa = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                 $stmtUsr = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'siswa', ?, NOW(), NOW())");
                 $stmtUsr->execute([$nisn, $pass_siswa, $siswa_id]);
 
                 // 3. Buat akun login Orang Tua otomatis (username: ORT + NISN)
                 $username_ortu = 'ORT' . $nisn;
-                $pass_ortu = password_hash('123456', PASSWORD_DEFAULT);
+                $pass_ortu = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                 $stmtOrtu = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'orang_tua', ?, NOW(), NOW())");
                 $stmtOrtu->execute([$username_ortu, $pass_ortu, $siswa_id]);
 
@@ -128,12 +128,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt->execute([$nisn, $nama_siswa, $kelas]);
                             $siswa_id = $pdo->lastInsertId();
 
-                            $pass_siswa = password_hash('123456', PASSWORD_DEFAULT);
+                            $pass_siswa = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                             $stmtUsr = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'siswa', ?, NOW(), NOW())");
                             $stmtUsr->execute([$nisn, $pass_siswa, $siswa_id]);
 
                             $username_ortu = 'ORT' . $nisn;
-                            $pass_ortu = password_hash('123456', PASSWORD_DEFAULT);
+                            $pass_ortu = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                             $stmtOrtu = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'orang_tua', ?, NOW(), NOW())");
                             $stmtOrtu->execute([$username_ortu, $pass_ortu, $siswa_id]);
 
@@ -161,13 +161,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fitur Pencarian & Ambil Data Siswa
 $search = trim($_GET['q'] ?? '');
-$query = "SELECT * FROM siswa";
+$filterKelas = trim($_GET['kelas'] ?? '');
+
+$query = "SELECT * FROM siswa WHERE 1=1";
 $params = [];
 if ($search !== '') {
-    $query .= " WHERE nisn LIKE ? OR nama_siswa LIKE ? OR kelas LIKE ?";
-    $params = ["%$search%", "%$search%", "%$search%"];
+    $query .= " AND (nisn LIKE ? OR nama_siswa LIKE ? OR kelas LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
 }
-$query .= " ORDER BY nama_siswa ASC";
+if ($filterKelas !== '') {
+    $query .= " AND kelas = ?";
+    $params[] = $filterKelas;
+}
+$query .= " ORDER BY CASE WHEN kelas = 'Belum Ada Kelas' THEN 0 ELSE 1 END, kelas ASC, nama_siswa ASC";
 $stmtSiswa = $pdo->prepare($query);
 $stmtSiswa->execute($params);
 $daftar_siswa = $stmtSiswa->fetchAll(PDO::FETCH_ASSOC);
@@ -223,13 +231,24 @@ require_once '../includes/header-kaih.php';
     <?php endif; ?>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-        <h3 style="margin: 0;">📄 Data Siswa</h3>
+        <h3 style="margin: 0;">📄 Data Siswa (<?php echo count($daftar_siswa); ?> Siswa)</h3>
         
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <!-- Form Pencarian -->
-            <form method="GET" action="" style="display: flex; gap: 5px;">
+            <!-- Form Pencarian & Filter Kelas -->
+            <form method="GET" action="" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                 <input type="text" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari NISN / Nama..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none;">
-                <button type="submit" style="padding: 8px 12px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cari</button>
+                <select name="kelas" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; background: white;">
+                    <option value="">Semua Kelas</option>
+                    <?php foreach ($daftar_kelas as $k): ?>
+                        <option value="<?php echo htmlspecialchars($k['nama_kelas']); ?>" <?php echo $filterKelas === $k['nama_kelas'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($k['nama_kelas']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" style="padding: 8px 12px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Filter</button>
+                <?php if ($search || $filterKelas): ?>
+                    <a href="siswa.php" style="font-size: 13px; color: #64748b; text-decoration: none; padding: 4px;">Reset</a>
+                <?php endif; ?>
             </form>
             <button onclick="openModalImport()" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                 📥 Import CSV
@@ -263,9 +282,15 @@ require_once '../includes/header-kaih.php';
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;"><b><?php echo htmlspecialchars($s['nisn']); ?></b></td>
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($s['nama_siswa']); ?></td>
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">
-                                <span style="background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-                                    <?php echo htmlspecialchars($s['kelas']); ?>
-                                </span>
+                                <?php if ($s['kelas'] === 'Belum Ada Kelas'): ?>
+                                    <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                        Belum Ada Kelas
+                                    </span>
+                                <?php else: ?>
+                                    <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                        <?php echo htmlspecialchars($s['kelas']); ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <!-- Tambahan Data Wali Kelas -->
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">

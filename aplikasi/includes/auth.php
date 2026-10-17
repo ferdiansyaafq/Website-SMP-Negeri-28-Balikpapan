@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $role = $_SESSION['role'] ?? '';
-$allowed_roles = ['admin', 'guru', 'siswa', 'orang_tua'];
+$allowed_roles = ['admin', 'guru', 'siswa', 'orang_tua', 'kepsek'];
 
 if (!in_array($role, $allowed_roles)) {
     session_destroy();
@@ -44,6 +44,7 @@ try {
             WHEN u.role = 'guru' THEN g.nama_guru 
             WHEN u.role = 'siswa' THEN s.nama_siswa 
             WHEN u.role = 'orang_tua' THEN 'Orang Tua'
+            WHEN u.role = 'kepsek' THEN COALESCE(g.nama_guru, 'Aris Broto, S.Pd (Kepala Sekolah)')
             ELSE u.username 
         END as nama_lengkap
         FROM users u
