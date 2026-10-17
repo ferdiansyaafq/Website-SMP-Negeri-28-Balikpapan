@@ -25,26 +25,26 @@ $teachers = [
     ['name' => 'Muh. Alief Ramadhany', 'position' => 'Waka Kurikulum', 'initials' => 'MR'],
     ['name' => 'Angelyn May Rotua Lumban Batu', 'position' => 'Waka Kesiswaan', 'initials' => 'AL'],
     ['name' => 'Imil Mahmudah', 'position' => 'Guru PAI', 'initials' => 'IM'],
-    ['name' => 'Firman Ahmad', 'position' => 'Guru IPA', 'initials' => 'FA'],
     ['name' => 'Cindy Milenia', 'position' => 'Guru PKN', 'initials' => 'CM'],
     ['name' => 'Rini Yulianti', 'position' => 'Guru BK', 'initials' => 'RY'],
     ['name' => 'Eka Rahmayanti', 'position' => 'Guru IPS', 'initials' => 'ER'],
     ['name' => 'Jenni Roslianthi', 'position' => 'Guru Matematika', 'initials' => 'JR'],
     ['name' => 'Nurhabibah', 'position' => 'Guru TIK', 'initials' => 'NH'],
-    ['name' => 'Ana', 'position' => 'Guru PAK', 'initials' => 'AN'],
+    ['name' => 'Apryana Wulandari', 'position' => 'Guru PAK', 'initials' => 'AW'],
      ['name' => 'Petugas Keamanan 1', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
     ['name' => 'Petugas Keamanan 2', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
     ['name' => 'Petugas Kebersihan 1', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
     ['name' => 'Petugas Kebersihan 2', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
+    ['name' => 'Lorem Ipsum', 'position' => 'Lorem Ipsum', 'initials' => 'LI']
 ];
 
 $ekskulData = [
-    ['nama' => 'Pramuka', 'gambar' => 'assets/img/pramuka.png', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
-    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/pencaksilat.png', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Futsal', 'gambar' => 'assets/img/futsal.png', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
-    ['nama' => 'PMR', 'gambar' => 'assets/img/pmr.png', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
-    ['nama' => 'Memanah', 'gambar' => 'assets/img/memanah.png', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/kaderlingkungan.png', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
+    ['nama' => 'Pramuka', 'gambar' => 'assets/img/ekstrakurikuler/pramuka.png', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
+    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.png', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Futsal', 'gambar' => 'assets/img/fasilitas/futsal.png', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
+    ['nama' => 'PMR', 'gambar' => 'assets/img/ekstrakurikuler/pmr1.png', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
+    ['nama' => 'Memanah', 'gambar' => 'assets/img/ekstrakurikuler/memanah.png', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.png', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
 ];
 ?>
 
@@ -931,7 +931,6 @@ $ekskulData = [
             </div>
             <div class="name"><?php echo $teacher['name']; ?></div>
             <div class="position"><?php echo $teacher['position']; ?></div>
-            <div class="qualification">S1</div>
         </div>
         <?php endforeach; ?>
     </div>
@@ -944,7 +943,7 @@ $ekskulData = [
     <div class="fasilitas-gallery">
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/ruangkelas.png" alt="Ruang Kelas">
+            <img src="assets/img/fasilitas/ruangkelas.png" alt="Ruang Kelas">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
@@ -956,7 +955,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/laboratoriumkomputer.png" alt="Laboratorium Komputer">
+            <img src="assets/img/fasilitas/laboratoriumkomputer.png" alt="Laboratorium Komputer">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
@@ -968,11 +967,11 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/perpustakaan.png" alt="Perpustakaan">
+            <img src="assets/img/fasilitas/perpustakaan.jpeg" alt="Pojok Literasi">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
-            <h4>Perpustakaan</h4>
+            <h4>Pojok Literasi</h4>
             <p>Koleksi buku fisik dan digital dengan akses online serta sudut baca yang nyaman untuk menumbuhkan budaya literasi.</p>
             <a href="#" class="btn-foto">Lihat Foto →</a>
         </div>
@@ -980,7 +979,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/masjidsekolah.png" alt="Masjid Sekolah">
+            <img src="assets/img/fasilitas/masjidsekolah.png" alt="Masjid Sekolah">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
@@ -992,11 +991,11 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/lapangan.jpg" alt="Lapangan Olahraga">
+            <img src="assets/img/fasilitas/lapangan.jpeg" alt="Lapangan Olahraga">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
-            <h4>Lapangan</h4>
+            <h4>Lapangan Sekolah</h4>
             <p>Lapangan serbaguna untuk berbagai kegiatan olahraga seperti basket, futsal, voli, serta upacara dan kegiatan sekolah.</p>
             <a href="#" class="btn-foto">Lihat Foto →</a>
         </div>
@@ -1004,7 +1003,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/kantin.png" alt="Kantin Sekolah">
+            <img src="assets/img/fasilitas/kantin.png" alt="Kantin Sekolah">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">

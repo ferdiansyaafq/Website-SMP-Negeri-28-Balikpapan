@@ -413,21 +413,18 @@ include 'header.php';
 
         <form action="proses_bullying.php" method="POST">
 
-            <!-- Nama Pelapor -->
             <div class="form-group">
                 <label>Nama Pelapor <span class="required">*</span></label>
                 <input type="text" name="nama_pelapor" required placeholder="Masukkan nama Anda (atau ketik 'Anonim' jika ingin merahasiakan nama)">
-                <span class="hint">Anda berhak menulis "Anonim" bila merasa lebih nyaman.</span>
+                <span class="hint">Anda berhak menulis "Anonim" bila ingin merasa lebih nyaman.</span>
             </div>
 
-            <!-- Kontak -->
             <div class="form-group">
                 <label>Nomor HP / WhatsApp / Email Pelapor <span class="required">*</span></label>
                 <input type="text" name="kontak" required placeholder="Contoh: 0812xxxxxxxx atau email@domain.com">
                 <span class="hint">Kontak ini dijaga kerahasiaannya dan hanya dipakai tim sekolah untuk konfirmasi dan update penanganan.</span>
             </div>
 
-            <!-- Status Pelapor -->
             <div class="form-group">
                 <label>Status Pelapor <span class="required">*</span></label>
                 <select name="status_pelapor" required>
@@ -440,10 +437,9 @@ include 'header.php';
                 </select>
             </div>
 
-            <!-- Nama & Kelas Korban -->
             <div class="form-row">
                 <div class="form-group">
-                    <label>Nama Siswa yang Mengalami (Korban) <span class="required">*</span></label>
+                    <label>Nama Korban <span class="required">*</span></label>
                     <input type="text" name="nama_korban" required placeholder="Nama siswa korban">
                 </div>
                 <div class="form-group">
@@ -475,7 +471,7 @@ include 'header.php';
             <!-- Tanggal & Lokasi -->
             <div class="form-row">
                 <div class="form-group">
-                    <label>Perkiraan Tanggal Kejadian <span class="required">*</span></label>
+                    <label>Tanggal Kejadian <span class="required">*</span></label>
                     <input type="date" name="tanggal_kejadian" required>
                 </div>
                 <div class="form-group">
@@ -486,19 +482,18 @@ include 'header.php';
 
             <!-- Saksi -->
             <div class="form-group">
-                <label>Saksi yang Melihat (Opsional)</label>
+                <label>Saksi (Opsional)</label>
                 <input type="text" name="saksi" placeholder="Tuliskan nama teman, guru, atau saksi lain jika ada">
             </div>
 
             <!-- Deskripsi -->
             <div class="form-group">
-                <label>Deskripsi Kejadian Secara Rinci <span class="required">*</span></label>
+                <label>Deskripsi Kejadian<span class="required">*</span></label>
                 <textarea name="deskripsi" rows="5" required placeholder="Ceritakan kronologi singkat: apa yang terjadi, siapa pelakunya (jika diketahui), dan dampak yang dirasakan..."></textarea>
-                <span class="hint">Semua rincian yang Anda berikan sangat berarti bagi perlindungan dan solusi yang adil.</span>
             </div>
 
             <button type="submit" class="btn-submit">
-                🛡️ Kirim Laporan ke Ruang Peduli
+                Kirim Laporan
             </button>
         </form>
 

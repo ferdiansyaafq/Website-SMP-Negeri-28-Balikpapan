@@ -1,6 +1,7 @@
 <?php
 $page_title = 'Detail Berita';
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/site_images.php';
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $berita = null;
@@ -14,6 +15,9 @@ if ($id) {
     );
     $stmt->execute([':id' => $id]);
     $berita = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($berita) {
+        $berita['gambar_url'] = resolveSiteImagePath($berita['gambar'] ?? null);
+    }
 }
 
 if (!$berita) {
@@ -133,8 +137,8 @@ include 'header.php';
     <?php else: ?>
         <article class="detail-card">
             <div class="detail-image">
-                <?php if (!empty($berita['gambar'])): ?>
-                    <img src="<?php echo htmlspecialchars($berita['gambar']); ?>" alt="<?php echo htmlspecialchars($berita['judul']); ?>">
+                <?php if (!empty($berita['gambar_url'])): ?>
+                    <img src="<?php echo htmlspecialchars($berita['gambar_url']); ?>" alt="<?php echo htmlspecialchars($berita['judul']); ?>">
                 <?php else: ?>
                     Gambar Berita
                 <?php endif; ?>

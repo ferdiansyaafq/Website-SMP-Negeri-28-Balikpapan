@@ -27,13 +27,8 @@
         };
 
         $logoSrc = $pick([
-            'assets/img/logo-sekolah.png',
-            'assets/img/logo-sekolah.jpg',
-            'assets/img/logo-sekolah.jpeg',
-            'assets/img/logo-sekolah.webp',
-            'assets/img/logo-sekolah.svg',
-            'assets/img/logo.png',
-        ], 'assets/img/logo-sekolah.svg');
+            'assets/img/logosekolah.png',
+        ], 'assets/img/logosekolah.png');
     ?>
     <footer class="kaih-footer">
         <div class="footer-container">

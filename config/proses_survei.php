@@ -5,7 +5,7 @@ require_once __DIR__ . '/database.php';
 // 2. Cek apakah ada data yang dikirim dari form (metode POST)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // 3. Tangkap data dari form lainnya.php
+    // 3. Tangkap data dari form survey.php
     $nama_pengisi = $_POST['nama_pengisi'];
     $peran        = $_POST['peran'];
     $rating       = $_POST['rating'];
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 } else {
-    // Jika ada yang mencoba akses file ini secara langsung lewat URL, lempar balik ke lainnya.php
+    // Jika file ini diakses langsung, kembalikan ke halaman survei.
     header("Location: ../survey.php");
     exit();
 }

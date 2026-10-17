@@ -18,10 +18,13 @@ if (!function_exists('pickFirstExistingImage')) {
 
 $logoSekolah = pickFirstExistingImage([
     'assets/img/logosekolah.png',
-    'assets/img/logo.png',
-], 'assets/img/logo-sekolah.svg');
+], 'assets/img/logosekolah.png');
 
 $current_page = basename($_SERVER['PHP_SELF']);
+$systemPages = ['sistem.php', 'login.php', 'buku_tamu.php', 'bullying.php', 'survey.php'];
+$otherPages = ['lainnya.php', 'kontak.php'];
+$schoolContactEmail = 'smpnegeri28.balikpapan@gmail.com';
+$schoolWhatsappUrl = 'https://wa.me/6285349310534';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -67,7 +70,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 }
 
 .school-name h1 {
-    font-size: 20px;
+    font-size: 30px;
     color: #1e293b;
     margin-bottom: 3px;
     font-weight: 700;
@@ -395,16 +398,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             <a href="informasi.php#kaih">KAIH</a>
         </div>
         
+        <button class="mobile-dropdown-toggle" onclick="toggleSubmenu(event, 'submenu-sistem')">
+            Sistem <span class="arrow">▾</span>
+        </button>
+        <div class="mobile-submenu" id="submenu-sistem">
+            <a href="login.php">Login</a>
+            <a href="buku_tamu.php">Buku Tamu</a>
+            <a href="bullying.php">Ruang Peduli</a>
+            <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+        </div>
+
         <button class="mobile-dropdown-toggle" onclick="toggleSubmenu(event, 'submenu-lainnya')">
             Lainnya <span class="arrow">▾</span>
         </button>
         <div class="mobile-submenu" id="submenu-lainnya">
             <a href="lainnya.php#faq">FAQ</a>
-            <a href="login.php">Login</a>
-            <a href="jurnal_guru.php">Jurnal Guru</a>
-            <a href="buku_tamu.php">Buku Tamu</a>
-            <a href="bullying.php">Ruang Peduli</a>
-            <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+            <a href="kontak.php">Kontak</a>
         </div>
     </div>
 </div>
@@ -415,7 +424,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             <img src="<?php echo htmlspecialchars($logoSekolah); ?>" alt="Logo SMP 28" class="logo">
             <div class="school-name">
                 <h1>SMP NEGERI 28 BALIKPAPAN</h1>
-                <p>MERCUSUAR (Media Rekap Cerdas Unjuk Aktivitas Rapor)</p>
             </div>
         </div>
         
@@ -448,16 +456,24 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             </div>
             
             <div class="nav-item">
-                <a href="lainnya.php" class="<?php echo in_array($current_page, ['lainnya.php', 'bullying.php', 'buku_tamu.php', 'survey.php', 'jurnal_kelas.php', 'jurnal_guru.php', 'kepuasan.php']) ? 'active' : ''; ?>">
+                <a href="sistem.php" class="<?php echo in_array($current_page, $systemPages, true) ? 'active' : ''; ?>">
+                    Sistem <span class="arrow">▾</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="login.php">Login</a>
+                    <a href="buku_tamu.php">Buku Tamu</a>
+                    <a href="bullying.php">Ruang Peduli</a>
+                    <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <a href="lainnya.php" class="<?php echo in_array($current_page, $otherPages, true) ? 'active' : ''; ?>">
                     Lainnya <span class="arrow">▾</span>
                 </a>
                 <div class="dropdown-menu">
                     <a href="lainnya.php#faq">FAQ</a>
-                    <a href="login.php">Login</a>
-                    <a href="jurnal_guru.php">Jurnal Guru</a>
-                    <a href="buku_tamu.php">Buku Tamu</a>
-                    <a href="bullying.php">Ruang Peduli</a>
-                    <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+                    <a href="kontak.php">Kontak</a>
                 </div>
             </div>
         </nav>

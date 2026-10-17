@@ -1,47 +1,16 @@
 <?php
-$page_title = "Lainnya & FAQ - SMP Negeri 28 Balikpapan";
+$page_title = "FAQ - SMP Negeri 28 Balikpapan";
 include 'header.php';
 ?>
 
 <link rel="stylesheet" href="assets/css/faq.css">
 
 <div class="page-header">
-    <h1>❓ Pusat Informasi & Layanan</h1>
-    <p>Pertanyaan yang Sering Diajukan (FAQ) dan Layanan Pendukung SMP Negeri 28 Balikpapan</p>
+    <h1>❓ Pertanyaan yang Sering Diajukan</h1>
+    <p>Temukan jawaban atas pertanyaan umum tentang SMP Negeri 28 Balikpapan.</p>
 </div>
 
 <div class="container">
-
-    <!-- Quick Navigation to Essential Features -->
-    <div class="quick-nav-grid">
-        <a href="buku_tamu.php" class="quick-nav-card">
-            <div>
-                <div class="quick-nav-icon">📖</div>
-                <h4>Buku Tamu Digital</h4>
-                <p>Formulir pencatatan kunjungan resmi untuk dinas, orang tua, masyarakat, atau instansi mitra.</p>
-            </div>
-            <span class="quick-nav-link">Isi Buku Tamu →</span>
-        </a>
-
-        <a href="bullying.php" class="quick-nav-card" style="border-color: #fca5a5;">
-            <div>
-                <div class="quick-nav-icon">🛡️</div>
-                <h4 style="color: #b91c1c;">Ruang Peduli</h4>
-                <p>Layanan pengaduan dan perlindungan perundungan. <strong>Kerahasiaan laporan 100% terjamin.</strong></p>
-            </div>
-            <span class="quick-nav-link" style="color: #dc2626;">Lapor ke Ruang Peduli →</span>
-        </a>
-
-        <a href="survey.php" class="quick-nav-card">
-            <div>
-                <div class="quick-nav-icon">📝</div>
-                <h4>Survei Pelayanan</h4>
-                <p>Beri penilaian kepuasan dengan emotikon serta sampaikan kritik dan saran perbaikan.</p>
-            </div>
-            <span class="quick-nav-link">Isi Survei Pelayanan →</span>
-        </a>
-    </div>
-
     <!-- FAQ -->
     <div class="section" id="faq">
         <h2 class="section-title">❓ Pertanyaan yang Sering Diajukan</h2>

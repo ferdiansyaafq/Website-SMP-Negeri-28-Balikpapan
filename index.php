@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/site_images.php';
 
 function pickFirstExistingImage(array $candidates, string $fallback): string
 {
@@ -16,8 +17,7 @@ function pickFirstExistingImage(array $candidates, string $fallback): string
 
 $logoSekolah = pickFirstExistingImage([
     'assets/img/logosekolah.png',
-    'assets/img/logo.png',
-], 'assets/img/logo-sekolah.svg');
+], 'assets/img/logosekolah.png');
 
 $slideshowPhotos = [];
 try {
@@ -39,7 +39,7 @@ try {
 if (empty($slideshowPhotos)) {
     $slideshowPhotos = [
         ['src' => 'assets/img/fotoguru1.jpeg', 'alt' => 'Karya Siswa'],
-        ['src' => 'assets/img/fotoguru2.jpeg', 'alt' => 'Kegiatan Belajar'],
+        ['src' => 'assets/img/fotoguru3.jpeg', 'alt' => 'Kegiatan Belajar'],
         ['src' => 'assets/img/fotosiswa.jpg', 'alt' => 'Kegiatan Belajar'],
         ['src' => 'assets/img/karyasiswa.jpg', 'alt' => 'Kegiatan Belajar']
     ];
@@ -48,17 +48,27 @@ if (empty($slideshowPhotos)) {
 $beritaData = [];
 try {
     $stmtBerita = $pdo->query(
-        "SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
+        "(SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
          FROM berita
-         WHERE status = 'terbit'
+         WHERE status = 'terbit' AND kategori = 'Pengumuman'
          ORDER BY tanggal DESC, id DESC
-         LIMIT 3"
+         LIMIT 1)
+         UNION ALL
+         (SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
+          FROM berita
+          WHERE status = 'terbit' AND kategori = 'Akademik'
+          ORDER BY tanggal DESC, id DESC
+          LIMIT 1)
+         UNION ALL
+         (SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
+          FROM berita
+          WHERE status = 'terbit' AND kategori = 'Prestasi'
+          ORDER BY tanggal DESC, id DESC
+          LIMIT 1)"
     );
     while ($berita = $stmtBerita->fetch(PDO::FETCH_ASSOC)) {
         $berita['tanggal_formatted'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
-
-        $gambarPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $berita['gambar'] ?? '');
-        $berita['gambar_exists'] = !empty($berita['gambar']) && is_file($gambarPath);
+        $berita['gambar_url'] = resolveSiteImagePath($berita['gambar'] ?? null);
 
         $beritaData[] = $berita;
     }
@@ -71,32 +81,32 @@ $fasilitasData = [
     [
         'nama' => 'Ruang Kelas',
         'deskripsi' => '9 ruang kelas dengan fasilitas pendukung',
-        'gambar' => 'assets/img/ruangkelas.png'
+        'gambar' => 'assets/img/fasilitas/ruangkelas.png'
     ],
     [
         'nama' => 'Laboratorium Komputer',
         'deskripsi' => 'Lab komputer dengan 30 unit PC dan internet cepat',
-        'gambar' => 'assets/img/laboratoriumkomputer.png'
+        'gambar' => 'assets/img/fasilitas/laboratoriumkomputer.png'
     ],
     [
-        'nama' => 'Perpustakaan',
+        'nama' => 'Pojok Literasi',
         'deskripsi' => 'Koleksi buku fisik dan digital dengan sudut baca nyaman',
-        'gambar' => 'assets/img/perpustakaan.png'
+        'gambar' => 'assets/img/fasilitas/perpustakaan.jpeg'
     ],
     [
         'nama' => 'Masjid Sekolah',
         'deskripsi' => 'Ruang ibadah yang nyaman untuk kegiatan keagamaan',
-        'gambar' => 'assets/img/masjidsekolah.png'
+        'gambar' => 'assets/img/fasilitas/masjidsekolah.png'
     ],
     [
         'nama' => 'Lapangan Olahraga',
         'deskripsi' => 'Lapangan multifungsi untuk basket, futsal, dan voli',
-        'gambar' => 'assets/img/lapangan.jpg'
+        'gambar' => 'assets/img/fasilitas/lapangan.jpeg'
     ],
     [
         'nama' => 'Kantin Sehat',
         'deskripsi' => 'Kantin dengan menu gizi seimbang dan bersih',
-        'gambar' => 'assets/img/kantin.png'
+        'gambar' => 'assets/img/fasilitas/kantin.png'
     ]
 ];
 
@@ -105,37 +115,37 @@ $ekskulData = [
         'nama' => 'Pramuka',
         'jadwal' => 'Jumat, 14.00-16.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/pramuka.png'
+        'gambar' => 'assets/img/ekstrakurikuler/pramuka.png'
     ],
     [
         'nama' => 'Futsal',
         'jadwal' => 'Selasa & Kamis, 15.00-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/futsal.png'
+        'gambar' => 'assets/img/fasilitas/futsal.png'
     ],
     [
         'nama' => 'Pencak Silat',
         'jadwal' => 'Selasa, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/pencaksilat.png'
+        'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.png'
     ],
     [
         'nama' => 'PMR',
         'jadwal' => 'Kamis, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/pmr.png'
+        'gambar' => 'assets/img/ekstrakurikuler/pmr1.png'
     ],
     [
         'nama' => 'Memanah',
         'jadwal' => 'Senin, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/memanah.png'
+        'gambar' => 'assets/img/ekstrakurikuler/memanah.png'
     ],
     [
         'nama' => 'Kader Lingkungan',
         'jadwal' => 'Sabtu, 08.00-10.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/kaderlingkungan.png'
+        'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.png'
     ],
 ];
 
@@ -143,28 +153,37 @@ include 'header.php';
 ?>
 
 <style>
-.container { max-width: 1200px; margin: 40px auto; padding: 0 40px; }
+/* =========================================
+   PERBAIKAN HERO SECTION
+   ========================================= */
+.container { max-width: 1200px; margin: 20px auto 40px; padding: 0 40px; } /* Margin atas dikurangi */
 
 .hero-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 50px;
-    align-items: center;
+    align-items: center; /* Membuat teks dan gambar sejajar tengah secara vertikal */
     background: transparent;
-    padding: 40px 0;
+    padding: 10px 0 20px; /* Padding atas dikurangi agar dekat header */
 }
 
+/* Judul Utama */
 .text-content h2 {
-    font-size: 42px;
-    color: #1a1a1a;
+    font-size: 40px;
+    color: #1e293b; /* Warna hitam soft */
     margin-bottom: 20px;
-    line-height: 1.15;
+    line-height: 1.2;
     font-weight: 800;
     letter-spacing: -0.5px;
+    white-space: nowrap; /* Memaksa teks dalam satu baris */
 }
 
-.text-content h2 span { color: #1e6fbf; display: inline; }
+.text-content h2 span { 
+    color: #0284c7; /* Warna biru soft untuk "Balikpapan" */
+    display: inline; 
+}
 
+/* Deskripsi & Tagline */
 .tagline {
     font-size: 18px;
     color: #1e6fbf;
@@ -184,10 +203,36 @@ include 'header.php';
     font-weight: 400;
 }
 
-.image-section { background: #0284c7; padding: 20px; border-radius: 20px; position: relative; }
+/* Container Foto */
+.image-section { 
+    background: #0284c7; 
+    padding: 12px; 
+    border-radius: 20px; 
+    position: relative; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%; 
+}
 
-.carousel { position: relative; overflow: hidden; border-radius: 15px; background: white; }
-.carousel img { width: 100%; height: 450px; object-fit: cover; display: block; }
+.carousel { 
+    position: relative; 
+    overflow: hidden; 
+    border-radius: 15px; 
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 0;
+}
+
+.carousel img { 
+    width: 100%; 
+    height: auto; 
+    max-height: 500px; 
+    object-fit: contain; 
+    display: block; 
+}
 
 .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%);
@@ -195,11 +240,15 @@ include 'header.php';
     width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
     font-size: 20px; color: #0284c7; transition: all 0.3s;
     display: flex; align-items: center; justify-content: center;
+    z-index: 10;
 }
 .carousel-btn:hover { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .carousel-btn.prev { left: 15px; }
 .carousel-btn.next { right: 15px; }
 
+/* =========================================
+   SECTION LAINNYA
+   ========================================= */
 .berita-section,
 .fasilitas-section {
     background: white;
@@ -383,20 +432,21 @@ footer a:hover { opacity: 1; transform: translateY(-3px); }
 footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(37,211,102,0.6); }
 
 @media (max-width: 968px) {
-    .hero-section { grid-template-columns: 1fr; padding: 30px; }
-    .text-content h2 { font-size: 28px; }
+    .hero-section { grid-template-columns: 1fr; padding: 20px; gap: 30px; }
+    .text-content h2 { font-size: 28px; white-space: normal; } /* Normal kembali saat mobile */
+    .text-content { text-align: left; } /* Teks ke tengah saat mobile */
     .image-section { order: -1; }
-    .carousel img { height: 300px; }
+    .carousel img { height: auto; max-height: 400px; }
     .fasilitas-grid,
     .ekskul-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-    .container { padding: 0 20px; margin: 20px auto; }
-    .hero-section { padding: 25px; }
+    .container { padding: 0 20px; margin: 10px auto 20px; }
+    .hero-section { padding: 15px; }
     .text-content h2 { font-size: 24px; }
     .tagline { font-size: 15px; }
-    .description { font-size: 14px; }
+    .description { font-size: 14px; text-align: left; } /* Deskripsi ke tengah saat mobile */
     .berita-grid,
     .fasilitas-grid,
     .ekskul-grid { grid-template-columns: 1fr; padding: 0 20px; }
@@ -407,7 +457,7 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
 }
 
 @media (max-width: 480px) {
-    .hero-section { padding: 20px; }
+    .hero-section { padding: 10px; }
     .text-content h2 { font-size: 22px; }
 }
 </style>
@@ -463,7 +513,7 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
     </div>
 
     <?php if (empty($beritaData)): ?>
-        <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+        <div style="text-align: left; padding: 40px 20px; color: #94a3b8;">
             <p style="font-size: 16px;">📭 Belum ada berita yang dipublikasikan.</p>
         </div>
     <?php else: ?>
@@ -471,8 +521,8 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
             <?php foreach ($beritaData as $item): ?>
             <article class="berita-card">
                 <div class="berita-image">
-                    <?php if ($item['gambar_exists']): ?>
-                        <img src="<?php echo htmlspecialchars($item['gambar']); ?>" 
+                    <?php if (!empty($item['gambar_url'])): ?>
+                        <img src="<?php echo htmlspecialchars($item['gambar_url']); ?>"
                              alt="<?php echo htmlspecialchars($item['judul']); ?>">
                     <?php else: ?>
                         <span class="placeholder">📷 Gambar Berita</span>

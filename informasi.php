@@ -1,6 +1,7 @@
 <?php
 $page_title = "Informasi";
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/site_images.php';
 
 $currentPage = max(1, (int) ($_GET['page'] ?? 1));
 $itemsPerPage = 3;
@@ -25,10 +26,8 @@ try {
     $stmtBerita->execute();
     $beritaItems = $stmtBerita->fetchAll(PDO::FETCH_ASSOC);
 
-    // Cek apakah file gambar berita ada
     foreach ($beritaItems as $key => $item) {
-        $gambarPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $item['gambar'] ?? '');
-        $beritaItems[$key]['gambar_exists'] = !empty($item['gambar']) && is_file($gambarPath);
+        $beritaItems[$key]['gambar_url'] = resolveSiteImagePath($item['gambar'] ?? null);
     }
 } catch (PDOException $e) {
     $totalPages = 1;
@@ -410,8 +409,8 @@ include 'header.php';
                 <?php foreach ($beritaItems as $item): ?>
                 <article class="berita-item">
                     <div class="berita-thumb">
-                        <?php if ($item['gambar_exists']): ?>
-                            <img src="<?php echo htmlspecialchars($item['gambar']); ?>"
+                        <?php if (!empty($item['gambar_url'])): ?>
+                            <img src="<?php echo htmlspecialchars($item['gambar_url']); ?>"
                                  alt="<?php echo htmlspecialchars($item['judul']); ?>">
                         <?php else: ?>
                             <span class="thumb-placeholder">📷</span>

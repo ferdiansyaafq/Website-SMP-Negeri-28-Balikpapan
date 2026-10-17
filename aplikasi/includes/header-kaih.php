@@ -291,7 +291,7 @@ $sidebarLabel = match ($role) {
                 Jendela Literasi
             </a>
             <a href="laporan-bullying.php" class="<?php echo ($current_page == 'laporan-bullying.php') ? 'active' : ''; ?>">
-                Ruang Peduli (Bullying)
+                Ruang Peduli
             </a>
             <a href="survei.php" class="<?php echo ($current_page == 'survei.php') ? 'active' : ''; ?>">
                 Survei Pelayanan

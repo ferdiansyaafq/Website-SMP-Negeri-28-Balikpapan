@@ -34,7 +34,9 @@
                 <div>
                     <h4 style="font-size: 18px; margin-bottom: 12px; font-weight: 700;">Kontak Kami</h4>
                     <p class="site-footer-email">
-                        smpnegeri28.balikpapan@gmail.com
+                        <a href="mailto:<?= htmlspecialchars($schoolContactEmail, ENT_QUOTES, 'UTF-8') ?>" style="color: white; text-decoration: none;">
+                            <?= htmlspecialchars($schoolContactEmail, ENT_QUOTES, 'UTF-8') ?>
+                        </a>
                     </p>
                 </div>
             </div>
@@ -42,11 +44,10 @@
                 <h4 style="font-size: 18px; margin-bottom: 12px; font-weight: 700;">Menu Cepat</h4>
                 <ul style="list-style: none; line-height: 2.2;">
                     <li><a href="index.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Beranda</a></li>
-                    <li><a href="login.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Login KAIH</a></li>
                     <li><a href="profil.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Profil Sekolah</a></li>
                     <li><a href="informasi.php#berita" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Berita &amp; Pengumuman</a></li>
-                    <li><a href="bullying.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Pelaporan Bullying</a></li>
-                    <li><a href="survey.php#Survei-Pelayanan" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Survei Pelayanan</a></li>
+                    <li><a href="sistem.php" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">Sistem</a></li>
+                    <li><a href="lainnya.php#faq" style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.3s;">FAQ</a></li>
                 </ul>
             </div>
             <div>
@@ -68,7 +69,7 @@
                     <a href="https://www.youtube.com/@SMPNegeri28BalikpapanTimur" target="_blank" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">
                         <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
                     </a>
-                    <a href="https://wa.me/6285349310534" target="_blank" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">
+                    <a href="<?= htmlspecialchars($schoolWhatsappUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" aria-label="Hubungi melalui WhatsApp" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">
                         <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297a11.815 11.815 0 00-8.413-3.476c-6.53 0-11.839 5.309-11.839 11.839 0 2.093.544 4.136 1.579 5.935l-1.436 5.238 5.378-1.413a11.84 11.84 0 005.866 1.483h.005c6.53 0 11.839-5.309 11.839-11.839 0-3.164-1.229-6.135-3.467-8.368"/></svg>
                     </a>
                 </div>

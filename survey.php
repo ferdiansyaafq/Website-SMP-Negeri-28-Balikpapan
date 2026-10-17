@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="container">
 
-    <a href="lainnya.php" class="btn-back">← Kembali ke FAQ / Menu Lainnya</a>
+    <a href="sistem.php" class="btn-back">← Kembali ke Menu Sistem</a>
 
     <div class="survey-form">
         <h2 class="form-title">Formulir Kepuasan Pelayanan</h2>
@@ -103,14 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label>Nama Lengkap <span class="required">*</span></label>
                 <input type="text" name="nama" required placeholder="Masukkan nama lengkap Anda..." value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>">
-                <span class="hint">Nama Anda akan disimpan dengan aman untuk keperluan dokumentasi survei.</span>
             </div>
 
             <!-- Agenda Kunjungan -->
             <div class="form-group">
                 <label>Agenda Kunjungan <span class="required">*</span></label>
                 <textarea name="agenda_kunjungan" rows="3" required placeholder="Tuliskan tujuan atau agenda kunjungan Anda ke sekolah (contoh: Mengurus surat keterangan, konsultasi akademik siswa, kunjungan dinas, dll.)..."><?= htmlspecialchars($_POST['agenda_kunjungan'] ?? '') ?></textarea>
-                <span class="hint">Tuliskan agenda atau keperluan kedatangan Anda secara jelas.</span>
             </div>
 
             <!-- Penilaian Berdasarkan Emoji Kepuasan (1-5) -->
@@ -168,19 +166,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Pilih salah satu ekspresi kepuasan di atas.
                     </div>
                 </div>
-                <span class="hint">Klik salah satu ekspresi emotikon yang paling menggambarkan pengalaman pelayanan Anda.</span>
             </div>
 
             <!-- Kritik dan Saran -->
             <div class="form-group">
                 <label>Kritik dan Saran <span class="required">*</span></label>
-                <textarea name="kritik_saran" rows="5" required placeholder="Tuliskan kritik yang membangun dan saran perbaikan untuk pelayanan SMP Negeri 28 Balikpapan..."><?= htmlspecialchars($_POST['kritik_saran'] ?? '') ?></textarea>
-                <span class="hint">Setiap kritik dan saran Anda menjadi bahan perbaikan mutu layanan kami ke depan.</span>
+                <textarea name="kritik_saran" rows="5" required placeholder="Setiap kritik dan saran Anda menjadi bahan perbaikan mutu layanan kami ke depan."><?= htmlspecialchars($_POST['kritik_saran'] ?? '') ?></textarea>
             </div>
 
             <!-- Submit -->
             <button type="submit" class="btn-submit">
-                📩 Kirim Penilaian, Kritik & Saran
+                Kirim Survei
             </button>
         </form>
     </div>
