@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="assets/img/logosekolah.png" alt="Logo Sekolah" class="logo">
-            <h1>Sistem KAIH</h1>
+            <h1>MERCUSUAR</h1>
             <p>SMP Negeri 28 Balikpapan</p>
         </div>
 

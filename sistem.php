@@ -11,7 +11,6 @@ include 'header.php';
 </div>
 
 <div class="container">
-    <div class="quick-nav-grid">pre
 
         <a href="buku_tamu.php" class="quick-nav-card">
             <div>

@@ -424,6 +424,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             <img src="<?php echo htmlspecialchars($logoSekolah); ?>" alt="Logo SMP 28" class="logo">
             <div class="school-name">
                 <h1>SMP NEGERI 28 BALIKPAPAN</h1>
+                <p>MERCUSUAR (Media Rekap Cerdas Unjuk Aktivitas Rapor)</p>
             </div>
         </div>
         

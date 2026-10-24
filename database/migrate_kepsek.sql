@@ -15,11 +15,11 @@ SET @kepsek_guru_id = (SELECT `id` FROM `guru` WHERE `nip` = '198301172009031005
 
 -- 3. Tambahkan akun user untuk Kepala Sekolah jika belum ada
 -- Password '12345678' di-hash menggunakan password_hash bcrypt
--- Hash password: $2y$10$w0954p3qf81G0Yg8rW16u.V6075sFj4iY4i7E70wA1iQoYv0hN2W6
+-- Hash password: $2y$10$yyk2.vm3bJ2BBn7WT.bU4eWpUf7/SVK8XFUqy1/RkcHik6STHicYq
 INSERT INTO `users` (`username`, `password`, `role`, `guru_id`, `siswa_id`, `created_at`, `updated_at`)
-VALUES ('198301172009031005', '$2y$10$w0954p3qf81G0Yg8rW16u.V6075sFj4iY4i7E70wA1iQoYv0hN2W6', 'kepsek', @kepsek_guru_id, NULL, NOW(), NOW())
+VALUES ('198301172009031005', '$2y$10$yyk2.vm3bJ2BBn7WT.bU4eWpUf7/SVK8XFUqy1/RkcHik6STHicYq', 'kepsek', @kepsek_guru_id, NULL, NOW(), NOW())
 ON DUPLICATE KEY UPDATE 
-    `password` = '$2y$10$w0954p3qf81G0Yg8rW16u.V6075sFj4iY4i7E70wA1iQoYv0hN2W6',
+    `password` = '$2y$10$yyk2.vm3bJ2BBn7WT.bU4eWpUf7/SVK8XFUqy1/RkcHik6STHicYq',
     `role` = 'kepsek',
     `guru_id` = @kepsek_guru_id;
 
