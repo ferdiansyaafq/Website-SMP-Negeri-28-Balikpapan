@@ -39,7 +39,8 @@ $stmtRekap = $pdo->prepare("
         (SELECT COUNT(*) FROM laporan_harian lh JOIN siswa s ON lh.siswa_id = s.id WHERE s.kelas = k.nama_kelas AND lh.tanggal = ?) AS sudah_lapor,
         (SELECT COUNT(*) FROM laporan_harian lh JOIN siswa s ON lh.siswa_id = s.id WHERE s.kelas = k.nama_kelas AND lh.tanggal = ? AND (lh.orang_tua_validated_at IS NOT NULL OR lh.guru_validated_at IS NOT NULL)) AS tervalidasi
     FROM kaih_kelas k
-    ORDER BY k.nama_kelas ASC
+    WHERE k.nama_kelas != 'Belum Ada Kelas'
+    ORDER BY k.tingkat ASC, k.nama_kelas ASC
 ");
 $stmtRekap->execute([$tanggal_hari_ini, $tanggal_hari_ini]);
 $rekap_kelas = $stmtRekap->fetchAll(PDO::FETCH_ASSOC);

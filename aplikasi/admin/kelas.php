@@ -26,9 +26,11 @@ $query = "
 
 if (!empty($search)) {
     $query .= " WHERE k.nama_kelas LIKE :search";
+} else {
+    $query .= " WHERE k.nama_kelas != 'Belum Ada Kelas'";
 }
 
-$query .= " ORDER BY k.nama_kelas ASC";
+$query .= " ORDER BY k.tingkat ASC, k.nama_kelas ASC";
 
 $stmt = $pdo->prepare($query);
 if (!empty($search)) {

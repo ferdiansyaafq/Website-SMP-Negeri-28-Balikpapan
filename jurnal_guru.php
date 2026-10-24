@@ -7,7 +7,7 @@ include 'config/database.php';
 // 1. DATA MASTER
 // ============================================================
 $guru_list = $pdo->query("SELECT * FROM guru ORDER BY nama_guru ASC")->fetchAll();
-$kelas_list = $pdo->query("SELECT * FROM kaih_kelas ORDER BY nama_kelas ASC")->fetchAll();
+$kelas_list = $pdo->query("SELECT * FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll();
 
 // ============================================================
 // 2. FILTER

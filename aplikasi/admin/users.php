@@ -16,23 +16,32 @@ $search = trim($_GET['q'] ?? '');
 $filterRole = trim($_GET['role'] ?? '');
 
 // Query ke database (Kolom keterangan dihapus sementara)
-$query = "SELECT id, username, role, password FROM users WHERE 1=1";
+$query = "
+    SELECT u.id, u.username, u.role, u.password,
+           COALESCE(g.nama_guru, s.nama_siswa, CASE WHEN u.role = 'admin' THEN 'Administrator' ELSE '-' END) AS keterangan
+    FROM users u
+    LEFT JOIN guru g ON (u.guru_id = g.id OR u.username = g.nip)
+    LEFT JOIN siswa s ON (u.siswa_id = s.id OR u.username = s.nisn)
+    WHERE 1=1
+";
 $params = [];
 
 // Jika ada pencarian nama/keterangan
 if ($search !== '') {
     // Pencarian hanya berdasarkan username saja untuk sementara
-    $query .= " AND (username LIKE ?)";
+    $query .= " AND (u.username LIKE ? OR g.nama_guru LIKE ? OR s.nama_siswa LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
     $params[] = "%$search%";
 }
 
 // Jika ada filter role (jabatan)
 if ($filterRole !== '') {
-    $query .= " AND role = ?";
+    $query .= " AND u.role = ?";
     $params[] = $filterRole;
 }
 
-$query .= " ORDER BY role ASC, username ASC";
+$query .= " ORDER BY u.role ASC, u.username ASC";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $daftar_users = $stmt->fetchAll(PDO::FETCH_ASSOC);

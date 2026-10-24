@@ -13,11 +13,11 @@ $error = '';
 $kepsek_id = $_SESSION['user_id'] ?? 0;
 
 // Ambil daftar guru (kecuali kepala sekolah sendiri)
-$stmtGuru = $pdo->query("SELECT id, nip, nama_guru, kelas, jabatan FROM guru WHERE jabatan NOT LIKE '%Kepala Sekolah%' ORDER BY nama_guru ASC");
+$stmtGuru = $pdo->query("SELECT id, nip, nama_guru, kelas, jabatan FROM guru WHERE jabatan != 'Kepala Sekolah' ORDER BY nama_guru ASC");
 $daftar_guru = $stmtGuru->fetchAll(PDO::FETCH_ASSOC);
 
 // Ambil daftar kelas dari kaih_kelas
-$daftar_kelas = $pdo->query("SELECT nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC")->fetchAll(PDO::FETCH_COLUMN);
+$daftar_kelas = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_COLUMN);
 
 // Ambil seluruh indikator rubrik dari database
 $stmtRubrik = $pdo->query("SELECT * FROM supervisi_rubrik ORDER BY urutan ASC, id ASC");
@@ -209,12 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?= htmlspecialchars($kls); ?>
                             </option>
                         <?php endforeach; ?>
-                        <option value="Kelas 7A" <?= ($selectedKelas === 'Kelas 7A') ? 'selected' : ''; ?>>Kelas 7A</option>
-                        <option value="Kelas 7B" <?= ($selectedKelas === 'Kelas 7B') ? 'selected' : ''; ?>>Kelas 7B</option>
-                        <option value="Kelas 8A" <?= ($selectedKelas === 'Kelas 8A') ? 'selected' : ''; ?>>Kelas 8A</option>
-                        <option value="Kelas 8B" <?= ($selectedKelas === 'Kelas 8B') ? 'selected' : ''; ?>>Kelas 8B</option>
-                        <option value="Kelas 9A" <?= ($selectedKelas === 'Kelas 9A') ? 'selected' : ''; ?>>Kelas 9A</option>
-                        <option value="Kelas 9B" <?= ($selectedKelas === 'Kelas 9B') ? 'selected' : ''; ?>>Kelas 9B</option>
+                        
                     </select>
                 </div>
 

@@ -40,7 +40,7 @@ if ($guru_id > 0) {
     if ($rowG) { $kelas_guru_default = $rowG['kelas'] ?? ''; }
 }
 
-$list_kelas = $pdo->query("SELECT nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC")->fetchAll(PDO::FETCH_COLUMN);
+$list_kelas = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_COLUMN);
 $selected_kelas = $_GET['kelas'] ?? $kelas_guru_default;
 $selected_tanggal = $_GET['tanggal'] ?? date('Y-m-d');
 

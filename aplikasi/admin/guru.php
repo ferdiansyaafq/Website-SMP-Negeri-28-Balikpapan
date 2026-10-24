@@ -15,7 +15,7 @@ $flash = '';
 $flashType = 'success';
 
 // Ambil daftar kelas untuk dropdown Kelas Wali
-$stmtK = $pdo->query("SELECT nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC");
+$stmtK = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC");
 $list_kelas = $stmtK->fetchAll(PDO::FETCH_COLUMN);
 
 // Proses CRUD (Tambah, Edit, Hapus)
@@ -157,11 +157,11 @@ require_once '../includes/header-kaih.php';
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
             <thead>
-                <tr style="background: #f8fafc; text-align: left;">
+                <tr style="background: #f8fafc;">
                     <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">NIP</th>
                     <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Nama Guru</th>
                     <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Jabatan</th>
-                    <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Kelas Wali</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Wali Kelas</th>
                     <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Aksi</th>
                 </tr>
             </thead>
@@ -175,18 +175,33 @@ require_once '../includes/header-kaih.php';
                         <tr>
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;"><b><?php echo htmlspecialchars($g['nip']); ?></b></td>
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($g['nama_guru']); ?></td>
-                            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">
-                                <span style="background: #f3e8ff; color: #7e22ce; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-                                    <?php echo htmlspecialchars($g['jabatan']); ?>
-                                </span>
+                            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 320px;">
+                                    <?php 
+                                    $jabatanItems = array_filter(array_map('trim', explode('/', $g['jabatan'] ?? '')));
+                                    if (empty($jabatanItems)): ?>
+                                        <span style="color: #94a3b8; font-style: italic;">—</span>
+                                    <?php else: ?>
+                                        <?php foreach ($jabatanItems as $jbt): ?>
+                                            <span style="background: #f3e8ff; color: #6b21a8; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #e9d5ff; display: inline-block;">
+                                                <?php echo htmlspecialchars($jbt); ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
                             </td>
-                            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">
-                                <?php if (!empty($g['kelas'])): ?>
-                                    <span style="background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-                                        Kelas <?php echo htmlspecialchars($g['kelas']); ?>
+                            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;">
+                                <?php 
+                                $kelasVal = trim($g['kelas'] ?? '');
+                                $isWaliKelas = !empty($kelasVal) && stripos($kelasVal, 'Ruang') === false && stripos($kelasVal, 'Lab') === false && $kelasVal !== 'Belum Ada Kelas';
+                                if ($isWaliKelas):
+                                    $displayKelas = (stripos($kelasVal, 'Kelas ') === 0) ? $kelasVal : 'Kelas ' . $kelasVal;
+                                ?>
+                                    <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block; border: 1px solid #bae6fd;">
+                                        <?php echo htmlspecialchars($displayKelas); ?>
                                     </span>
                                 <?php else: ?>
-                                    <span style="color: #94a3b8; font-style: italic;">—</span>
+                                    <span style="color: #94a3b8; font-weight: 600; padding-left: 8px;">—</span>
                                 <?php endif; ?>
                             </td>
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">
@@ -238,11 +253,11 @@ require_once '../includes/header-kaih.php';
                 <input type="text" name="jabatan" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" placeholder="Contoh: Guru Matematika / Kepala Sekolah">
             </div>
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Kelas Wali (Opsional)</label>
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Wali Kelas (Opsional)</label>
                 <select name="kelas" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff;">
-                    <option value="">— Pilih Kelas —</option>
+                    <option value="">— Bukan Wali Kelas —</option>
                     <?php foreach ($list_kelas as $kls): ?>
-                        <option value="<?php echo htmlspecialchars($kls); ?>">Kelas <?php echo htmlspecialchars($kls); ?></option>
+                        <option value="<?php echo htmlspecialchars($kls); ?>"><?php echo htmlspecialchars($kls); ?></option>
                     <?php endforeach; ?>
                 </select>
                 <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Kosongkan jika bukan wali kelas</small>
@@ -278,11 +293,11 @@ require_once '../includes/header-kaih.php';
                 <input type="text" name="jabatan" id="edit_jabatan" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
             </div>
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Kelas Wali (Opsional)</label>
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155;">Wali Kelas (Opsional)</label>
                 <select name="kelas" id="edit_kelas" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: #fff;">
-                    <option value="">— Pilih Kelas —</option>
+                    <option value="">— Bukan Wali Kelas —</option>
                     <?php foreach ($list_kelas as $kls): ?>
-                        <option value="<?php echo htmlspecialchars($kls); ?>">Kelas <?php echo htmlspecialchars($kls); ?></option>
+                        <option value="<?php echo htmlspecialchars($kls); ?>"><?php echo htmlspecialchars($kls); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

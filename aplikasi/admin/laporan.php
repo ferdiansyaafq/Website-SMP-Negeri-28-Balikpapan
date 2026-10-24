@@ -59,7 +59,7 @@ if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
 
 // Load dropdown data pakai PDO
 $allGuru = $pdo->query("SELECT id, nama_guru, kelas AS wali_kelas FROM guru ORDER BY nama_guru ASC")->fetchAll(PDO::FETCH_ASSOC);
-$allKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
+$allKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 $allSiswa = $pdo->query("SELECT id, nama_siswa, kelas FROM siswa ORDER BY kelas ASC, nama_siswa ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 $guruWaliKelas = '';

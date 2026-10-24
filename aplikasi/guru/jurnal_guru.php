@@ -13,7 +13,7 @@ if (!$guru_id && isset($_SESSION['user_id'])) {
     $guru_id = $stmt->fetchColumn();
 }
 
-$kelasList = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas ORDER BY nama_kelas")->fetchAll(PDO::FETCH_ASSOC);
+$kelasList = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 // ====== Filter minggu ======
 $minggu_input = $_GET['minggu'] ?? date('Y-m-d');

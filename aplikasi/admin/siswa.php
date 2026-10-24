@@ -182,7 +182,7 @@ $daftar_siswa = $stmtSiswa->fetchAll(PDO::FETCH_ASSOC);
 
 // Tarik Dinamis Data Kelas dari Database
 $daftar_kelas = [];
-$stmtKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas ORDER BY nama_kelas ASC");
+$stmtKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC");
 if ($stmtKelas) {
     $daftar_kelas = $stmtKelas->fetchAll(PDO::FETCH_ASSOC);
 }
