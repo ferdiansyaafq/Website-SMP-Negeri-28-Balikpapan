@@ -382,9 +382,6 @@ function getRekomendasiOtomatis($indikator) {
         <div class="kepsek-card">
             <div class="kepsek-card-title">
                 <h3>📋 Tabel Evaluasi Rubrik Lengkap</h3>
-                <a href="cetak.php?id=<?= $penilaian['id']; ?>" target="_blank" class="btn-kepsek-action" style="padding: 6px 14px; font-size: 12px; background: #0284c7; color: white;">
-                    🖨️ Cetak Rapor Resmi
-                </a>
             </div>
 
             <div style="overflow-x: auto;">

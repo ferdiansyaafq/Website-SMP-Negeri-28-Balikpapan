@@ -375,18 +375,18 @@ function tglIndo($tanggal) {
         <div class="ttd-container">
             <div class="ttd-box">
                 <p>Mengetahui,</p>
-                <p>Guru yang Diobservasi</p>
-                <div class="ttd-space"></div>
-                <p style="text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($penilaian['nama_guru']); ?></p>
-                <p>NIP. <?= htmlspecialchars($penilaian['nip']); ?></p>
-            </div>
-
-            <div class="ttd-box">
-                <p>Balikpapan, <?= tglIndo($penilaian['tanggal_observasi']); ?></p>
                 <p>Kepala SMP Negeri 28 Balikpapan</p>
                 <div class="ttd-space"></div>
                 <p style="text-decoration: underline; font-weight: bold;">Aris Broto, S.Pd</p>
                 <p>NIP. 198301172009031005</p>
+            </div>
+
+            <div class="ttd-box">
+                <p>Balikpapan, <?= tglIndo($penilaian['tanggal_observasi']); ?></p>
+                <p>Guru yang Diobservasi</p>
+                <div class="ttd-space"></div>
+                <p style="text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($penilaian['nama_guru']); ?></p>
+                <p>NIP. <?= htmlspecialchars($penilaian['nip']); ?></p>
             </div>
         </div>
     </div>
