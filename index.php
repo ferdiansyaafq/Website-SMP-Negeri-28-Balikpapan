@@ -66,11 +66,30 @@ try {
           ORDER BY tanggal DESC, id DESC
           LIMIT 1)"
     );
+    $pickedIds = [];
     while ($berita = $stmtBerita->fetch(PDO::FETCH_ASSOC)) {
         $berita['tanggal_formatted'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
         $berita['gambar_url'] = resolveSiteImagePath($berita['gambar'] ?? null);
 
         $beritaData[] = $berita;
+        $pickedIds[] = (int) $berita['id'];
+    }
+
+    if (count($beritaData) < 3) {
+        $remaining = 3 - count($beritaData);
+        $excludeSql = !empty($pickedIds) ? ('AND id NOT IN (' . implode(',', $pickedIds) . ')') : '';
+        $stmtExtra = $pdo->query(
+            "SELECT id, jenis, tanggal, kategori, judul, ringkasan, gambar
+             FROM berita
+             WHERE status = 'terbit' $excludeSql
+             ORDER BY tanggal DESC, id DESC
+             LIMIT $remaining"
+        );
+        while ($berita = $stmtExtra->fetch(PDO::FETCH_ASSOC)) {
+            $berita['tanggal_formatted'] = strtoupper(date('d M Y', strtotime($berita['tanggal'])));
+            $berita['gambar_url'] = resolveSiteImagePath($berita['gambar'] ?? null);
+            $beritaData[] = $berita;
+        }
     }
 } catch (PDOException $e) {
     error_log('Homepage news query failed: ' . $e->getMessage());

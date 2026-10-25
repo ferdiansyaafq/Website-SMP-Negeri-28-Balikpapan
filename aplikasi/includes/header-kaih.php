@@ -287,6 +287,9 @@ $sidebarLabel = match ($role) {
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
                 Laporan
             </a>
+            <a href="berita.php" class="<?php echo ($current_page == 'berita.php') ? 'active' : ''; ?>">
+                Kelola Berita
+            </a>
             <!-- MENU TAMBAHAN JENDELA LITERASI -->
             <a href="literasi.php" class="<?php echo ($current_page == 'literasi.php') ? 'active' : ''; ?>">
                 Jendela Literasi
