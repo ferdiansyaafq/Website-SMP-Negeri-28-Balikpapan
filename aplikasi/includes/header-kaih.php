@@ -284,6 +284,9 @@ $sidebarLabel = match ($role) {
             <a href="kelas.php" class="<?php echo ($current_page == 'kelas.php') ? 'active' : ''; ?>">
                 Kelola Kelas
             </a>
+            <a href="users.php" class="<?php echo ($current_page == 'users.php') ? 'active' : ''; ?>">
+                Kelola User
+            </a>
             <a href="laporan.php" class="<?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
                 Laporan
             </a>

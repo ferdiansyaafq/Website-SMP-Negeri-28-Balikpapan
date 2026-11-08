@@ -1,6 +1,6 @@
 <?php
 // aplikasi/kepsek/penilaian.php
-require_once '../includes/header-kaih.php';
+session_start();
 require_once '../../config/database.php';
 
 // Pastikan hanya role kepsek
@@ -134,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+require_once '../includes/header-kaih.php';
 ?>
 
 <link rel="stylesheet" href="../../assets/css/kepsek.css">

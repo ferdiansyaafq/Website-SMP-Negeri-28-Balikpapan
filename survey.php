@@ -33,8 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <link rel="stylesheet" href="assets/css/survey.css">
 
-<link rel="stylesheet" href="assets/css/survey.css?v=<?= time() ?>">
-
 <style>
 /* Paksa layout vertikal — override apapun */
 .emoji-rating-grid {

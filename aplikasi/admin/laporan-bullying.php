@@ -75,7 +75,7 @@ require_once '../includes/header-kaih.php';
                             <td>
                                 <strong><?= htmlspecialchars($item['nama_pelapor']) ?></strong><br>
                                 <small>📞 <?= htmlspecialchars($item['kontak']) ?></small><br>
-                                <small style="color: #64748b;"><strong>Agenda:</strong> <?= htmlspecialchars($item['status_pelapor']) ?></small>
+                                <small style="color: #64748b;"><strong>Status:</strong> <?= htmlspecialchars($item['status_pelapor']) ?></small>
                             </td>
                             <td>
                                 <?= htmlspecialchars($item['nama_korban']) ?><br>

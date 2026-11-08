@@ -1,19 +1,8 @@
 <?php
-// Pastikan kredensial database sesuai dengan Laragon kamu
-$host = 'localhost';
-$dbname = 'kaih';
-$user = 'root';
-$pass = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Koneksi Gagal: " . $e->getMessage());
-}
+require_once __DIR__ . '/config/database.php';
 
 if (isset($_GET['id']) && isset($_GET['aksi'])) {
-    $id_laporan = $_GET['id'];
+    $id_laporan = (int)$_GET['id'];
     $aksi = $_GET['aksi'];
 
     try {

@@ -48,6 +48,18 @@ function tglIndo($tanggal) {
     $pecahkan = explode('-', $tanggal);
     return $pecahkan[2] . ' ' . $bulan[(int)$pecahkan[1]] . ' ' . $pecahkan[0];
 }
+
+// Logo Kop Surat: Logo Pemkot Balikpapan di kiri, Logo SMPN 28 di kanan
+$pathPemkot = __DIR__ . '/../../assets/img/logopemkot.png';
+$pathSekolah = __DIR__ . '/../../assets/img/logosekolah.png';
+
+$logoPemkotSrc = file_exists($pathPemkot)
+    ? 'data:image/png;base64,' . base64_encode(file_get_contents($pathPemkot))
+    : '../../assets/img/logopemkot.png';
+
+$logoSekolahSrc = file_exists($pathSekolah)
+    ? 'data:image/png;base64,' . base64_encode(file_get_contents($pathSekolah))
+    : '../../assets/img/logosekolah.png';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -81,16 +93,39 @@ function tglIndo($tanggal) {
         .kop-surat {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             border-bottom: 3px double #000;
             padding-bottom: 15px;
             margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .kop-logo-box {
+            width: 95px;
+            height: 95px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .kop-logo {
-            width: 75px;
-            height: 75px;
+            display: block;
             object-fit: contain;
-            margin-right: 20px;
+        }
+
+        .kop-logo-pemkot {
+            height: 92px;
+            max-height: 92px;
+            width: auto;
+            max-width: 90px;
+        }
+
+        .kop-logo-sekolah {
+            height: 84px;
+            max-height: 84px;
+            width: auto;
+            max-width: 88px;
         }
 
         .kop-teks {
@@ -231,6 +266,10 @@ function tglIndo($tanggal) {
         }
 
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 1.2cm 1.5cm;
+            }
             body {
                 background: white;
                 padding: 0;
@@ -260,12 +299,17 @@ function tglIndo($tanggal) {
     <div class="paper">
         <!-- KOP SURAT RESMI -->
         <div class="kop-surat">
-            <img src="../../assets/img/logo-sekolah1.jpeg" alt="Logo SMPN 28" class="kop-logo">
+            <div class="kop-logo-box">
+                <img src="<?= $logoPemkotSrc; ?>" alt="Logo Pemkot Balikpapan" class="kop-logo kop-logo-pemkot" title="Pemerintah Kota Balikpapan">
+            </div>
             <div class="kop-teks">
                 <h3>PEMERINTAH KOTA BALIKPAPAN</h3>
                 <h2>DINAS PENDIDIKAN DAN KEBUDAYAAN</h2>
                 <h1>SMP NEGERI 28 BALIKPAPAN</h1>
                 <p>Jl. Manggar Baru, Balikpapan Timur, Kota Balikpapan, Kalimantan Timur | NPSN: 69978713</p>
+            </div>
+            <div class="kop-logo-box">
+                <img src="<?= $logoSekolahSrc; ?>" alt="Logo SMP Negeri 28 Balikpapan" class="kop-logo kop-logo-sekolah" title="SMP Negeri 28 Balikpapan">
             </div>
         </div>
 

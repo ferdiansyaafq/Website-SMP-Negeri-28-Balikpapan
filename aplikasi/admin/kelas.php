@@ -212,6 +212,16 @@ require_once '../includes/header-kaih.php';
 </style>
 
 <div class="kelas-container">
+    <?php 
+    $flash_msg = $_SESSION['flash_msg'] ?? '';
+    $flash_type = $_SESSION['flash_type'] ?? 'success';
+    unset($_SESSION['flash_msg'], $_SESSION['flash_type']);
+    if (!empty($flash_msg)): 
+    ?>
+        <div style="padding: 12px 18px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; font-weight: 600; background: <?= $flash_type === 'error' ? '#fee2e2; color: #991b1b; border: 1px solid #fca5a5;' : '#dcfce7; color: #166534; border: 1px solid #86efac;'; ?>">
+            <?= htmlspecialchars($flash_msg); ?>
+        </div>
+    <?php endif; ?>
     
     <!-- Header: Judul & Aksi Menyamping -->
     <div class="kelas-header">
@@ -234,7 +244,10 @@ require_once '../includes/header-kaih.php';
                 <!-- Card Utama: Menggunakan data-href sebagai penyimpan link -->
                 <div class="kelas-card" data-href="siswa.php?q=<?php echo urlencode($row['nama_kelas']); ?>">
                     
-                    <h3>Kelas <?php echo htmlspecialchars($row['nama_kelas']); ?></h3>
+                    <?php
+                    $namaTampil = preg_match('/^kelas\s+/i', $row['nama_kelas']) ? $row['nama_kelas'] : 'Kelas ' . $row['nama_kelas'];
+                    ?>
+                    <h3><?php echo htmlspecialchars($namaTampil); ?></h3>
                     
                     <div class="wali-kelas">
                         👤 <?php echo !empty($row['nama_wali']) ? htmlspecialchars($row['nama_wali']) : 'Belum Ada Wali Kelas'; ?>

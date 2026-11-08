@@ -42,6 +42,18 @@ if ($guru_id > 0) {
 $stmt = $pdo->prepare('SELECT s.nisn, s.nama_siswa, lh.id AS laporan_id, lh.bangun, lh.ibadah, lh.olahraga, lh.sarapan, lh.membaca, lh.membantu, lh.menabung FROM siswa s LEFT JOIN laporan_harian lh ON lh.siswa_id = s.id AND lh.tanggal = ? WHERE s.kelas = ? ORDER BY s.nama_siswa ASC');
 $stmt->execute([$filterTanggal, $filterKelas]);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Logo Kop Surat
+$pathPemkot = __DIR__ . '/../../assets/img/logopemkot.png';
+$pathSekolah = __DIR__ . '/../../assets/img/logosekolah.png';
+
+$logoPemkotSrc = file_exists($pathPemkot)
+    ? 'data:image/png;base64,' . base64_encode(file_get_contents($pathPemkot))
+    : '../../assets/img/logopemkot.png';
+
+$logoSekolahSrc = file_exists($pathSekolah)
+    ? 'data:image/png;base64,' . base64_encode(file_get_contents($pathSekolah))
+    : '../../assets/img/logosekolah.png';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -51,7 +63,34 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <style>
         body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; color: #000; background: #fff; margin: 0; padding: 20px; }
         h2, h3, h4 { margin: 5px 0; text-align: center; }
-        .kop-surat { border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        /* Kop Surat Resmi */
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px double #000;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .kop-logo-box {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .kop-logo { display: block; object-fit: contain; }
+        .kop-logo-pemkot { height: 86px; max-height: 86px; width: auto; max-width: 85px; }
+        .kop-logo-sekolah { height: 78px; max-height: 78px; width: auto; max-width: 82px; }
+        .kop-teks { text-align: center; flex: 1; }
+        .kop-teks h3 { font-size: 13px; font-weight: normal; margin: 0; letter-spacing: 0.5px; }
+        .kop-teks h2 { font-size: 15px; font-weight: bold; margin: 2px 0; text-transform: uppercase; }
+        .kop-teks h1 { font-size: 18px; font-weight: bold; margin: 2px 0; text-transform: uppercase; }
+        .kop-teks p { font-size: 10px; margin-top: 3px; color: #333; margin-bottom: 0; }
+        .judul-dokumen { text-align: center; margin-bottom: 15px; }
+        .judul-dokumen h3 { font-size: 15px; font-weight: bold; text-decoration: underline; margin-bottom: 4px; }
         .info-bar { margin-bottom: 15px; width: 100%; display: flex; justify-content: space-between; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt; }
         th, td { border: 1px solid #000; padding: 6px 8px; }
@@ -75,10 +114,24 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button onclick="window.close()" style="padding:10px 20px; background:#ef4444; color:white; border:none; cursor:pointer; font-weight:bold; border-radius: 6px; font-size: 14px;">❌ Tutup</button>
     </div>
 
+    <!-- KOP SURAT RESMI -->
     <div class="kop-surat">
-        <h2>SMP NEGERI 28 BALIKPAPAN</h2>
-        <h4>Jl. Mulawarman, Teritip, Kec. Balikpapan Timur, Kota Balikpapan, Kalimantan Timur</h4>
-        <h3 style="margin-top:15px; text-decoration: underline;">LAPORAN MONITORING KAIH</h3>
+        <div class="kop-logo-box">
+            <img src="<?= $logoPemkotSrc; ?>" alt="Logo Pemkot Balikpapan" class="kop-logo kop-logo-pemkot">
+        </div>
+        <div class="kop-teks">
+            <h3>PEMERINTAH KOTA BALIKPAPAN</h3>
+            <h2>DINAS PENDIDIKAN DAN KEBUDAYAAN</h2>
+            <h1>SMP NEGERI 28 BALIKPAPAN</h1>
+            <p>Jl. Manggar Baru, Balikpapan Timur, Kota Balikpapan, Kalimantan Timur | NPSN: 69978713</p>
+        </div>
+        <div class="kop-logo-box">
+            <img src="<?= $logoSekolahSrc; ?>" alt="Logo SMP Negeri 28 Balikpapan" class="kop-logo kop-logo-sekolah">
+        </div>
+    </div>
+
+    <div class="judul-dokumen">
+        <h3>LAPORAN MONITORING KAIH</h3>
     </div>
 
     <div class="info-bar">

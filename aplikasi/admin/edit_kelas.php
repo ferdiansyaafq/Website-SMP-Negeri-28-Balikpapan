@@ -33,17 +33,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_kelas_baru = trim($_POST['nama_kelas']);
 
     if (!empty($nama_kelas_baru)) {
+        if (!preg_match('/^kelas\s+/i', $nama_kelas_baru)) {
+            $nama_kelas_baru = 'Kelas ' . strtoupper(trim($nama_kelas_baru));
+        } else {
+            $nama_kelas_baru = preg_replace_callback('/^kelas\s+(.*)$/i', function($m) {
+                return 'Kelas ' . strtoupper(trim($m[1]));
+            }, $nama_kelas_baru);
+        }
+        $tingkat = preg_match('/\d+/', $nama_kelas_baru, $m) ? $m[0] : null;
+        $nama_lama = $kelas['nama_kelas'];
         try {
-            $update_stmt = $pdo->prepare("UPDATE kaih_kelas SET nama_kelas = :nama_kelas WHERE id = :id");
+            $pdo->beginTransaction();
+            $update_stmt = $pdo->prepare("UPDATE kaih_kelas SET nama_kelas = :nama_kelas, tingkat = :tingkat, updated_at = NOW() WHERE id = :id");
             $update_stmt->execute([
                 ':nama_kelas' => $nama_kelas_baru,
+                ':tingkat' => $tingkat,
                 ':id' => $id_kelas
             ]);
             
             // Redirect kembali ke halaman kelas setelah berhasil
+            if ($nama_lama !== $nama_kelas_baru) {
+                $stmtS = $pdo->prepare("UPDATE siswa SET kelas = ? WHERE kelas = ?");
+                $stmtS->execute([$nama_kelas_baru, $nama_lama]);
+
+                $stmtG = $pdo->prepare("UPDATE guru SET kelas = ? WHERE kelas = ?");
+                $stmtG->execute([$nama_kelas_baru, $nama_lama]);
+            }
+            $pdo->commit();
+            $_SESSION['flash_msg'] = "Kelas {$nama_kelas_baru} berhasil diperbarui!";
+            $_SESSION['flash_type'] = 'success';
             header('Location: kelas.php');
             exit;
         } catch (PDOException $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $error_msg = "Gagal memperbarui data: " . $e->getMessage();
         }
     } else {

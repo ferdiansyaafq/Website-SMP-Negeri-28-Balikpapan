@@ -2,7 +2,8 @@
 // Pastikan session sudah dimulai jika menggunakan fitur login
 // session_start();
 
-// 1. Konfigurasi Koneksi PDO (Sesuaikan dengan file koneksimu jika sudah dipisah)
+require_once __DIR__ . '/config/database.php';
+/*
 $host = 'localhost';
 $dbname = 'kaih';
 $user = 'root';
@@ -13,6 +14,8 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
     die("Koneksi Gagal: " . $e->getMessage());
+} */
+if (false) {
 }
 
 // 2. Query untuk mengambil laporan yang BELUM divalidasi (Antrean Pending)

@@ -11,14 +11,70 @@ if (!$isAdminSession) {
     exit;
 }
 
+$flash = '';
+$flashType = 'success';
+
+// Handle Reset Password (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'reset_single') {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id > 0) {
+            $stmtU = $pdo->prepare("SELECT id, username, role FROM users WHERE id = ?");
+            $stmtU->execute([$id]);
+            $u = $stmtU->fetch(PDO::FETCH_ASSOC);
+
+            if ($u) {
+                // Tentukan default password berdasarkan role
+                $newPass = '123456';
+                if ($u['role'] === 'kepsek') {
+                    $newPass = '12345678';
+                } elseif ($u['role'] === 'siswa' || $u['role'] === 'orang_tua') {
+                    $newPass = 'smpn28bpp';
+                } elseif ($u['role'] === 'admin') {
+                    $newPass = 'admin123';
+                }
+
+                $hash = password_hash($newPass, PASSWORD_DEFAULT);
+                $stmtUpd = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?");
+                $stmtUpd->execute([$hash, $id]);
+
+                $flash = "Password untuk akun <strong>" . htmlspecialchars($u['username']) . "</strong> berhasil direset menjadi: <code>" . htmlspecialchars($newPass) . "</code>";
+                $flashType = 'success';
+            } else {
+                $flash = "Akun tidak ditemukan.";
+                $flashType = 'error';
+            }
+        }
+    } elseif ($action === 'reset_massal') {
+        $targetRole = trim($_POST['target_role'] ?? '');
+        if (in_array($targetRole, ['guru', 'siswa', 'orang_tua'], true)) {
+            $newPass = ($targetRole === 'guru') ? '123456' : 'smpn28bpp';
+            $hash = password_hash($newPass, PASSWORD_DEFAULT);
+
+            $stmtUpd = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE role = ?");
+            $stmtUpd->execute([$hash, $targetRole]);
+            $count = $stmtUpd->rowCount();
+
+            $labelRole = ($targetRole === 'guru') ? 'Guru' : (($targetRole === 'siswa') ? 'Siswa' : 'Orang Tua');
+            $flash = "Berhasil mereset password {$count} akun <strong>{$labelRole}</strong> menjadi default: <code>{$newPass}</code>";
+            $flashType = 'success';
+        } else {
+            $flash = "Pilih kategori role yang valid untuk reset massal.";
+            $flashType = 'error';
+        }
+    }
+}
+
 // Ambil parameter filter dari form pencarian
 $search = trim($_GET['q'] ?? '');
 $filterRole = trim($_GET['role'] ?? '');
 
-// Query ke database (Kolom keterangan dihapus sementara)
+// Query ke database dengan relasi nama pemilik akun (Guru / Siswa / Admin)
 $query = "
     SELECT u.id, u.username, u.role, u.password,
-           COALESCE(g.nama_guru, s.nama_siswa, CASE WHEN u.role = 'admin' THEN 'Administrator' ELSE '-' END) AS keterangan
+           COALESCE(g.nama_guru, s.nama_siswa, CASE WHEN u.role = 'admin' THEN 'Administrator Sistem' ELSE '-' END) AS keterangan
     FROM users u
     LEFT JOIN guru g ON (u.guru_id = g.id OR u.username = g.nip)
     LEFT JOIN siswa s ON (u.siswa_id = s.id OR u.username = s.nisn)
@@ -26,16 +82,13 @@ $query = "
 ";
 $params = [];
 
-// Jika ada pencarian nama/keterangan
 if ($search !== '') {
-    // Pencarian hanya berdasarkan username saja untuk sementara
     $query .= " AND (u.username LIKE ? OR g.nama_guru LIKE ? OR s.nama_siswa LIKE ?)";
     $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
 
-// Jika ada filter role (jabatan)
 if ($filterRole !== '') {
     $query .= " AND u.role = ?";
     $params[] = $filterRole;
@@ -46,11 +99,11 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $daftar_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Memuat Header UI (yang sudah memiliki fitur sidebar toggle garis 3)
+// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 
-<!-- Styling Tambahan Khusus untuk Tabel Akun -->
+<!-- Styling Khusus Tabel Akun -->
 <style>
     .table-container {
         background: #ffffff;
@@ -68,67 +121,124 @@ require_once '../includes/header-kaih.php';
         text-align: left;
         padding: 12px 15px;
         border-bottom: 2px solid #e2e8f0;
+        background-color: #f8fafc;
         color: #475569;
         font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .table-kaih td {
         padding: 12px 15px;
         border-bottom: 1px solid #f1f5f9;
-        color: #1e293b;
-        font-weight: 600;
+        color: #334155;
+        vertical-align: middle;
     }
     .table-kaih tr:hover td {
         background-color: #f8fafc;
     }
-    
-    /* Warna Warni Badge Role */
     .badge-role {
+        display: inline-block;
         padding: 4px 10px;
         border-radius: 20px;
         font-size: 12px;
         font-weight: 700;
-        display: inline-block;
+        text-align: center;
     }
-    .role-admin { background: #fee2e2; color: #ef4444; }
-    .role-guru { background: #f3e8ff; color: #a855f7; }
-    .role-siswa { background: #e0f2fe; color: #0284c7; }
-    .role-orangtua { background: #dcfce7; color: #166534; }
-    .role-kepsek { background: #fef3c7; color: #b45309; }
+    .role-admin { background-color: #fee2e2; color: #dc2626; }
+    .role-guru { background-color: #e0f2fe; color: #0284c7; }
+    .role-siswa { background-color: #fef3c7; color: #d97706; }
+    .role-orangtua { background-color: #f3e8ff; color: #9333ea; }
+    .role-kepsek { background-color: #dcfce7; color: #166534; }
     
-    /* Tombol Aksi */
     .btn-reset {
-        background: #f59e0b;
-        color: white;
-        border: none;
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
         padding: 6px 12px;
         border-radius: 6px;
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 600;
         cursor: pointer;
         transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
     .btn-reset:hover {
-        background: #d97706;
+        background-color: #fee2e2;
+        border-color: #f87171;
     }
     .btn-reset-massal {
         background: #ef4444;
         color: white;
         border: none;
-        padding: 8px 16px;
+        padding: 8px 14px;
         border-radius: 8px;
         font-size: 13px;
         font-weight: 700;
         cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-reset-massal:hover {
+        background: #dc2626;
+    }
+    .alert-box {
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+    /* Modal Massal */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 440px;
+        width: 90%;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
 </style>
 
 <div class="table-container">
     
+    <?php if ($flash !== ''): ?>
+        <div class="alert-box <?php echo $flashType === 'error' ? 'alert-error' : 'alert-success'; ?>">
+            <?php echo $flash; ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Baris Judul & Filter Pencarian -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h3 style="margin: 0; font-size: 20px; color: #1e293b; display: flex; align-items: center; gap: 10px;">
-            🔐 Manajemen Akun & Password
-        </h3>
+        <div>
+            <h3 style="margin: 0; font-size: 20px; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                🔐 Manajemen Akun & Password
+            </h3>
+            <p style="margin: 4px 0 0; color: #64748b; font-size: 13px;">Kelola akun login dan reset password default bagi warga sekolah.</p>
+        </div>
         
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <form method="GET" action="" style="display: flex; gap: 8px;">
@@ -143,13 +253,13 @@ require_once '../includes/header-kaih.php';
                 </select>
                 
                 <!-- Input Cari Nama/Username -->
-                <input type="text" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari Username/Nama..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; width: 200px;">
+                <input type="text" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari Username/Nama..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; width: 190px;">
                 
-                <button type="submit" style="padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Filter</button>
+                <button type="submit" style="padding: 8px 16px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Cari</button>
             </form>
             
-            <button class="btn-reset-massal">
-                ⚠ Reset Password Massal
+            <button type="button" class="btn-reset-massal" onclick="openModalMassal()">
+                ⚡ Reset Massal
             </button>
         </div>
     </div>
@@ -162,8 +272,8 @@ require_once '../includes/header-kaih.php';
                     <th>Username</th>
                     <th>Role</th>
                     <th>Pemilik / Keterangan</th>
-                    <th>Password</th>
-                    <th>Aksi</th>
+                    <th>Status Password</th>
+                    <th style="text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -173,50 +283,43 @@ require_once '../includes/header-kaih.php';
                 </tr>
                 <?php else: ?>
                     <?php foreach ($daftar_users as $u): 
-                        // Menentukan warna badge berdasarkan tipe role
                         $roleClass = 'role-siswa';
                         $roleText = strtolower($u['role']);
                         if ($roleText === 'admin') $roleClass = 'role-admin';
                         elseif ($roleText === 'guru') $roleClass = 'role-guru';
                         elseif (strpos($roleText, 'orang') !== false) $roleClass = 'role-orangtua';
                         elseif ($roleText === 'kepsek') $roleClass = 'role-kepsek';
+
+                        // Default hint password
+                        $defaultHint = '123456';
+                        if ($roleText === 'kepsek') $defaultHint = '12345678';
+                        elseif ($roleText === 'siswa' || $roleText === 'orang_tua') $defaultHint = 'smpn28bpp';
+                        elseif ($roleText === 'admin') $defaultHint = 'admin123';
                     ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($u['username']); ?></td>
+                        <td style="font-weight: 700; color: #1e293b;"><?php echo htmlspecialchars($u['username']); ?></td>
                         <td>
                             <span class="badge-role <?php echo $roleClass; ?>">
-                                <?php echo ucwords(htmlspecialchars($u['role'])); ?>
+                                <?php echo ucwords(htmlspecialchars(str_replace('_', ' ', $u['role']))); ?>
                             </span>
                         </td>
                         <td><?php echo htmlspecialchars($u['keterangan'] ?? '-'); ?></td>
                         
-                        <!-- Kolom Password dengan Fitur Toggle/Intip -->
+                        <!-- Kolom Status Password Aman (Bcrypt) -->
                         <td>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span id="pw-text-<?php echo $u['id']; ?>" style="font-family: monospace; letter-spacing: 2px; color: #64748b; font-size: 14px;">
-                                    ••••••••
-                                </span>
-                                
-                                <button type="button" 
-                                        data-id="<?php echo $u['id']; ?>" 
-                                        data-pw="<?php echo htmlspecialchars($u['password']); ?>"
-                                        onclick="togglePassword(this)" 
-                                        title="Tampilkan Password"
-                                        style="background: none; border: none; cursor: pointer; color: #94a3b8; padding: 2px; display: flex; align-items: center; transition: 0.2s;">
-                                    <!-- Icon Mata (Default tertutup/disamarkan) -->
-                                    <svg id="pw-icon-<?php echo $u['id']; ?>" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                            <span style="font-family: monospace; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; color: #475569; font-size: 12px; font-weight: 600;" title="Terenkripsi Bcrypt (Default: <?php echo $defaultHint; ?>)">
+                                🔒 Terenkripsi (Default: <?= $defaultHint; ?>)
+                            </span>
                         </td>
                         
-                        <td>
-                            <!-- Tombol Reset Belum Ada Logika Backend-nya, Baru Tampil Saja -->
-                            <button type="button" class="btn-reset" onclick="return confirm('Yakin ingin mereset password untuk akun <?php echo htmlspecialchars($u['username']); ?>?');">
-                                Reset Password
-                            </button>
+                        <td style="text-align: center;">
+                            <form method="POST" action="" onsubmit="return confirm('Reset password akun <?php echo htmlspecialchars($u['username']); ?> ke default (<?= $defaultHint; ?>)?');" style="display: inline; margin: 0;">
+                                <input type="hidden" name="action" value="reset_single">
+                                <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
+                                <button type="submit" class="btn-reset">
+                                    🔑 Reset Password
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -226,38 +329,50 @@ require_once '../includes/header-kaih.php';
     </div>
 </div>
 
-<!-- Script JavaScript untuk Fitur Show/Hide Password -->
+<!-- Modal Reset Password Massal -->
+<div class="modal-overlay" id="modalMassal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #1e293b; font-size: 18px;">⚡ Reset Password Massal</h3>
+        <p style="color: #64748b; font-size: 13px; line-height: 1.5;">
+            Fitur ini akan mengembalikan password seluruh akun pada kategori yang dipilih ke password standar sekolah.
+        </p>
+
+        <form method="POST" action="" onsubmit="return confirm('PENTING: Apakah Anda yakin ingin mereset password massal untuk role yang dipilih?');">
+            <input type="hidden" name="action" value="reset_massal">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Pilih Role Akun:</label>
+                <select name="target_role" required style="width: 100%; padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                    <option value="">-- Pilih Kategori --</option>
+                    <option value="guru">Seluruh Guru (Default: 123456)</option>
+                    <option value="siswa">Seluruh Siswa (Default: smpn28bpp)</option>
+                    <option value="orang_tua">Seluruh Orang Tua (Default: smpn28bpp)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeModalMassal()" style="padding: 8px 16px; background: #e2e8f0; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" style="padding: 8px 18px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                    Reset Sekarang
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    function togglePassword(btn) {
-        // Ambil data dari atribut HTML tombol yang diklik
-        const id = btn.getAttribute('data-id');
-        const realPw = btn.getAttribute('data-pw');
-        
-        // Ambil elemen teks dan icon berdasarkan ID unik
-        const pwSpan = document.getElementById('pw-text-' + id);
-        const iconSvg = document.getElementById('pw-icon-' + id);
-        
-        // Cek apakah password sedang disamarkan
-        if (pwSpan.innerText === '••••••••') {
-            // Tampilkan Password Asli
-            pwSpan.innerText = realPw;
-            pwSpan.style.letterSpacing = 'normal'; // Kembalikan spasi huruf menjadi normal
-            pwSpan.style.color = '#ef4444'; // Ubah warna jadi merah agar lebih berhati-hati
-            pwSpan.style.fontWeight = '700';
-            btn.style.color = '#ef4444';
-            
-            // Ubah Icon SVG menjadi "Mata Dicoret" (Eye-slash)
-            iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
-        } else {
-            // Sembunyikan Password Kembali
-            pwSpan.innerText = '••••••••';
-            pwSpan.style.letterSpacing = '2px';
-            pwSpan.style.color = '#64748b';
-            pwSpan.style.fontWeight = 'normal';
-            btn.style.color = '#94a3b8';
-            
-            // Ubah Icon SVG menjadi "Mata Terbuka"
-            iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
-        }
+    function openModalMassal() {
+        document.getElementById('modalMassal').style.display = 'flex';
     }
+    function closeModalMassal() {
+        document.getElementById('modalMassal').style.display = 'none';
+    }
+    window.onclick = function(e) {
+        const modal = document.getElementById('modalMassal');
+        if (e.target === modal) {
+            closeModalMassal();
+        }
+    };
 </script>

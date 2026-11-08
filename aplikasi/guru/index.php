@@ -58,7 +58,13 @@ if ($kelas_guru) {
         <div style="font-size: 32px; font-weight: 800; color: #0284c7;"><?php echo $total_siswa; ?></div>
         <div style="color: #64748b; font-size: 14px;">Total Siswa</div>
         <?php if ($kelas_guru): ?>
-        <div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">Kelas <?php echo htmlspecialchars($kelas_guru); ?></div>
+        <?php 
+        $isRealClass = preg_match('/^(kelas\s+)?[789][a-d]/i', trim($kelas_guru));
+        $labelKelas = $isRealClass 
+            ? (preg_match('/^kelas\s+/i', $kelas_guru) ? $kelas_guru : 'Kelas ' . $kelas_guru)
+            : $kelas_guru;
+        ?>
+        <div style="color: #64748b; font-size: 12px; margin-top: 4px;"><?php echo htmlspecialchars($isRealClass ? 'Wali ' . $labelKelas : $labelKelas); ?></div>
         <?php endif; ?>
     </div>
     <div class="card" style="text-align: center; border-top: 4px solid #10b981;">

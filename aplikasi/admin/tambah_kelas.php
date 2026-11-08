@@ -16,9 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_kelas = trim($_POST['nama_kelas']);
 
     if (!empty($nama_kelas)) {
+        if (!preg_match('/^kelas\s+/i', $nama_kelas)) {
+            $nama_kelas = 'Kelas ' . strtoupper(trim($nama_kelas));
+        } else {
+            $nama_kelas = preg_replace_callback('/^kelas\s+(.*)$/i', function($m) {
+                return 'Kelas ' . strtoupper(trim($m[1]));
+            }, $nama_kelas);
+        }
+        $tingkat = preg_match('/\d+/', $nama_kelas, $m) ? $m[0] : null;
         try {
-            $stmt = $pdo->prepare("INSERT INTO kaih_kelas (nama_kelas) VALUES (:nama_kelas)");
-            $stmt->execute([':nama_kelas' => $nama_kelas]);
+            $stmt = $pdo->prepare("INSERT INTO kaih_kelas (nama_kelas, tingkat, created_at, updated_at) VALUES (:nama_kelas, :tingkat, NOW(), NOW())");
+            $stmt->execute([':nama_kelas' => $nama_kelas, ':tingkat' => $tingkat]);
+            $_SESSION['flash_msg'] = "{$nama_kelas} berhasil ditambahkan!";
+            $_SESSION['flash_type'] = 'success';
             
             // Redirect kembali ke halaman kelas setelah berhasil
             header('Location: kelas.php');
