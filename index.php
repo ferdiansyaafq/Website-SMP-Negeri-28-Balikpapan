@@ -105,7 +105,7 @@ $fasilitasData = [
     [
         'nama' => 'Laboratorium Komputer',
         'deskripsi' => 'Lab komputer dengan 30 unit PC dan internet cepat',
-        'gambar' => 'assets/img/fasilitas/laboratoriumkomputer.png'
+        'gambar' => 'assets/img/fasilitas/laboratoriumkomputer.jpg'
     ],
     [
         'nama' => 'Pojok Literasi',
@@ -115,7 +115,7 @@ $fasilitasData = [
     [
         'nama' => 'Masjid Sekolah',
         'deskripsi' => 'Ruang ibadah yang nyaman untuk kegiatan keagamaan',
-        'gambar' => 'assets/img/fasilitas/masjidsekolah.png'
+        'gambar' => 'assets/img/fasilitas/masjidsekolah.jpg'
     ],
     [
         'nama' => 'Lapangan Olahraga',
@@ -125,7 +125,7 @@ $fasilitasData = [
     [
         'nama' => 'Kantin Sehat',
         'deskripsi' => 'Kantin dengan menu gizi seimbang dan bersih',
-        'gambar' => 'assets/img/fasilitas/kantin.png'
+        'gambar' => 'assets/img/fasilitas/kantin.jpg'
     ]
 ];
 
@@ -134,19 +134,19 @@ $ekskulData = [
         'nama' => 'Pramuka',
         'jadwal' => 'Jumat, 14.00-16.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/ekstrakurikuler/pramuka.png'
+        'gambar' => 'assets/img/ekstrakurikuler/pramuka.jpg'
     ],
     [
         'nama' => 'Futsal',
         'jadwal' => 'Selasa & Kamis, 15.00-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/fasilitas/futsal.png'
+        'gambar' => 'assets/img/ekstrakurikuler/futsal.jpg'
     ],
     [
         'nama' => 'Pencak Silat',
         'jadwal' => 'Selasa, 15.30-17.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.png'
+        'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.jpg'
     ],
     [
         'nama' => 'PMR',
@@ -164,7 +164,7 @@ $ekskulData = [
         'nama' => 'Kader Lingkungan',
         'jadwal' => 'Sabtu, 08.00-10.00',
         'pembina' => 'Pembimbing',
-        'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.png'
+        'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.jpg'
     ],
 ];
 
