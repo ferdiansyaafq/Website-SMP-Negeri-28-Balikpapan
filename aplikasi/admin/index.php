@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/index.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -13,25 +11,18 @@ if (!$isAdminSession) {
 
 $tanggal_hari_ini = date('Y-m-d');
 
-// =======================================================
-// 1. STATISTIK GLOBAL HARI INI
-// =======================================================
 $total_siswa = (int)$pdo->query("SELECT COUNT(*) FROM siswa")->fetchColumn();
 
 $stmtMasuk = $pdo->prepare("SELECT COUNT(*) FROM laporan_harian WHERE tanggal = ?");
 $stmtMasuk->execute([$tanggal_hari_ini]);
 $laporan_hari_ini = (int)$stmtMasuk->fetchColumn();
 
-// Mencegah minus jika ada data anomali
 $belum_lapor = max(0, $total_siswa - $laporan_hari_ini);
 
 $stmtValid = $pdo->prepare("SELECT COUNT(*) FROM laporan_harian WHERE tanggal = ? AND (orang_tua_validated_at IS NOT NULL OR guru_validated_at IS NOT NULL)");
 $stmtValid->execute([$tanggal_hari_ini]);
 $tervalidasi_hari_ini = (int)$stmtValid->fetchColumn();
 
-// =======================================================
-// 2. DATA REKAP KEHADIRAN KAIH PER KELAS (HARI INI)
-// =======================================================
 $stmtRekap = $pdo->prepare("
     SELECT 
         k.nama_kelas,
@@ -45,9 +36,6 @@ $stmtRekap = $pdo->prepare("
 $stmtRekap->execute([$tanggal_hari_ini, $tanggal_hari_ini]);
 $rekap_kelas = $stmtRekap->fetchAll(PDO::FETCH_ASSOC);
 
-// =======================================================
-// 3. AKTIVITAS TERBARU (LIVE FEED)
-// =======================================================
 $stmtAktivitas = $pdo->prepare("
     SELECT s.nama_siswa, s.kelas, lh.created_at, 
            (lh.bangun + lh.ibadah + lh.olahraga + lh.sarapan + lh.membaca + lh.membantu + lh.menabung) as skor,
@@ -60,9 +48,6 @@ $stmtAktivitas = $pdo->prepare("
 $stmtAktivitas->execute([$tanggal_hari_ini]);
 $aktivitas_terbaru = $stmtAktivitas->fetchAll(PDO::FETCH_ASSOC);
 
-// =======================================================
-// 4. DATA GRAFIK 7 KAIH GLOBAL HARI INI
-// =======================================================
 $stmtGrafik = $pdo->prepare("
     SELECT 
         COALESCE(SUM(bangun), 0) as tot_bangun,
@@ -78,7 +63,6 @@ $stmtGrafik = $pdo->prepare("
 $stmtGrafik->execute([$tanggal_hari_ini]);
 $dataGrafik = $stmtGrafik->fetch(PDO::FETCH_ASSOC);
 
-// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 

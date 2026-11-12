@@ -1,10 +1,7 @@
 <?php
-// aplikasi/guru/index.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
-
-// Ambil data statistik dari database
 $guru_id = $_SESSION['guru_id'] ?? 0;
 $kelas_guru = '';
 
@@ -17,30 +14,25 @@ if ($guru_id > 0) {
             $kelas_guru = $guru['kelas'] ?? '';
         }
     } catch (PDOException $e) {
-        // Abaikan error
     }
 }
 
-// Hitung statistik
 $total_siswa = 0;
 $kegiatan_hari_ini = 0;
 $menunggu_validasi = 0;
 
 if ($kelas_guru) {
     try {
-        // Total siswa di kelas guru
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM siswa WHERE kelas = ?");
         $stmt->execute([$kelas_guru]);
         $total_siswa = $stmt->fetchColumn();
         
-        // Kegiatan hari ini
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM laporan_harian lh 
                                JOIN siswa s ON lh.siswa_id = s.id 
                                WHERE s.kelas = ? AND lh.tanggal = ?");
         $stmt->execute([$kelas_guru, date('Y-m-d')]);
         $kegiatan_hari_ini = $stmt->fetchColumn();
         
-        // Menunggu validasi
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM laporan_harian lh 
                                JOIN siswa s ON lh.siswa_id = s.id 
                                WHERE s.kelas = ? AND lh.tanggal = ? 
@@ -48,7 +40,6 @@ if ($kelas_guru) {
         $stmt->execute([$kelas_guru, date('Y-m-d')]);
         $menunggu_validasi = $stmt->fetchColumn();
     } catch (PDOException $e) {
-        // Tabel mungkin belum ada
     }
 }
 ?>

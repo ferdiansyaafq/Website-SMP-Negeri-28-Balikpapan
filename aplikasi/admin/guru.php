@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/guru.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -14,11 +12,9 @@ if (!$isAdminSession) {
 $flash = '';
 $flashType = 'success';
 
-// Ambil daftar kelas untuk dropdown Kelas Wali
 $stmtK = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC");
 $list_kelas = $stmtK->fetchAll(PDO::FETCH_COLUMN);
 
-// Proses CRUD (Tambah, Edit, Hapus)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
@@ -26,18 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nip = trim($_POST['nip'] ?? '');
         $nama_guru = trim($_POST['nama_guru'] ?? '');
         $jabatan = trim($_POST['jabatan'] ?? '');
-        $kelas = trim($_POST['kelas'] ?? ''); // Kelas wali (bisa kosong)
+        $kelas = trim($_POST['kelas'] ?? ''); 
 
         if ($nip !== '' && $nama_guru !== '' && $jabatan !== '') {
             try {
                 $pdo->beginTransaction();
                 
-                // 1. Masukkan data ke tabel guru (termasuk kolom kelas)
                 $stmt = $pdo->prepare("INSERT INTO guru (nip, nama_guru, jabatan, kelas, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
                 $stmt->execute([$nip, $nama_guru, $jabatan, $kelas !== '' ? $kelas : null]);
                 $guru_id = $pdo->lastInsertId();
                 
-                // 2. Buat akun login Guru otomatis (password default: 123456)
                 $pass_guru = password_hash('123456', PASSWORD_DEFAULT);
                 $stmtUsr = $pdo->prepare("INSERT INTO users (username, password, role, guru_id, created_at, updated_at) VALUES (?, ?, 'guru', ?, NOW(), NOW())");
                 $stmtUsr->execute([$nip, $pass_guru, $guru_id]);
@@ -66,11 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $pdo->beginTransaction();
                 
-                // 1. Update data guru
                 $stmt = $pdo->prepare("UPDATE guru SET nip = ?, nama_guru = ?, jabatan = ?, kelas = ?, updated_at = NOW() WHERE id = ?");
                 $stmt->execute([$nip, $nama_guru, $jabatan, $kelas !== '' ? $kelas : null, $id]);
 
-                // 2. Jika NIP berubah, update username login
                 if ($nip !== $nip_lama) {
                     $stmtUsr = $pdo->prepare("UPDATE users SET username = ? WHERE guru_id = ? AND role = 'guru'");
                     $stmtUsr->execute([$nip, $id]);
@@ -93,11 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id > 0) {
             try {
                 $pdo->beginTransaction();
-                // Hapus relasi akun users
                 $stmtU = $pdo->prepare("DELETE FROM users WHERE guru_id = ?");
                 $stmtU->execute([$id]);
                 
-                // Hapus data guru
                 $stmtG = $pdo->prepare("DELETE FROM guru WHERE id = ?");
                 $stmtG->execute([$id]);
                 
@@ -112,7 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fitur Pencarian & Ambil Data Guru
 $search = trim($_GET['q'] ?? '');
 $query = "SELECT * FROM guru";
 $params = [];
@@ -127,7 +116,6 @@ $stmtGuru = $pdo->prepare($query);
 $stmtGuru->execute($params);
 $daftar_guru = $stmtGuru->fetchAll(PDO::FETCH_ASSOC);
 
-// Header UI
 require_once '../includes/header-kaih.php';
 ?>
 

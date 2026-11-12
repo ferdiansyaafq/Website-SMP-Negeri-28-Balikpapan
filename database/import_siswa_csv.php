@@ -1,12 +1,10 @@
 <?php
-// database/import_siswa_csv.php
 require_once __DIR__ . '/../config/database.php';
 
 echo "=========================================================\n";
 echo " IMPORT SISWA & GENERATE AKUN PENGGUNA (SMPN 28 BALIKPAPAN)\n";
 echo "=========================================================\n\n";
 
-// 1. Pastikan kelas-kelas terdaftar di tabel kaih_kelas
 $kelas_diperlukan = [
     ['nama_kelas' => 'Kelas 7A', 'tingkat' => '7'],
     ['nama_kelas' => 'Kelas 7B', 'tingkat' => '7'],
@@ -16,7 +14,7 @@ $kelas_diperlukan = [
     ['nama_kelas' => 'Kelas 8D', 'tingkat' => '8'],
     ['nama_kelas' => 'Kelas 9A', 'tingkat' => '9'],
     ['nama_kelas' => 'Kelas 9B', 'tingkat' => '9'],
-    ['nama_kelas' => 'Belum Ada Kelas', 'tingkat' => '7'] // Wadah murid baru sebelum dibagi
+    ['nama_kelas' => 'Belum Ada Kelas', 'tingkat' => '7'] 
 ];
 
 $stmtCekKelas = $pdo->prepare("SELECT id FROM kaih_kelas WHERE nama_kelas = ?");
@@ -31,14 +29,11 @@ foreach ($kelas_diperlukan as $k) {
     }
 }
 
-// Ambil map kelas => id
 $mapKelas = $pdo->query("SELECT nama_kelas, id FROM kaih_kelas")->fetchAll(PDO::FETCH_KEY_PAIR);
 
-// 2. Hash password terstandar: "smpn28bpp"
 $password_plain = 'smpn28bpp';
 $password_hash = password_hash($password_plain, PASSWORD_DEFAULT);
 
-// Prepared statements untuk tabel siswa
 $stmtInsertSiswa = $pdo->prepare("
     INSERT INTO siswa (nisn, nama_siswa, kelas, jenis_kelamin, wali_kelas_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, NOW(), NOW())
@@ -52,7 +47,6 @@ $stmtInsertSiswa = $pdo->prepare("
 
 $stmtGetSiswaId = $pdo->prepare("SELECT id FROM siswa WHERE nisn = ?");
 
-// Prepared statements untuk tabel users (Akun Siswa)
 $stmtUpsertUserSiswa = $pdo->prepare("
     INSERT INTO users (username, password, role, siswa_id, created_at, updated_at)
     VALUES (?, ?, 'siswa', ?, NOW(), NOW())
@@ -63,7 +57,6 @@ $stmtUpsertUserSiswa = $pdo->prepare("
         updated_at = NOW()
 ");
 
-// Prepared statements untuk tabel users (Akun Orang Tua)
 $stmtUpsertUserOrtu = $pdo->prepare("
     INSERT INTO users (username, password, role, siswa_id, created_at, updated_at)
     VALUES (?, ?, 'orang_tua', ?, NOW(), NOW())
@@ -85,30 +78,22 @@ $stats = [
     'total_user_ortu' => 0,
 ];
 
-// Helper fungsi proses 1 siswa
 function prosesSiswa($nisn, $nama, $kelas, $jk, $pdo, $stmtInsertSiswa, $stmtGetSiswaId, $stmtUpsertUserSiswa, $stmtUpsertUserOrtu, $password_hash, $mapKelas) {
     $wali_kelas_id = $mapKelas[$kelas] ?? null;
 
-    // 1. Simpan/Update Siswa
     $stmtInsertSiswa->execute([$nisn, $nama, $kelas, $jk, $wali_kelas_id]);
 
-    // 2. Ambil ID Siswa
     $stmtGetSiswaId->execute([$nisn]);
     $siswa_id = $stmtGetSiswaId->fetchColumn();
 
-    // 3. Akun Siswa (username = NISN)
     $stmtUpsertUserSiswa->execute([$nisn, $password_hash, $siswa_id]);
 
-    // 4. Akun Orang Tua (username = ORT + NISN)
     $username_ortu = 'ORT' . $nisn;
     $stmtUpsertUserOrtu->execute([$username_ortu, $password_hash, $siswa_id]);
 
     return true;
 }
 
-// ========================================================
-// 3. PROSES KELAS 8 (8A, 8B, 8C, 8D)
-// ========================================================
 $csv_kelas_8 = [
     'kelas_8a' => ['path' => __DIR__ . '/csv/1_kelas_8a.csv', 'kelas' => 'Kelas 8A'],
     'kelas_8b' => ['path' => __DIR__ . '/csv/2_kelas_8b.csv', 'kelas' => 'Kelas 8B'],
@@ -124,22 +109,20 @@ foreach ($csv_kelas_8 as $key => $info) {
     }
 
     $h = fopen($info['path'], 'r');
-    fgetcsv($h, 0, ',', '"', '\\'); // Lewati header
+    fgetcsv($h, 0, ',', '"', '\\'); 
     $count = 0;
 
     while (($row = fgetcsv($h, 0, ',', '"', '\\')) !== false) {
         $no = trim($row[1] ?? '');
-        // Abaikan baris rekapitulasi (S, I, A, dll)
         if (in_array(strtoupper($no), ['S', 'I', 'A', ''])) continue;
 
         $rawNisn = trim(explode('/', $row[2] ?? '')[0]);
         $nama = trim($row[3] ?? '');
         $jk = strtoupper(trim($row[4] ?? ''));
         if ($jk !== 'L' && $jk !== 'P') {
-            $jk = 'L'; // Default
+            $jk = 'L'; 
         }
 
-        // Penanganan siswa khusus Cantika (jika NISN belum terisi di csv)
         if (empty($rawNisn) && stripos($nama, 'Cantika') !== false) {
             $rawNisn = '0120000026';
             $jk = 'P';
@@ -158,16 +141,13 @@ foreach ($csv_kelas_8 as $key => $info) {
     echo " [✓] {$info['kelas']}: Berhasil memproses {$count} siswa & akun.\n";
 }
 
-// ========================================================
-// 4. PROSES MURID BARU 2026/2027 (DIJADIKAN 1 KELAS: 'Belum Ada Kelas')
-// ========================================================
 echo "\n--- Memproses Murid Baru 2026/2027 ---\n";
 $path_murid_baru = __DIR__ . '/csv/daftar_nama_murid_baru_2026_2027.csv';
 
 if (file_exists($path_murid_baru)) {
     $h = fopen($path_murid_baru, 'r');
-    fgetcsv($h, 0, ',', '"', '\\'); // Lewati baris 0 (Unnamed)
-    fgetcsv($h, 0, ',', '"', '\\'); // Lewati baris 1 (Header nama kolom)
+    fgetcsv($h, 0, ',', '"', '\\'); 
+    fgetcsv($h, 0, ',', '"', '\\'); 
     $countMb = 0;
 
     while (($row = fgetcsv($h, 0, ',', '"', '\\')) !== false) {
@@ -179,7 +159,6 @@ if (file_exists($path_murid_baru)) {
 
         if (empty($nisn) || empty($nama)) continue;
 
-        // Kelas murid baru dijadikan 1 sebagai 'Belum Ada Kelas'
         $kelasMb = 'Belum Ada Kelas';
 
         prosesSiswa($nisn, $nama, $kelasMb, $jk, $pdo, $stmtInsertSiswa, $stmtGetSiswaId, $stmtUpsertUserSiswa, $stmtUpsertUserOrtu, $password_hash, $mapKelas);

@@ -1,5 +1,4 @@
 <?php
-// aplikasi/siswa/refleksi.php
 require_once '../includes/header-kaih.php';
 
 $message = '';
@@ -8,7 +7,6 @@ $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $nama_siswa = 'Siswa';
 $kelas = '';
 
-// Ambil data siswa
 if ($siswa_id > 0) {
     try {
         $stmt = $pdo->prepare("SELECT nama_siswa, kelas FROM siswa WHERE id = ?");
@@ -21,9 +19,6 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// AUTO-CREATE TABEL REFLEKSI
-// ============================================================
 function ensureRefleksiTable($pdo) {
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS `refleksi` (
@@ -48,7 +43,6 @@ function ensureRefleksiTable($pdo) {
                 ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-        // Pastikan kolom bulan sudah ada di tabel refleksi
         $stmt = $pdo->query("SHOW COLUMNS FROM refleksi LIKE 'bulan'");
         if (!$stmt->fetch()) {
             $pdo->exec("ALTER TABLE refleksi ADD COLUMN bulan VARCHAR(20) NULL AFTER tanggal");
@@ -60,7 +54,6 @@ function ensureRefleksiTable($pdo) {
 }
 ensureRefleksiTable($pdo);
 
-// Daftar Bulan Indonesia
 $bulan_list = [
     '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
     '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
@@ -84,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     
     if ($siswa_id > 0) {
         try {
-            // Cek apakah sudah ada refleksi untuk siswa pada bulan & tahun ajaran ini
             $stmt = $pdo->prepare("SELECT id FROM refleksi WHERE siswa_id = ? AND (bulan = ? OR (bulan IS NULL AND semester = ?)) AND tahun_ajaran = ?");
             $stmt->execute([$siswa_id, $bulan, $bulan, $tahun_ajaran]);
             $existing = $stmt->fetch();
@@ -130,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_refleksi'])) {
     }
 }
 
-// Ambil data refleksi untuk bulan terpilih atau terakhir
 $data_refleksi = null;
 if ($siswa_id > 0) {
     try {
@@ -145,7 +136,6 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// Ambil semua refleksi untuk riwayat
 $riwayat_refleksi = [];
 if ($siswa_id > 0) {
     try {

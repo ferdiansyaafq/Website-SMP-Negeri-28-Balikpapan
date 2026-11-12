@@ -26,7 +26,6 @@ $data['saksi'] = trim((string) ($_POST['saksi'] ?? ''));
 
 foreach ($fields as $field) {
     if ($data[$field] === '') {
-        // Simpan error ke session agar bisa dilihat
         session_start();
         $_SESSION['error_msg'] = "Field '$field' tidak boleh kosong.";
         header('Location: bullying.php?status=error');
@@ -35,7 +34,6 @@ foreach ($fields as $field) {
 }
 
 try {
-    // Cek apakah tabel ada
     $pdo->query("SELECT 1 FROM laporan_bullying LIMIT 1");
 } catch (PDOException $e) {
     session_start();
@@ -57,7 +55,6 @@ try {
     $stmt->execute($data);
     header('Location: bullying.php?status=success');
 } catch (PDOException $e) {
-    // Simpan error asli ke session
     session_start();
     $_SESSION['error_msg'] = 'DB Error: ' . $e->getMessage();
     header('Location: bullying.php?status=error');

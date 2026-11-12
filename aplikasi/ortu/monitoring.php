@@ -1,11 +1,7 @@
 <?php
-// aplikasi/ortu/monitoring.php
 session_start();
 require_once '../../config/database.php';
 
-// ============================================================
-// 1. PROSES AKSI: VALIDASI / BATAL SETUJU (SEBELUM HEADER)
-// ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
     $laporanId = (int) ($_POST['laporan_id'] ?? 0);
@@ -46,9 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ============================================================
-// 2. PROSES AKSI GET (LAMA): VALIDASI / BATAL SETUJU
-// ============================================================
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
     $id_laporan = (int)$_GET['id'];
     $aksi = $_GET['aksi'];
@@ -71,17 +64,11 @@ if (isset($_GET['aksi']) && isset($_GET['id'])) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// 3. CEK ROLE SEBELUM HEADER
-// ============================================================
 if (($_SESSION['role'] ?? '') !== 'orang_tua') {
     header('Location: ../index.php');
     exit;
 }
 
-// ============================================================
-// 4. PASTIKAN TABEL laporan_harian ADA
-// ============================================================
 function ensureLaporanHarianTableOrtu(PDO $pdo): void
 {
     try {
@@ -111,14 +98,10 @@ function ensureLaporanHarianTableOrtu(PDO $pdo): void
             INDEX `idx_tanggal` (`tanggal`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     } catch (PDOException $e) {
-        // Abaikan
     }
 }
 ensureLaporanHarianTableOrtu($pdo);
 
-// ============================================================
-// 5. AMBIL DATA ANAK
-// ============================================================
 $siswa_id = (int) ($_SESSION['siswa_id'] ?? 0);
 $anak = null;
 if ($siswa_id > 0) {
@@ -131,25 +114,16 @@ if ($siswa_id > 0) {
     }
 }
 
-// ============================================================
-// 6. FLASH MESSAGE
-// ============================================================
 $flash = $_SESSION['flash_ortu_msg'] ?? '';
 $flashType = $_SESSION['flash_ortu_type'] ?? 'success';
 unset($_SESSION['flash_ortu_msg'], $_SESSION['flash_ortu_type']);
 
-// ============================================================
-// 7. FILTER BULAN
-// ============================================================
 $filterBulan = trim((string) ($_GET['bulan'] ?? date('Y-m')));
 if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
     $filterBulan = date('Y-m');
 }
 $redirectQs = http_build_query(['bulan' => $filterBulan]);
 
-// ============================================================
-// 8. AMBIL DATA KEGIATAN SEBULAN
-// ============================================================
 $laporanList = [];
 $statTotal = 0;
 $statValidOrtu = 0;

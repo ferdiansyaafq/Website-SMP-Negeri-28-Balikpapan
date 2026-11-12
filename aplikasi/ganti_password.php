@@ -1,9 +1,7 @@
 <?php
-// aplikasi/ganti_password.php
 session_start();
 require_once '../config/database.php';
 
-// Pastikan user sudah login
 if (!isset($_SESSION['username'])) {
     header('Location: ../login.php');
     exit;
@@ -13,7 +11,6 @@ $message = '';
 $message_type = '';
 $username = $_SESSION['username'];
 
-// Proses Ganti Password
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old_password = $_POST['old_password'] ?? '';
     $new_password = $_POST['new_password'] ?? '';
@@ -30,16 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message_type = 'error';
     } else {
         try {
-            // Ambil hash password saat ini dari database
             $stmt = $pdo->prepare("SELECT password FROM users WHERE username = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($old_password, $user['password'])) {
-                // Enkripsi password baru
                 $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
                 
-                // Update ke database
                 $stmtUpdate = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE username = ?");
                 $stmtUpdate->execute([$new_hash, $username]);
                 
@@ -56,9 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Set variabel untuk header agar tidak error
 $_SESSION['portal_role'] = $_SESSION['portal_role'] ?? $_SESSION['role'] ?? 'user';
-// Include header (karena kita ada di root 'aplikasi', path-nya menyesuaikan)
 require_once 'includes/header-kaih.php';
 ?>
 
@@ -111,6 +103,5 @@ require_once 'includes/header-kaih.php';
 </div>
 
 <?php 
-// Kosongkan fungsi klik menu yang nyangkut di header karena beda path folder
 echo '<script>document.querySelectorAll(".nav-link").forEach(el => { if(el.getAttribute("href") === "../ganti_password.php") el.setAttribute("href", "#"); });</script>';
 ?>

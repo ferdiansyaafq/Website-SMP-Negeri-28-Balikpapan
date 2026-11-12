@@ -204,7 +204,6 @@ $gmail_link = "https://mail.google.com/mail/?view=cm&fs=1&to={$email_tujuan}&su=
             <span class="quick-nav-link">Kirim Email →</span>
         </a>
 
-        <!-- Kartu WhatsApp -->
         <a href="<?= htmlspecialchars($schoolWhatsappUrl, ENT_QUOTES, 'UTF-8') ?>" class="quick-nav-card card-wa" target="_blank" rel="noopener noreferrer">
             <div>
                 <div class="quick-nav-icon-wrapper">

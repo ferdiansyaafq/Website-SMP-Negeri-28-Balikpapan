@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/siswa.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -14,7 +12,6 @@ if (!$isAdminSession) {
 $flash = '';
 $flashType = 'success';
 
-// Proses CRUD (Tambah, Edit, Hapus, & Import)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
@@ -26,17 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($nisn !== '' && $nama_siswa !== '' && $kelas !== '') {
             try {
                 $pdo->beginTransaction();
-                // 1. Masukkan data ke tabel siswa
                 $stmt = $pdo->prepare("INSERT INTO siswa (nisn, nama_siswa, kelas, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
                 $stmt->execute([$nisn, $nama_siswa, $kelas]);
                 $siswa_id = $pdo->lastInsertId();
 
-                // 2. Buat akun login Siswa otomatis (password default: smpn28bpp)
                 $pass_siswa = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                 $stmtUsr = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'siswa', ?, NOW(), NOW())");
                 $stmtUsr->execute([$nisn, $pass_siswa, $siswa_id]);
 
-                // 3. Buat akun login Orang Tua otomatis (username: ORT + NISN)
                 $username_ortu = 'ORT' . $nisn;
                 $pass_ortu = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                 $stmtOrtu = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'orang_tua', ?, NOW(), NOW())");
@@ -63,11 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id > 0 && $nisn !== '' && $nama_siswa !== '' && $kelas !== '') {
             try {
                 $pdo->beginTransaction();
-                // 1. Update tabel siswa
                 $stmt = $pdo->prepare("UPDATE siswa SET nisn = ?, nama_siswa = ?, kelas = ?, updated_at = NOW() WHERE id = ?");
                 $stmt->execute([$nisn, $nama_siswa, $kelas, $id]);
 
-                // 2. Jika NISN berubah, update juga username di tabel users
                 if ($nisn !== $nisn_lama) {
                     $stmtUsr = $pdo->prepare("UPDATE users SET username = ? WHERE siswa_id = ? AND role = 'siswa'");
                     $stmtUsr->execute([$nisn, $id]);
@@ -92,11 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id > 0) {
             try {
                 $pdo->beginTransaction();
-                // Hapus relasi akun users terlebih dahulu
                 $stmtU = $pdo->prepare("DELETE FROM users WHERE siswa_id = ?");
                 $stmtU->execute([$id]);
 
-                // Hapus data siswa
                 $stmtS = $pdo->prepare("DELETE FROM siswa WHERE id = ?");
                 $stmtS->execute([$id]);
                 $pdo->commit();
@@ -108,14 +98,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'import') {
-        // --- LOGIKA IMPORT CSV ---
         if (isset($_FILES['file_csv']) && $_FILES['file_csv']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['file_csv']['tmp_name'];
             $sukses = 0;
             $gagal = 0;
 
             if (($handle = fopen($fileTmpPath, "r")) !== FALSE) {
-                fgetcsv($handle, 1000, ","); // Lewati Header
+                fgetcsv($handle, 1000, ","); 
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                     $nisn = trim($data[0] ?? '');
                     $nama_siswa = trim($data[1] ?? '');
@@ -159,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fitur Pencarian & Ambil Data Siswa
 $search = trim($_GET['q'] ?? '');
 $filterKelas = trim($_GET['kelas'] ?? '');
 
@@ -180,24 +168,19 @@ $stmtSiswa = $pdo->prepare($query);
 $stmtSiswa->execute($params);
 $daftar_siswa = $stmtSiswa->fetchAll(PDO::FETCH_ASSOC);
 
-// Tarik Dinamis Data Kelas dari Database
 $daftar_kelas = [];
 $stmtKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC");
 if ($stmtKelas) {
     $daftar_kelas = $stmtKelas->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// --- AMBIL DATA WALI KELAS UNTUK JS AUTO-FILL ---
 $mapWaliKelas = [];
 try {
-    // Mengecek kombinasi jika ada kolom 'kelas' ataupun lewat format string di 'jabatan'
     $stmtWali = $pdo->query("SELECT nama_guru, kelas, jabatan FROM guru");
     while ($row = $stmtWali->fetch(PDO::FETCH_ASSOC)) {
-        // Prioritas 1: Jika kolom 'kelas' ada isinya
         if (!empty($row['kelas'])) {
             $mapWaliKelas[trim($row['kelas'])] = $row['nama_guru'];
         } 
-        // Prioritas 2: Jika tertulis di jabatan misal "Wali Kelas 7C"
         elseif (!empty($row['jabatan']) && stripos($row['jabatan'], 'Wali Kelas') !== false) {
             $kelasDariJabatan = trim(str_ireplace('Wali Kelas', '', $row['jabatan']));
             if (!empty($kelasDariJabatan)) {
@@ -206,7 +189,6 @@ try {
         }
     }
 } catch (PDOException $e) {
-    // Jika tabel guru tidak memiliki kolom 'kelas', fallback tarik dari 'jabatan' saja
     try {
         $stmtWali2 = $pdo->query("SELECT nama_guru, jabatan FROM guru WHERE jabatan LIKE '%Wali Kelas%'");
         while ($row = $stmtWali2->fetch(PDO::FETCH_ASSOC)) {
@@ -219,7 +201,6 @@ try {
 }
 $mapWaliKelasJson = json_encode($mapWaliKelas);
 
-// Header bawaan tampilan UI asli
 require_once '../includes/header-kaih.php';
 ?>
 
@@ -295,7 +276,6 @@ require_once '../includes/header-kaih.php';
                             <!-- Tambahan Data Wali Kelas -->
                             <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">
                                 <?php 
-                                    // Panggil mapping PHP wali kelas berdasarkan kelas siswa
                                     $waliKelasText = $mapWaliKelas[$s['kelas']] ?? 'Belum Ada';
                                     echo htmlspecialchars($waliKelasText); 
                                 ?>
@@ -484,4 +464,4 @@ require_once '../includes/header-kaih.php';
     }
 </script>
 
-<?php // Tutup file ?>
+<?php ?>

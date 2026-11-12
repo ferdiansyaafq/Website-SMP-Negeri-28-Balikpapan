@@ -1,5 +1,4 @@
 <?php
-// aplikasi/siswa/absensi.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
@@ -8,13 +7,15 @@ $message_type = '';
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 
 function cekWaktuAbsensi() {
-    // Set timezone ke WITA (Asia/Makassar)
-    date_default_timezone_set('Asia/Makassar');
+    if (defined('APP_TIMEZONE')) {
+        date_default_timezone_set(APP_TIMEZONE);
+    } else {
+        date_default_timezone_set(PHP_OS_FAMILY === 'Windows' ? 'Asia/Jakarta' : 'Asia/Makassar');
+    }
     
-    $hari = date('N'); // 1=Senin, 7=Minggu
-    $jam = date('H:i'); // Format 24 jam
+    $hari = date('N'); 
+    $jam = date('H:i'); 
     
-    // Absensi hanya Senin-Jumat (1-5)
     if ($hari < 1 || $hari > 5) {
         return [
             'status' => false,
@@ -25,14 +26,13 @@ function cekWaktuAbsensi() {
     if ($jam < '07:15' || $jam > '07:30') {
         return [
             'status' => false,
-            'pesan' => '❌ Absensi hanya berlaku pukul 07.15 - 07.30 WITA!'
+            'pesan' => '❌ Absensi hanya berlaku pukul 07.15 - 07.30 WITA! (Waktu server saat ini: ' . $jam . ' WITA)'
         ];
     }
     
     return ['status' => true];
 }
 
-// Ambil nama siswa
 $nama_siswa = 'Siswa';
 if ($siswa_id > 0) {
     try {
@@ -73,7 +73,6 @@ function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
         $today = new DateTime();
         $dayOfWeek = $today->format('N');
         
-        // Cari Senin minggu ini
         $monday = clone $today;
         if ($dayOfWeek == 1) {
             $monday = $today;
@@ -81,19 +80,15 @@ function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
             $monday->modify('last monday');
         }
         
-        // Loop dari Senin sampai Jumat
         $current = clone $monday;
         for ($i = 0; $i < 5; $i++) {
             $tgl_str = $current->format('Y-m-d');
             
-            // Jika tanggal sudah lewat (lebih kecil dari hari ini)
             if ($tgl_str < date('Y-m-d')) {
-                // Cek apakah sudah ada absensi untuk tanggal ini
                 $stmt = $pdo->prepare("SELECT id, status FROM absensi WHERE siswa_id = ? AND tanggal = ?");
                 $stmt->execute([$siswa_id, $tgl_str]);
                 $existing = $stmt->fetch();
                 
-                // Jika belum ada absensi, catat sebagai ALPHA
                 if (!$existing) {
                     $stmt = $pdo->prepare("INSERT INTO absensi (
                         siswa_id, tanggal, status, deskripsi, catatan, created_at, updated_at
@@ -105,27 +100,18 @@ function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
             $current->modify('+1 day');
         }
     } catch (PDOException $e) {
-        // Abaikan error
     }
 }
 
-// Jalankan fungsi pengecekan absensi terlewat
 cekDanCatatAbsenTerlewat($pdo, $siswa_id);
 
-// ============================================================
-// PROSES ABSENSI
-// ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
     
-    // ============================================================
-    // CEK WAKTU DAN HARI ABSENSI - TAMBAHKAN INI!
-    // ============================================================
     $cek = cekWaktuAbsensi();
     if (!$cek['status']) {
         $message = $cek['pesan'];
         $message_type = 'error';
     } else {
-        // Lanjutkan proses absensi
         $tanggal = date('Y-m-d');
         $status = 'hadir';
         $deskripsi = 'Sesi kelas reguler';
@@ -164,9 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
     }
 }
 
-// ============================================================
-// AMBIL DATA MINGGU INI
-// ============================================================
 $today = new DateTime();
 $dayOfWeek = $today->format('N');
 $monday = clone $today;
@@ -363,7 +346,7 @@ foreach ($tanggal_minggu as $tgl) {
     <div class="absensi-card">
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 10px 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #166534;">
             <span style="font-size: 18px;">⏰</span>
-            <div><strong>Jadwal Presensi:</strong> Hari Senin - Jumat pukul <strong>07.15 - 07.30 WITA</strong>. Pastikan absen tepat waktu.</div>
+            <div><strong>Jadwal Presensi:</strong> Hari Senin - Jumat pukul <strong>07.15 - 07.30 WITA</strong> (Waktu Server: <strong><?php echo date('H:i'); ?> WITA</strong>). Pastikan absen tepat waktu.</div>
         </div>
         <h3>📊 Absensi Minggu Ini (<?php echo formatTanggalIndo($monday->format('Y-m-d')); ?> - <?php echo formatTanggalIndo($friday->format('Y-m-d')); ?>)</h3>
         

@@ -1,9 +1,7 @@
 <?php
-// aplikasi/guru/monitoring.php
 session_start();
 require_once '../../config/database.php';
 
-// Logika Aksi Validasi (Gabungan)
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
     $id_laporan = (int)$_GET['id'];
     $aksi = $_GET['aksi'];
@@ -12,7 +10,6 @@ if (isset($_GET['aksi']) && isset($_GET['id'])) {
         if ($aksi === 'setuju') {
             $sql = "UPDATE laporan_harian SET guru_validated_at = NOW() WHERE id = :id";
         } elseif ($aksi === 'batal') {
-            // BATAL SETUJU MERESET KEDUANYA AGAR KEMBALI PENDING
             $sql = "UPDATE laporan_harian SET guru_validated_at = NULL, orang_tua_validated_at = NULL WHERE id = :id";
         }
         
@@ -107,7 +104,6 @@ if (!empty($selected_kelas)) {
                 <?php else: ?>
                     <?php $no = 1; foreach ($laporan_siswa as $s): 
                         $is_lapor = !empty($s['laporan_id']);
-                        // KONSEP GABUNGAN: True jika salah satu pihak sudah validasi
                         $is_validated = $is_lapor && (!empty($s['orang_tua_validated_at']) || !empty($s['guru_validated_at']));
                     ?>
                         <tr>

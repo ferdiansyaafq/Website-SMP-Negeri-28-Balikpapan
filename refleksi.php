@@ -1,17 +1,14 @@
 <?php
-// refleksi.php
 $page_title = "Refleksi Pembelajaran - SMP Negeri 28 Balikpapan";
 include 'header.php';
 require_once 'config/database.php';
 
-// Ambil daftar kelas aktif
 $kelasList = [];
 try {
     $stmtK = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC");
     $kelasList = $stmtK->fetchAll(PDO::FETCH_COLUMN);
 } catch (PDOException $e) {}
 
-// Auto-fill jika siswa sedang login
 $auto_nama = '';
 $auto_kelas = '';
 if (!empty($_SESSION['siswa_id'])) {

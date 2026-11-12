@@ -1,10 +1,4 @@
 <?php
-/**
- * Header Component
- * Digunakan di seluruh halaman website
- */
-
-// Tentukan halaman aktif
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 

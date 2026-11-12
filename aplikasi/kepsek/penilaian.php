@@ -1,9 +1,7 @@
 <?php
-// aplikasi/kepsek/penilaian.php
 session_start();
 require_once '../../config/database.php';
 
-// Pastikan hanya role kepsek
 if (($_SESSION['role'] ?? '') !== 'kepsek') {
     header('Location: ../../login.php');
     exit;
@@ -12,24 +10,19 @@ if (($_SESSION['role'] ?? '') !== 'kepsek') {
 $error = '';
 $kepsek_id = $_SESSION['user_id'] ?? 0;
 
-// Ambil daftar guru (kecuali kepala sekolah sendiri)
 $stmtGuru = $pdo->query("SELECT id, nip, nama_guru, kelas, jabatan FROM guru WHERE jabatan != 'Kepala Sekolah' ORDER BY nama_guru ASC");
 $daftar_guru = $stmtGuru->fetchAll(PDO::FETCH_ASSOC);
 
-// Ambil daftar kelas dari kaih_kelas
 $daftar_kelas = $pdo->query("SELECT nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_COLUMN);
 
-// Ambil seluruh indikator rubrik dari database
 $stmtRubrik = $pdo->query("SELECT * FROM supervisi_rubrik ORDER BY urutan ASC, id ASC");
 $rubrik_items = $stmtRubrik->fetchAll(PDO::FETCH_ASSOC);
 
-// Kelompokkan indikator berdasarkan aspek
 $rubrik_by_aspek = [];
 foreach ($rubrik_items as $item) {
     $rubrik_by_aspek[$item['aspek']][] = $item;
 }
 
-// Skala Poin Pilihan Ganda & Bobot Persentase
 $pilihan_skor = [
     'A' => ['persen' => 100.0, 'label' => 'Sangat Baik (100%)', 'desc' => 'Seluruh kriteria terpenuhi sangat konsisten'],
     'B' => ['persen' => 75.0,  'label' => 'Baik (75%)',        'desc' => 'Sebagian besar kriteria terpenuhi efektif'],
@@ -38,7 +31,6 @@ $pilihan_skor = [
     'E' => ['persen' => 0.0,   'label' => 'Sangat Kurang (0%)','desc' => 'Tidak tampak sama sekali'],
 ];
 
-// Proses Simpan Penilaian Form Rubrik
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $guru_id = (int)($_POST['guru_id'] ?? 0);
     $tanggal_observasi = trim($_POST['tanggal_observasi'] ?? '');
@@ -60,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // Hitung total skor persentase
             $total_persen = 0.0;
             $detail_records = [];
 
@@ -81,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $skor_akhir = round($total_persen / count($rubrik_items), 2);
 
-            // Tentukan predikat
             if ($skor_akhir >= 86.0) {
                 $predikat = 'Sangat Baik';
             } elseif ($skor_akhir >= 71.0) {
@@ -92,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $predikat = 'Kurang';
             }
 
-            // Simpan ke tabel supervisi_penilaian
             $stmtInsert = $pdo->prepare("
                 INSERT INTO supervisi_penilaian 
                 (guru_id, kepsek_id, tanggal_observasi, semester, tahun_ajaran, mata_pelajaran, kelas, skor_akhir, predikat, catatan_kelebihan, catatan_kelemahan, rekomendasi_tindak_lanjut, created_at, updated_at)
@@ -105,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $penilaian_id = (int)$pdo->lastInsertId();
 
-            // Simpan detail jawaban rubrik
             $stmtDetail = $pdo->prepare("
                 INSERT INTO supervisi_penilaian_detail 
                 (penilaian_id, rubrik_id, pilihan, skor_persen, catatan_khusus)
@@ -124,7 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->commit();
 
-            // Sesuai ketentuan: langsung tampilkan grafiknya setelah mengisi rubrik penilaian
             header("Location: analisis.php?id=" . $penilaian_id . "&saved=1");
             exit;
 

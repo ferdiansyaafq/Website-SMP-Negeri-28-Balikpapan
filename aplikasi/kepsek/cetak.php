@@ -1,9 +1,7 @@
 <?php
-// aplikasi/kepsek/cetak.php
 session_start();
 require_once '../../config/database.php';
 
-// Pastikan user adalah kepsek atau admin
 $role = $_SESSION['role'] ?? '';
 if (!in_array($role, ['kepsek', 'admin'], true)) {
     header('Location: ../../login.php');
@@ -15,7 +13,6 @@ if ($id <= 0) {
     die("ID observasi tidak valid.");
 }
 
-// Ambil data sesi supervisi
 $stmt = $pdo->prepare("
     SELECT sp.*, g.nama_guru, g.nip, g.kelas as kelas_guru, g.jabatan, g.alamat, g.no_hp
     FROM supervisi_penilaian sp
@@ -29,7 +26,6 @@ if (!$penilaian) {
     die("Data supervisi tidak ditemukan.");
 }
 
-// Ambil detail rubrik
 $stmtDetail = $pdo->prepare("
     SELECT spd.*, r.aspek, r.indikator, r.deskripsi, r.urutan
     FROM supervisi_penilaian_detail spd
@@ -49,7 +45,6 @@ function tglIndo($tanggal) {
     return $pecahkan[2] . ' ' . $bulan[(int)$pecahkan[1]] . ' ' . $pecahkan[0];
 }
 
-// Logo Kop Surat: Logo Pemkot Balikpapan di kiri, Logo SMPN 28 di kanan
 $pathPemkot = __DIR__ . '/../../assets/img/logopemkot.png';
 $pathSekolah = __DIR__ . '/../../assets/img/logosekolah.png';
 

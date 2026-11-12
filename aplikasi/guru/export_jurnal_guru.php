@@ -29,68 +29,52 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$guru_id, $senin, $minggu_end]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Nama file
 $filename = 'Jurnal_Guru_' . $senin . '_sd_' . $minggu_end . '.csv';
 
-// Header CSV
-header('Content-Type: text/csv; charset=utf-8');
+header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Pragma: no-cache');
 header('Expires: 0');
 
-$output = fopen('php://output', 'w');
+$out = fopen('php://output', 'w');
 
-// BOM UTF-8 agar Excel membaca karakter Indonesia dengan benar
-fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
 
-// Header Kolom
-fputcsv($output, [
-    'No',
-    'Hari / Tanggal',
-    'Jam Mulai',
-    'Jam Selesai',
-    'Kelas',
-    'Mata Pelajaran',
-    'Materi / Topik',
-    'Kegiatan Pembelajaran',
-    'Catatan / Refleksi',
-    'Jml Siswa Hadir',
-    'Jml Siswa Tidak Hadir',
-    'Siswa Tidak Hadir (Detail)',
+fputcsv($out, [
+    'No', 'Tanggal', 'Hari', 'Jam Ke-', 'Jam Mulai', 'Jam Selesai',
+    'Kelas', 'Mata Pelajaran', 'Materi', 'Uraian Materi',
+    'Jumlah Hadir', 'Jumlah Tidak Hadir', 'Catatan'
 ]);
-
-$hariMap = [
-    'Sunday'    => 'Minggu',
-    'Monday'    => 'Senin',
-    'Tuesday'   => 'Selasa',
-    'Wednesday' => 'Rabu',
-    'Thursday'  => 'Kamis',
-    'Friday'    => 'Jumat',
-    'Saturday'  => 'Sabtu',
-];
 
 $no = 1;
 foreach ($rows as $r) {
-    $dayName = $hariMap[date('l', strtotime($r['tanggal']))] ?? date('l', strtotime($r['tanggal']));
-    $tglFmt  = $dayName . ', ' . date('d/m/Y', strtotime($r['tanggal']));
-    $jamMulai = substr($r['jam_mulai'], 0, 5);
-    $jamSelesai = $r['jam_selesai'] ? substr($r['jam_selesai'], 0, 5) : '-';
+    $cat = $r['catatan'] ?? '';
+    preg_match('/Jam ke:\s*(.+)/', $cat, $mJam);
+    preg_match('/Kehadiran:\s*(.+)/', $cat, $mHadir);
+    preg_match('/Uraian:\s*(.+?)(?:\nCatatan:|$)/s', $cat, $mUraian);
+    preg_match('/Catatan:\s*(.+)/s', $cat, $mCat);
 
-    fputcsv($output, [
+    $jamKe = trim($mJam[1] ?? '-');
+    $kehadiran = trim($mHadir[1] ?? '-');
+    $uraian = trim($mUraian[1] ?? '-');
+    $catatan = trim($mCat[1] ?? '-');
+
+    fputcsv($out, [
         $no++,
-        $tglFmt,
-        $jamMulai,
-        $jamSelesai,
+        date('d/m/Y', strtotime($r['tanggal'])),
+        date('l', strtotime($r['tanggal'])),
+        $jamKe,
+        substr($r['jam_mulai'], 0, 5),
+        substr($r['jam_selesai'], 0, 5),
         $r['nama_kelas'] ?? '-',
         $r['mata_pelajaran'],
         $r['materi'],
-        $r['kegiatan'] ?? '-',
-        $r['catatan'] ?? '-',
+        $uraian,
         $r['jumlah_hadir'],
         $r['jumlah_tidak_hadir'],
-        $r['siswa_tidak_hadir'] ?? '-',
+        $catatan
     ]);
 }
 
-fclose($output);
+fclose($out);
 exit;

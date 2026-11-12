@@ -1,5 +1,4 @@
 <?php
-// aplikasi/siswa/kaih.php
 require_once '../includes/auth.php';
 
 if ($role !== 'siswa') {
@@ -21,14 +20,13 @@ function cekWaktuKAIH(): array
     if ($jam < '08:00' || $jam > '21:00') {
         return [
             'status' => false,
-            'pesan' => '❌ Form KAIH hanya dapat diisi pukul 08.00 - 21.00 WITA!'
+            'pesan' => '❌ Form KAIH hanya dapat diisi pukul 08.00 - 21.00 WITA! (Waktu server saat ini: ' . $jam . ' WITA)'
         ];
     }
     
     return ['status' => true];
 }
 
-// Ambil nama siswa
 if ($siswa_id > 0) {
     try {
         $stmt = $pdo->prepare("SELECT nama_siswa FROM siswa WHERE id = ?");
@@ -113,20 +111,13 @@ try {
     $message_type = 'error';
 }
 
-// ============================================================
-// PROSES SIMPAN KAIH
-// ============================================================
 if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_kaih'])) {
     
-    // ============================================================
-    // CEK WAKTU KAIH
-    // ============================================================
     $cek = cekWaktuKAIH();
     if (!$cek['status']) {
         $message = $cek['pesan'];
         $message_type = 'error';
     } else {
-        // Lanjutkan proses simpan KAIH
         $tanggal = date('Y-m-d');
         
         $bangun = isset($_POST['bangun']) && $_POST['bangun'] == 1 ? 1 : 0;
@@ -137,10 +128,8 @@ if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sim
         $membantu = isset($_POST['membantu']) && $_POST['membantu'] == 1 ? 1 : 0;
         $menabung = isset($_POST['menabung']) && $_POST['menabung'] == 1 ? 1 : 0;
         
-        // 1. Bangun Pagi
         $bangun_keterangan = ($bangun == 1) ? trim($_POST['bangun_keterangan'] ?? '') : '';
         
-        // 2. Beribadah (Sholat 5 Waktu & Kegiatan Lainnya)
         $ibadah_catatan = '';
         if ($ibadah == 1) {
             $sholat_post = $_POST['sholat'] ?? [];
@@ -162,10 +151,8 @@ if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sim
             $ibadah_catatan = implode(' | ', $ibadah_parts);
         }
         
-        // 3. Berolahraga
         $olahraga_jenis = ($olahraga == 1) ? trim($_POST['olahraga_jenis'] ?? '') : '';
         
-        // 4. Gemar Membaca (Fiksi & Non Fiksi)
         $membaca_judul = '';
         if ($membaca == 1) {
             $baca_parts = [];
@@ -184,10 +171,8 @@ if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sim
             $membaca_judul = implode(' ; ', $baca_parts);
         }
         
-        // 5. Membantu Orang Tua
         $membantu_jenis = ($membantu == 1) ? trim($_POST['membantu_jenis'] ?? '') : '';
         
-        // 6. Menabung
         $menabung_keterangan = ($menabung == 1) ? trim($_POST['menabung_keterangan'] ?? '') : '';
         
         if ($siswa_id > 0) {
@@ -233,7 +218,6 @@ if ($databaseReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sim
     }
 }
 
-// Ambil data hari ini
 $data_hari_ini = null;
 if ($databaseReady && $siswa_id > 0) {
     try {
@@ -247,7 +231,6 @@ if ($databaseReady && $siswa_id > 0) {
     }
 }
 
-// Ekstraksi data Ibadah untuk form hari ini
 $saved_ibadah_catatan = $data_hari_ini['ibadah_catatan'] ?? '';
 $sholat_checked = [
     'Subuh' => (stripos($saved_ibadah_catatan, 'Subuh') !== false),
@@ -263,10 +246,8 @@ if (preg_match('/Kegiatan Lain:\s*(.*?)(?:\||$)/i', $saved_ibadah_catatan, $m_la
     $saved_ibadah_lainnya = $saved_ibadah_catatan;
 }
 
-// Ekstraksi data Olahraga
 $saved_olahraga_jenis = $data_hari_ini['olahraga_jenis'] ?? '';
 
-// Ekstraksi data Membaca (Fiksi & Non Fiksi)
 $saved_membaca_judul = $data_hari_ini['membaca_judul'] ?? '';
 $is_fiksi_checked = (stripos($saved_membaca_judul, '[Fiksi]') !== false);
 $is_nonfiksi_checked = (stripos($saved_membaca_judul, '[Non Fiksi]') !== false);
@@ -288,7 +269,6 @@ if (!$is_fiksi_checked && !$is_nonfiksi_checked && !empty($saved_membaca_judul))
     $saved_judul_nonfiksi = $saved_membaca_judul;
 }
 
-// Ekstraksi data Membantu Orang Tua
 $saved_membantu_jenis = $data_hari_ini['membantu_jenis'] ?? '';
 
 $total_terisi = 0;

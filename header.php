@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/config/database.php';
 
 if (!function_exists('pickFirstExistingImage')) {
     function pickFirstExistingImage(array $candidates, string $fallback): string {
@@ -21,7 +22,7 @@ $logoSekolah = pickFirstExistingImage([
 ], 'assets/img/logosekolah.png');
 
 $current_page = basename($_SERVER['PHP_SELF']);
-$systemPages = ['sistem.php', 'login.php', 'buku_tamu.php', 'bullying.php', 'survey.php'];
+$systemPages = ['sistem.php', 'login.php', 'buku_tamu.php', 'bullying.php', 'survey.php', 'literasi.php'];
 $otherPages = ['lainnya.php', 'kontak.php'];
 $schoolContactEmail = 'smpnegeri28.balikpapan@gmail.com';
 $schoolWhatsappUrl = 'https://wa.me/6285349310534';
@@ -406,6 +407,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
             <a href="buku_tamu.php">Buku Tamu</a>
             <a href="bullying.php">Ruang Peduli</a>
             <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+            <a href="literasi.php">Jendela Literasi</a>
         </div>
 
         <button class="mobile-dropdown-toggle" onclick="toggleSubmenu(event, 'submenu-lainnya')">
@@ -464,6 +466,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
                     <a href="buku_tamu.php">Buku Tamu</a>
                     <a href="bullying.php">Ruang Peduli</a>
                     <a href="survey.php#Survei-Pelayanan">Survei Pelayanan</a>
+                    <a href="literasi.php">Jendela Literasi</a>
                 </div>
             </div>
 

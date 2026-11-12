@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/tambah_kelas.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -11,7 +9,6 @@ if (!$isAdminSession) {
     exit;
 }
 
-// Proses Simpan Data jika form di-submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_kelas = trim($_POST['nama_kelas']);
 
@@ -30,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash_msg'] = "{$nama_kelas} berhasil ditambahkan!";
             $_SESSION['flash_type'] = 'success';
             
-            // Redirect kembali ke halaman kelas setelah berhasil
             header('Location: kelas.php');
             exit;
         } catch (PDOException $e) {
@@ -41,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 

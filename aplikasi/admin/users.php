@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/users.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -14,7 +12,6 @@ if (!$isAdminSession) {
 $flash = '';
 $flashType = 'success';
 
-// Handle Reset Password (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -26,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $u = $stmtU->fetch(PDO::FETCH_ASSOC);
 
             if ($u) {
-                // Tentukan default password berdasarkan role
                 $newPass = '123456';
                 if ($u['role'] === 'kepsek') {
                     $newPass = '12345678';
@@ -67,11 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Ambil parameter filter dari form pencarian
 $search = trim($_GET['q'] ?? '');
 $filterRole = trim($_GET['role'] ?? '');
 
-// Query ke database dengan relasi nama pemilik akun (Guru / Siswa / Admin)
 $query = "
     SELECT u.id, u.username, u.role, u.password,
            COALESCE(g.nama_guru, s.nama_siswa, CASE WHEN u.role = 'admin' THEN 'Administrator Sistem' ELSE '-' END) AS keterangan
@@ -99,7 +93,6 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $daftar_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 
@@ -290,7 +283,6 @@ require_once '../includes/header-kaih.php';
                         elseif (strpos($roleText, 'orang') !== false) $roleClass = 'role-orangtua';
                         elseif ($roleText === 'kepsek') $roleClass = 'role-kepsek';
 
-                        // Default hint password
                         $defaultHint = '123456';
                         if ($roleText === 'kepsek') $defaultHint = '12345678';
                         elseif ($roleText === 'siswa' || $roleText === 'orang_tua') $defaultHint = 'smpn28bpp';

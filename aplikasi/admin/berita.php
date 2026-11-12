@@ -1,10 +1,8 @@
 <?php
-// aplikasi/admin/berita.php
 session_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/site_images.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -12,7 +10,6 @@ if (!$isAdminSession) {
     exit;
 }
 
-// Pastikan tabel berita tersedia di database
 try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS `berita` (
@@ -32,7 +29,6 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 } catch (PDOException $e) {
-    // Abaikan jika tabel sudah ada
 }
 
 $flash = '';
@@ -44,9 +40,6 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-/**
- * Helper upload gambar berita
- */
 function uploadGambarBerita(array $file, string $uploadDir, ?string &$errorMsg = null): ?string
 {
     if (empty($file['name']) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -82,7 +75,6 @@ function uploadGambarBerita(array $file, string $uploadDir, ?string &$errorMsg =
     return 'assets/img/berita/' . $fileName;
 }
 
-// Proses CRUD (Tambah, Edit, Hapus)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -99,11 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $jenis = (strcasecmp($kategori, 'Pengumuman') === 0) ? 'pengumuman' : 'berita';
 
-        // Jika ringkasan kosong namun isi ada, ambil otomatis dari isi
         if ($ringkasan === '' && $isi !== '') {
             $ringkasan = mb_substr($isi, 0, 220);
         }
-        // Jika isi kosong namun ringkasan ada, gunakan ringkasan sebagai isi
         if ($isi === '' && $ringkasan !== '') {
             $isi = $ringkasan;
         }
@@ -160,7 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_FILES['gambar']['name'])) {
             $newGambar = uploadGambarBerita($_FILES['gambar'], $uploadDir, $uploadError);
             if ($newGambar !== null) {
-                // Hapus file upload lama jika merupakan file hasil upload (berita_*)
                 if ($gambar_lama !== '' && str_starts_with(basename($gambar_lama), 'berita_') && is_file('../../' . $gambar_lama)) {
                     @unlink('../../' . $gambar_lama);
                 }
@@ -214,7 +203,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Cari ID berita yang saat ini tampil di halaman utama (Berita Terkini di index.php)
 $featuredIds = [];
 try {
     $stmtFeatured = $pdo->query("
@@ -229,7 +217,6 @@ try {
     $featuredIds = [];
 }
 
-// Filter & Pencarian
 $filterKategori = trim($_GET['kategori'] ?? '');
 $searchQuery    = trim($_GET['q'] ?? '');
 
@@ -258,7 +245,6 @@ foreach ($daftar_berita as $idx => $item) {
     $daftar_berita[$idx]['gambar_preview'] = $resolved ? ('../../' . $resolved) : null;
 }
 
-// Hitung statistik per tipe berita
 $stats = [
     'total'      => 0,
     'Pengumuman' => 0,
@@ -659,7 +645,6 @@ require_once __DIR__ . '/../includes/header-kaih.php';
         </div>
     </div>
 
-    <!-- Form Tambah Berita Baru -->
     <div class="form-card" id="formTambahBerita">
         <div class="section-title-bar">
             <div>
@@ -667,7 +652,6 @@ require_once __DIR__ . '/../includes/header-kaih.php';
                 <p>Berita yang diterbitkan otomatis tampil di halaman <strong>Informasi</strong> dan <strong>Berita Terkini (Beranda)</strong> sesuai tipe beritanya.</p>
             </div>
             <div style="display: flex; gap: 8px;">
-                <a href="../../index.php" target="_blank" class="btn-action btn-view">🌐 Lihat Beranda</a>
                 <a href="../../informasi.php#pengumuman" target="_blank" class="btn-action btn-view">📄 Lihat Halaman Informasi</a>
             </div>
         </div>

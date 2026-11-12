@@ -1,9 +1,7 @@
 <?php
-// aplikasi/kepsek/index.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
-// Pastikan hanya role kepsek yang dapat mengakses
 if (($_SESSION['role'] ?? '') !== 'kepsek') {
     header('Location: ../../login.php');
     exit;
@@ -11,18 +9,14 @@ if (($_SESSION['role'] ?? '') !== 'kepsek') {
 
 $kepsek_id = $_SESSION['user_id'] ?? 0;
 
-// 1. Data Statistik Utama
 $total_guru = (int)$pdo->query("SELECT COUNT(*) FROM guru WHERE jabatan NOT LIKE '%Kepala Sekolah%'")->fetchColumn();
 $total_supervisi = (int)$pdo->query("SELECT COUNT(*) FROM supervisi_penilaian")->fetchColumn();
 
-// Rata-rata skor seluruh guru
 $rata_skor = $pdo->query("SELECT AVG(skor_akhir) FROM supervisi_penilaian")->fetchColumn();
 $rata_skor_fmt = $rata_skor ? number_format((float)$rata_skor, 1) : '0.0';
 
-// Guru yang perlu pembinaan (skor < 70)
 $perlu_bimbingan = (int)$pdo->query("SELECT COUNT(*) FROM supervisi_penilaian WHERE skor_akhir < 70")->fetchColumn();
 
-// 2. Daftar Observasi & Supervisi Terakhir (Limit 5)
 $stmtTerbaru = $pdo->query("
     SELECT sp.*, g.nama_guru, g.nip 
     FROM supervisi_penilaian sp
@@ -32,7 +26,6 @@ $stmtTerbaru = $pdo->query("
 ");
 $supervisi_terbaru = $stmtTerbaru->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Agregat Rata-rata Aspek Sekolah untuk Grafik Radar Overview
 $stmtAspek = $pdo->query("
     SELECT r.aspek, AVG(spd.skor_persen) as rata_aspek
     FROM supervisi_penilaian_detail spd

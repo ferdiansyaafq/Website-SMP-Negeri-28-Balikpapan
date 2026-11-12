@@ -30,7 +30,6 @@ if (!in_array($role, $allowed_roles, true)) {
 }
 
 // 3. Strict Role-Based Access Control (RBAC): Cegah nembak URL lintas role
-// Deteksi portal tujuan berdasarkan path URL file yang sedang diakses
 $targetPortal = '';
 if (strpos($scriptPath, '/aplikasi/admin/') !== false) {
     $targetPortal = 'admin';
@@ -46,9 +45,7 @@ if (strpos($scriptPath, '/aplikasi/admin/') !== false) {
 
 if ($targetPortal !== '') {
     // Validasi: User hanya boleh mengakses portal yang sesuai dengan rolenya
-    // (Admin diizinkan mengakses portal admin dan portal lain jika diperlukan)
     if ($role !== $targetPortal && $role !== 'admin') {
-        // Jika mencoba nembak URL yang bukan hak aksesnya, lempar balik ke dashboard masing-masing
         switch ($role) {
             case 'guru':
                 header('Location: ' . $basePath . '/aplikasi/guru/index.php');

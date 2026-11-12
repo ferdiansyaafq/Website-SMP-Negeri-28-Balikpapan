@@ -3,7 +3,6 @@ $page_title = "Jurnal Guru - SMP Negeri 28 Balikpapan";
 require_once '../includes/header-kaih.php';
 require_once __DIR__ . '/../../config/database.php';
 
-// ====== Ambil data guru yang login ======
 $guru_id = $_SESSION['guru_id'] ?? null;
 $guru_kelas_id = $_SESSION['kelas_id'] ?? null;
 
@@ -15,7 +14,6 @@ if (!$guru_id && isset($_SESSION['user_id'])) {
 
 $kelasList = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// ====== Filter minggu ======
 $minggu_input = $_GET['minggu'] ?? date('Y-m-d');
 $ts = strtotime($minggu_input);
 $senin = date('Y-m-d', strtotime('monday this week', $ts));
@@ -24,7 +22,6 @@ $minggu = date('Y-m-d', strtotime('sunday this week', $ts));
 $pesan = '';
 $tipe = 'success';
 
-// ====== Proses POST ======
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_jurnal'])) {
     $kelas_id       = (int)($_POST['kelas_id'] ?? 0);
     $tanggal        = $_POST['tanggal'] ?? date('Y-m-d');
@@ -35,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_jurnal'])) {
     $materi         = trim($_POST['materi'] ?? '');
     $uraian         = trim($_POST['uraian_materi'] ?? '');
     $catatan        = trim($_POST['catatan'] ?? '');
-    $absensi        = $_POST['absensi'] ?? [];  // ← array [siswa_id => status]
+    $absensi        = $_POST['absensi'] ?? [];  
 
     if (!$kelas_id || !$tanggal || !$mata_pelajaran || !$materi) {
         $pesan = 'Mohon lengkapi: Kelas, Tanggal, Mata Pelajaran, dan Materi.';
@@ -44,14 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_jurnal'])) {
         try {
             $pdo->beginTransaction();
 
-            // Hitung jumlah hadir & tidak hadir
             $hadir = 0; $tidak = 0;
             foreach ($absensi as $status) {
                 if ($status === 'hadir') $hadir++;
                 else $tidak++;
             }
 
-            // Simpan jurnal
             $catatan_full = "Jam ke: $jam_ke\nUraian: $uraian\nCatatan: $catatan";
             $sql = "INSERT INTO jurnal_guru 
                     (guru_id, kelas_id, tanggal, jam_mulai, jam_selesai, mata_pelajaran, materi,
@@ -63,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_jurnal'])) {
                 $mata_pelajaran, $materi, $hadir, $tidak, $catatan_full
             ]);
 
-            // Simpan absensi per siswa (pakai REPLACE biar tidak dobel)
             if (!empty($absensi)) {
                 $stmtAbs = $pdo->prepare("
                     INSERT INTO absensi (siswa_id, tanggal, status, deskripsi, catatan, created_at)
@@ -90,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_jurnal'])) {
     }
 }
 
-// ====== Ambil jurnal minggu ini ======
 $sql = "SELECT jg.*, k.nama_kelas
         FROM jurnal_guru jg
         LEFT JOIN kaih_kelas k ON jg.kelas_id = k.id

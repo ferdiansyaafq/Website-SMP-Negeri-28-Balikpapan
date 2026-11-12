@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="stylesheet" href="assets/css/buku-tamu.css">
 
 <style>
-    /* Tambahan CSS agar teks placeholder pada input date & time terlihat jelas */
     input[type="date"]::before,
     input[type="time"]::before {
         content: attr(placeholder);
@@ -62,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         width: 100%;
     }
     
-    /* Menyembunyikan placeholder saat input sudah terisi (diklik) */
     input[type="date"]:focus::before,
     input[type="date"]:valid::before,
     input[type="time"]:focus::before,
@@ -146,12 +144,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-row">
                 <div class="form-group">
                     <label>Tanggal Kunjungan <span class="required">*</span></label>
-                    <!-- Value diubah agar tidak otomatis date('Y-m-d') jika kosong -->
                     <input type="date" id="tanggal_kunjungan" name="tanggal_kunjungan" required placeholder="Pilih Tanggal" value="<?= htmlspecialchars($_POST['tanggal_kunjungan'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                     <label>Waktu / Jam Kedatangan <span class="required">*</span></label>
-                    <!-- Value diubah agar tidak otomatis date('H:i') jika kosong -->
                     <input type="time" id="jam_kunjungan" name="jam_kunjungan" required placeholder="Pilih Jam" value="<?= htmlspecialchars($_POST['jam_kunjungan'] ?? '') ?>">
                 </div>
             </div>

@@ -1,5 +1,4 @@
 <?php
-// aplikasi/index.php
 require_once 'includes/auth.php';
 
 $role = $_SESSION['role'];
