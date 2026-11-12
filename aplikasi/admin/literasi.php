@@ -202,8 +202,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$stmtData = $pdo->query("SELECT * FROM jendela_literasi ORDER BY id DESC");
-$daftar_buku = $stmtData->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $stmtData = $pdo->query("SELECT * FROM jendela_literasi ORDER BY id DESC");
+} catch (PDOException $e) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `jendela_literasi` (
+          `id` int NOT NULL AUTO_INCREMENT,
+          `judul` varchar(255) NOT NULL,
+          `penulis` varchar(150) NOT NULL,
+          `penerbit` varchar(150) DEFAULT NULL,
+          `tahun_terbit` YEAR DEFAULT NULL,
+          `kategori` varchar(100) NOT NULL DEFAULT 'Umum',
+          `sinopsis` text,
+          `cover` varchar(255) DEFAULT NULL,
+          `file_pdf` varchar(255) DEFAULT NULL,
+          `link_baca` varchar(255) DEFAULT NULL,
+          `status` enum('draft','terbit') NOT NULL DEFAULT 'terbit',
+          `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        $stmtData = $pdo->query("SELECT * FROM jendela_literasi ORDER BY id DESC");
+    } catch (Exception $ex) {
+        $stmtData = null;
+    }
+}
+$daftar_buku = $stmtData ? $stmtData->fetchAll(PDO::FETCH_ASSOC) : [];
 
 require_once __DIR__ . '/../includes/header-kaih.php';
 ?>
