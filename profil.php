@@ -39,12 +39,12 @@ $teachers = [
 ];
 
 $ekskulData = [
-    ['nama' => 'Pramuka', 'gambar' => 'assets/img/ekstrakurikuler/pramuka.png', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
-    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.png', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Futsal', 'gambar' => 'assets/img/fasilitas/futsal.png', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
+    ['nama' => 'Pramuka', 'gambar' => 'assets/img/ekstrakurikuler/pramuka.jpg', 'deskripsi' => 'Membentuk karakter kemandirian, kedisiplinan, serta keterampilan kepanduan dan ketahanan mental.', 'hari' => 'Jumat', 'waktu' => '14.00 - 16.00', 'lokasi' => 'Lapangan Utama'],
+    ['nama' => 'Pencak Silat', 'gambar' => 'assets/img/ekstrakurikuler/pencaksilat.jpg', 'deskripsi' => 'Melestarikan warisan budaya bangsa, melatih konsentrasi, kekuatan fisik, serta teknik pertahanan diri.', 'hari' => 'Selasa', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
+    ['nama' => 'Futsal', 'gambar' => 'assets/img/ekstrakurikuler/futsal.jpg', 'deskripsi' => 'Mengembangkan bakat olahraga, melatih koordinasi motorik, sportivitas, dan strategi kerja sama tim.', 'hari' => 'Rabu', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Futsal'],
     ['nama' => 'PMR', 'gambar' => 'assets/img/ekstrakurikuler/pmr1.png', 'deskripsi' => 'Melatih keterampilan pertolongan pertama, kesiapsiagaan bencana, dan jiwa kemanusiaan.', 'hari' => 'Kamis', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Ruang UKS'],
     ['nama' => 'Memanah', 'gambar' => 'assets/img/ekstrakurikuler/memanah.png', 'deskripsi' => 'Melatih fokus, konsentrasi, stabilitas emosi, ketepatan, dan kekuatan otot tubuh.', 'hari' => 'Senin', 'waktu' => '15.30 - 17.00', 'lokasi' => 'Lapangan Sekolah'],
-    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.png', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
+    ['nama' => 'Kader Lingkungan', 'gambar' => 'assets/img/ekstrakurikuler/kaderlingkungan.jpg', 'deskripsi' => 'Mewujudkan sekolah Adiwiyata melalui pengelolaan sampah, penghijauan, dan kampanye gaya hidup ramah lingkungan.', 'hari' => 'Sabtu', 'waktu' => '08.00 - 10.00', 'lokasi' => 'Taman Sekolah'],
 ];
 ?>
 
@@ -955,7 +955,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/fasilitas/laboratoriumkomputer.png" alt="Laboratorium Komputer">
+            <img src="assets/img/fasilitas/laboratoriumkomputer.jpg" alt="Laboratorium Komputer">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
@@ -979,7 +979,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/fasilitas/masjidsekolah.png" alt="Masjid Sekolah">
+            <img src="assets/img/fasilitas/masjidsekolah.jpg" alt="Masjid Sekolah">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
@@ -1003,7 +1003,7 @@ $ekskulData = [
 
     <div class="fasilitas-item">
         <div class="fasilitas-thumb">
-            <img src="assets/img/fasilitas/kantin.png" alt="Kantin Sekolah">
+            <img src="assets/img/fasilitas/kantin.jpg" alt="Kantin Sekolah">
             <div class="fasilitas-overlay"></div>
         </div>
         <div class="fasilitas-info">
