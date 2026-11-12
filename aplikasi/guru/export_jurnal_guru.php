@@ -2,7 +2,17 @@
 session_start();
 require_once __DIR__ . '/../../config/database.php';
 
-$guru_id = (int)($_GET['guru_id'] ?? ($_SESSION['guru_id'] ?? 0));
+if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['guru', 'admin'])) {
+    die("Akses ditolak. Silakan login sebagai Guru terlebih dahulu.");
+}
+
+$userRole = $_SESSION['role'] ?? '';
+if ($userRole === 'guru') {
+    $guru_id = (int)($_SESSION['guru_id'] ?? 0);
+} else {
+    $guru_id = (int)($_GET['guru_id'] ?? ($_SESSION['guru_id'] ?? 0));
+}
+
 $minggu  = $_GET['minggu'] ?? date('Y-m-d');
 
 $ts     = strtotime($minggu);

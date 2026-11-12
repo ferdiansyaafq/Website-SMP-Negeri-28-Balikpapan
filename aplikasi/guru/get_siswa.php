@@ -4,6 +4,12 @@ require_once __DIR__ . '/../../config/database.php';
 
 header('Content-Type: application/json');
 
+if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', ['guru', 'admin'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
 $kelas_id = (int)($_GET['kelas_id'] ?? 0);
 
 if (!$kelas_id) {

@@ -1,5 +1,14 @@
 <?php
-include '../../config/database.php'; 
+// aplikasi/admin/export_rekapan_bulanan.php
+session_start();
+$isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
+    || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
+if (!$isAdminSession) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+require_once '../../config/database.php'; 
 
 $bulan_pilih = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
 $tahun_pilih = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
@@ -9,7 +18,6 @@ header("Content-type: application/vnd-ms-excel");
 header("Content-Disposition: attachment; filename=$nama_file");
 ?>
 
-<!-- 4. Buat struktur tabel HTML -->
 <table border="1">
     <thead>
         <tr>
@@ -29,12 +37,11 @@ header("Content-Disposition: attachment; filename=$nama_file");
                          lh.orang_tua_validated_at, lh.guru_validated_at
                   FROM laporan_harian lh
                   JOIN siswa s ON lh.siswa_id = s.id
-                  WHERE MONTH(lh.tanggal) = ? AND YEAR(lh.tanggal) = ?
-                  ORDER BY lh.tanggal ASC, s.kelas ASC, s.nama_siswa ASC";
-
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$bulan_pilih, $tahun_pilih]);
+                  WHERE MONTH(lh.tanggal) = :bulan AND YEAR(lh.tanggal) = :tahun
+                  ORDER BY lh.tanggal ASC, s.nama_siswa ASC";
         
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['bulan' => $bulan_pilih, 'tahun' => $tahun_pilih]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $no = 1;
@@ -42,7 +49,7 @@ header("Content-Disposition: attachment; filename=$nama_file");
             foreach ($result as $row) {
                 echo "<tr>";
                 echo "<td>" . $no++ . "</td>";
-                echo "<td>" . date('d-m-Y', strtotime($row['tanggal'])) . "</td>";
+                echo "<td>" . $row['tanggal'] . "</td>";
                 echo "<td>" . htmlspecialchars($row['nama_siswa']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['kelas']) . "</td>";
                 echo "<td style='text-align: center;'>" . $row['skor'] . " / 7</td>";
@@ -55,7 +62,7 @@ header("Content-Disposition: attachment; filename=$nama_file");
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='7' style='text-align: center;'>Tidak ada data laporan di bulan dan tahun tersebut.</td></tr>";
+            echo "<tr><td colspan='7' style='text-align:center;'>Data tidak ditemukan untuk periode ini.</td></tr>";
         }
         ?>
     </tbody>

@@ -1,27 +1,35 @@
 <?php
+// aplikasi/includes/auth.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 1. Cegah caching browser agar halaman internal tidak bisa dibuka dari history/tombol Back setelah logout
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $applicationPathPosition = strpos($scriptPath, '/aplikasi/');
 $basePath = $applicationPathPosition === false ? '' : substr($scriptPath, 0, $applicationPathPosition);
-$loginUrl = $basePath . '/login.php';
+$loginUrl = ($basePath !== '' ? $basePath : '') . '/login.php';
 
-if (!isset($_SESSION['user_id'])) {
+// 2. Cek Login Global: jika belum login sama sekali, langsung lempar ke login.php
+if (!isset($_SESSION['user_id']) || empty($_SESSION['role'])) {
     header('Location: ' . $loginUrl);
     exit;
 }
 
-$role = $_SESSION['role'] ?? '';
+$role = strtolower((string)($_SESSION['role'] ?? ''));
 $allowed_roles = ['admin', 'guru', 'siswa', 'orang_tua', 'kepsek'];
 
-if (!in_array($role, $allowed_roles)) {
+if (!in_array($role, $allowed_roles, true)) {
     session_destroy();
     header('Location: ' . $loginUrl);
     exit;
 }
 
+<<<<<<< HEAD
 if (strpos($scriptPath, '/aplikasi/admin/') !== false && $role !== 'admin') {
     header('Location: ' . $loginUrl);
     exit;
@@ -44,15 +52,47 @@ if (strpos($scriptPath, '/aplikasi/kepsek/') !== false && $role !== 'kepsek' && 
 }
 
 require_once __DIR__ . '/../../config/database.php';
+=======
+// 3. Strict Role-Based Access Control (RBAC): Cegah nembak URL lintas role
+$targetPortal = '';
+if (strpos($scriptPath, '/aplikasi/admin/') !== false) {
+    $targetPortal = 'admin';
+} elseif (strpos($scriptPath, '/aplikasi/guru/') !== false) {
+    $targetPortal = 'guru';
+} elseif (strpos($scriptPath, '/aplikasi/siswa/') !== false) {
+    $targetPortal = 'siswa';
+} elseif (strpos($scriptPath, '/aplikasi/ortu/') !== false) {
+    $targetPortal = 'orang_tua';
+} elseif (strpos($scriptPath, '/aplikasi/kepsek/') !== false) {
+    $targetPortal = 'kepsek';
+}
+>>>>>>> a512096d0fe29a1c357b1d65ec3a8a32f6b30f9e
 
-if (!isset($pdo)) {
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=kaih;charset=utf8mb4", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die("Koneksi database gagal: " . $e->getMessage());
+if ($targetPortal !== '') {
+    // Validasi: User hanya boleh mengakses portal yang sesuai dengan rolenya
+    if ($role !== $targetPortal && $role !== 'admin') {
+        switch ($role) {
+            case 'guru':
+                header('Location: ' . $basePath . '/aplikasi/guru/index.php');
+                break;
+            case 'siswa':
+                header('Location: ' . $basePath . '/aplikasi/siswa/index.php');
+                break;
+            case 'orang_tua':
+                header('Location: ' . $basePath . '/aplikasi/ortu/index.php');
+                break;
+            case 'kepsek':
+                header('Location: ' . $basePath . '/aplikasi/kepsek/index.php');
+                break;
+            default:
+                header('Location: ' . $loginUrl);
+        }
+        exit;
     }
 }
+
+// Ambil data user
+require_once __DIR__ . '/../../config/database.php';
 
 try {
     $stmt = $pdo->prepare("SELECT u.*, 
@@ -70,9 +110,10 @@ try {
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $user = ['nama_lengkap' => $_SESSION['username']];
+    $user = ['nama_lengkap' => $_SESSION['username'] ?? 'User'];
 }
 
+// Konstanta path
 define('BASE_URL', $basePath . '/');
 define('KAIH_URL', BASE_URL . 'aplikasi/');
 ?>
