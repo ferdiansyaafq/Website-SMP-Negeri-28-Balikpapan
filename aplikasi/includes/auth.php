@@ -22,6 +22,27 @@ if (!in_array($role, $allowed_roles)) {
     exit;
 }
 
+if (strpos($scriptPath, '/aplikasi/admin/') !== false && $role !== 'admin') {
+    header('Location: ' . $loginUrl);
+    exit;
+}
+if (strpos($scriptPath, '/aplikasi/guru/') !== false && $role !== 'guru' && $role !== 'admin') {
+    header('Location: ' . $loginUrl);
+    exit;
+}
+if (strpos($scriptPath, '/aplikasi/siswa/') !== false && $role !== 'siswa' && $role !== 'admin') {
+    header('Location: ' . $loginUrl);
+    exit;
+}
+if (strpos($scriptPath, '/aplikasi/ortu/') !== false && $role !== 'orang_tua' && $role !== 'admin') {
+    header('Location: ' . $loginUrl);
+    exit;
+}
+if (strpos($scriptPath, '/aplikasi/kepsek/') !== false && $role !== 'kepsek' && $role !== 'admin') {
+    header('Location: ' . $loginUrl);
+    exit;
+}
+
 require_once __DIR__ . '/../../config/database.php';
 
 if (!isset($pdo)) {

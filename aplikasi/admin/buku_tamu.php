@@ -9,6 +9,30 @@ if (($_SESSION['role'] ?? '') !== 'admin') {
 
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $perPage = 10;
+
+$flash = '';
+$flashType = 'success';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $id = (int) ($_POST['id'] ?? 0);
+
+    if ($action === 'delete' && $id > 0) {
+        $stmtDel = $pdo->prepare('DELETE FROM buku_tamu WHERE id = ?');
+        $stmtDel->execute([$id]);
+        $_SESSION['flash_msg'] = 'Data kunjungan buku tamu berhasil dihapus.';
+        $_SESSION['flash_type'] = 'success';
+        header('Location: buku_tamu.php?page=' . $page);
+        exit;
+    }
+}
+
+if (!empty($_SESSION['flash_msg'])) {
+    $flash = $_SESSION['flash_msg'];
+    $flashType = $_SESSION['flash_type'] ?? 'success';
+    unset($_SESSION['flash_msg'], $_SESSION['flash_type']);
+}
+
 $total = (int) $pdo->query('SELECT COUNT(*) FROM buku_tamu')->fetchColumn();
 $totalPages = max(1, (int) ceil($total / $perPage));
 $page = min($page, $totalPages);
@@ -54,6 +78,12 @@ require_once '../includes/header-kaih.php';
     <h1>📖 Buku Tamu Digital</h1>
     <p class="intro">Daftar laporan kehadiran dan kunjungan tamu di lingkungan SMP Negeri 28 Balikpapan.</p>
 
+    <?php if ($flash !== ''): ?>
+        <div style="padding: 12px 16px; margin-bottom: 20px; border-radius: 10px; font-size: 14px; font-weight: 600; background: <?= $flashType === 'error' ? '#fee2e2; color: #991b1b; border: 1px solid #fecaca;' : '#dcfce7; color: #166534; border: 1px solid #bbf7d0;' ?>;">
+            <?= htmlspecialchars($flash) ?>
+        </div>
+    <?php endif; ?>
+
     <div class="table-wrap">
         <?php if (!$tamu): ?>
             <div class="empty">Belum ada data kunjungan tamu yang dicatat.</div>
@@ -67,6 +97,7 @@ require_once '../includes/header-kaih.php';
                         <th>Tujuan Dituju</th>
                         <th>Keperluan / Laporan</th>
                         <th>Rombongan</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +123,15 @@ require_once '../includes/header-kaih.php';
                             <td class="guest-purpose"><?= htmlspecialchars($item['keperluan']) ?></td>
                             <td style="text-align: center;">
                                 <strong><?= (int)$item['jumlah_orang'] ?></strong> orang
+                            </td>
+                            <td>
+                                <form method="POST" action="" onsubmit="return confirm('Yakin ingin menghapus data kunjungan tamu ini?');" style="margin: 0;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= (int)$item['id'] ?>">
+                                    <button type="submit" style="padding: 5px 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+                                        🗑️ Hapus
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>
