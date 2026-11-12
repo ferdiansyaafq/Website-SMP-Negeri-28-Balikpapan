@@ -29,30 +29,6 @@ if (!in_array($role, $allowed_roles, true)) {
     exit;
 }
 
-<<<<<<< HEAD
-if (strpos($scriptPath, '/aplikasi/admin/') !== false && $role !== 'admin') {
-    header('Location: ' . $loginUrl);
-    exit;
-}
-if (strpos($scriptPath, '/aplikasi/guru/') !== false && $role !== 'guru' && $role !== 'admin') {
-    header('Location: ' . $loginUrl);
-    exit;
-}
-if (strpos($scriptPath, '/aplikasi/siswa/') !== false && $role !== 'siswa' && $role !== 'admin') {
-    header('Location: ' . $loginUrl);
-    exit;
-}
-if (strpos($scriptPath, '/aplikasi/ortu/') !== false && $role !== 'orang_tua' && $role !== 'admin') {
-    header('Location: ' . $loginUrl);
-    exit;
-}
-if (strpos($scriptPath, '/aplikasi/kepsek/') !== false && $role !== 'kepsek' && $role !== 'admin') {
-    header('Location: ' . $loginUrl);
-    exit;
-}
-
-require_once __DIR__ . '/../../config/database.php';
-=======
 // 3. Strict Role-Based Access Control (RBAC): Cegah nembak URL lintas role
 $targetPortal = '';
 if (strpos($scriptPath, '/aplikasi/admin/') !== false) {
@@ -66,7 +42,6 @@ if (strpos($scriptPath, '/aplikasi/admin/') !== false) {
 } elseif (strpos($scriptPath, '/aplikasi/kepsek/') !== false) {
     $targetPortal = 'kepsek';
 }
->>>>>>> a512096d0fe29a1c357b1d65ec3a8a32f6b30f9e
 
 if ($targetPortal !== '') {
     // Validasi: User hanya boleh mengakses portal yang sesuai dengan rolenya
