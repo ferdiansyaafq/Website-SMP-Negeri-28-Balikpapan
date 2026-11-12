@@ -1,5 +1,4 @@
 <?php
-// database/fix_guru_kepsek_login.php
 require_once __DIR__ . '/../config/database.php';
 
 echo "=== MEMULAI SINKRONISASI & PERBAIKAN AKUN GURU DAN KEPSEK ===\n\n";
@@ -7,7 +6,6 @@ echo "=== MEMULAI SINKRONISASI & PERBAIKAN AKUN GURU DAN KEPSEK ===\n\n";
 try {
     $pdo->beginTransaction();
 
-    // 1. Perbaiki NIP Cindy Milenia dan Nurhabibah di tabel guru jika belum sesuai dokumen PDF
     echo "[1] Memperbaiki NIP di tabel guru agar sesuai lembar contekan login...\n";
     $stmtUpdNip1 = $pdo->prepare("UPDATE guru SET nip = '199708152020122001' WHERE nama_guru LIKE '%Cindy Milenia%'");
     $stmtUpdNip1->execute();
@@ -17,7 +15,6 @@ try {
     $stmtUpdNip2->execute();
     echo "    - Nurhabibah NIP diperbarui ke: 199211082020122004\n";
 
-    // 2. Perbaiki Wali Kelas / Ruang pada tabel guru sesuai dokumen
     echo "\n[2] Memperbarui penugasan ruang/wali kelas pada tabel guru...\n";
     $ruangGuru = [
         'Aris Broto, S.Pd' => 'Ruang Pimpinan',
@@ -41,7 +38,6 @@ try {
         echo "    - {$nama} => {$ruang}\n";
     }
 
-    // 3. Update wali_kelas_id di tabel kaih_kelas
     echo "\n[3] Menyinkronkan wali kelas di tabel kaih_kelas...\n";
     $waliKelasMap = [
         'Kelas 7A' => 'Siti Rahayu, Gr.S.Pd',
@@ -65,7 +61,6 @@ try {
         }
     }
 
-    // 4. Perbaiki Akun Kepala Sekolah di tabel users
     echo "\n[4] Memperbaiki akun Kepala Sekolah (password default: 12345678)...\n";
     $passKepsek = password_hash('12345678', PASSWORD_DEFAULT);
     $stmtGetKepsekGId = $pdo->query("SELECT id FROM guru WHERE nip = '198301172009031005'")->fetchColumn();
@@ -82,7 +77,6 @@ try {
     $stmtUpsertKepsek->execute([$passKepsek, $stmtGetKepsekGId]);
     echo "    [✓] Akun Kepsek (198301172009031005) berhasil di-update dengan password hash yang valid!\n";
 
-    // 5. Buat / Update Akun Semua Guru di tabel users
     echo "\n[5] Membuat dan menyinkronkan akun seluruh guru (password default: 123456)...\n";
     $passGuru = password_hash('123456', PASSWORD_DEFAULT);
 
@@ -104,7 +98,6 @@ try {
         echo "    [✓] Akun Guru dibuat/diupdate: {$g['nama_guru']} (NIP: {$g['nip']})\n";
     }
 
-    // 6. Pastikan Super Admin ada dan aktif
     echo "\n[6] Memastikan akun Super Admin (admin / admin123)...\n";
     $stmtAdmin = $pdo->query("SELECT id, password FROM users WHERE username = 'admin'");
     $admin = $stmtAdmin->fetch();

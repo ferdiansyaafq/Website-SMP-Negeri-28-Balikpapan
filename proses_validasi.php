@@ -7,7 +7,6 @@ if (isset($_GET['id']) && isset($_GET['aksi'])) {
 
     try {
         if ($aksi == 'setuju') {
-            // Logika Setuju: Isi dengan waktu saat ini (NOW)
             $sql = "UPDATE laporan_harian 
                     SET guru_validated_at = NOW(), orang_tua_validated_at = NOW() 
                     WHERE id = :id";
@@ -20,7 +19,6 @@ if (isset($_GET['id']) && isset($_GET['aksi'])) {
                   </script>";
                   
         } elseif ($aksi == 'batal') {
-            // Logika Batal Setuju: Kembalikan nilai jadi NULL
             $sql = "UPDATE laporan_harian 
                     SET guru_validated_at = NULL, orang_tua_validated_at = NULL 
                     WHERE id = :id";

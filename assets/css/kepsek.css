@@ -495,6 +495,51 @@
     margin: 10px 0;
 }
 
+.analysis-chart-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 24px;
+    margin-bottom: 25px;
+}
+
+.analysis-chart-card {
+    min-width: 0;
+}
+
+.analysis-chart-title {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.analysis-chart-title h3 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.analysis-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.analysis-chart-card .chart-container-box {
+    min-width: 0;
+    height: 420px;
+}
+
+.analysis-chart-card .analysis-bar-chart-container {
+    height: auto;
+    min-height: 440px;
+}
+
+@media (max-width: 1440px) {
+    .analysis-chart-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 /* Cetak Rapor Observasi */
 @media print {
     body {

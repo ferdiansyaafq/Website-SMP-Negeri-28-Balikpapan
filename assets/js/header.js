@@ -1,10 +1,6 @@
-/**
- * Header & Navigation JavaScript
- * Menangani interaksi hamburger menu dan dropdown
- */
+
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Hamburger Menu Toggle
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
@@ -17,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close menu when clicking on a link
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             hamburger.classList.remove('active');
@@ -25,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mobile Dropdown Toggle
     dropdownToggles.forEach(toggle => {
         toggle.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
@@ -33,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const parent = toggle.closest('.dropdown');
                 parent.classList.toggle('active');
                 
-                // Close other dropdowns
                 document.querySelectorAll('.dropdown.active').forEach(dropdown => {
                     if (dropdown !== parent) {
                         dropdown.classList.remove('active');
@@ -43,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.navbar-container')) {
             hamburger.classList.remove('active');
@@ -51,21 +43,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Search functionality
     const searchBtn = document.querySelector('.search-btn');
     const searchInput = document.querySelector('.search-input');
 
     if (searchBtn) {
         searchBtn.addEventListener('click', () => {
             if (searchInput.value.trim()) {
-                // Implementasi pencarian bisa ditambahkan di sini
                 console.log('Search for:', searchInput.value);
-                // Bisa di-redirect ke halaman search atau API
-                // window.location.href = '/search?q=' + encodeURIComponent(searchInput.value);
             }
         });
 
-        // Search on Enter key
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -75,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Handle window resize
     window.addEventListener('resize', () => {
         if (window.innerWidth > 768) {
             hamburger.classList.remove('active');
@@ -84,9 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-/**
- * Tambahkan class 'active' ke nav-link berdasarkan halaman saat ini
- */
 function setActiveNavLink() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.php';
     const navLinks = document.querySelectorAll('.nav-link');
@@ -101,16 +84,12 @@ function setActiveNavLink() {
     });
 }
 
-// Call on page load
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setActiveNavLink);
 } else {
     setActiveNavLink();
 }
 
-/**
- * Smooth scroll untuk anchor links
- */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const href = this.getAttribute('href');
@@ -123,10 +102,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-/**
- * Show toast notification
- * Usage: showToast('Message', 'success');
- */
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toast-container') || createToastContainer();
     
@@ -144,7 +119,6 @@ function showToast(message, type = 'info') {
     
     toastContainer.appendChild(toast);
     
-    // Auto remove after 5 seconds
     setTimeout(() => {
         toast.remove();
     }, 5000);
@@ -176,7 +150,6 @@ function getIconForType(type) {
     return icons[type] || icons['info'];
 }
 
-// Add toast styles if not already added
 function addToastStyles() {
     if (!document.getElementById('toast-styles')) {
         const style = document.createElement('style');

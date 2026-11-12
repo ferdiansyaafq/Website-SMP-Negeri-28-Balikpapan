@@ -9,7 +9,7 @@
         }
 
         $pick = function (array $candidates, string $fallback) use ($basePath): string {
-            $rootDir = dirname(__DIR__); // project root
+            $rootDir = dirname(__DIR__); 
             foreach ($candidates as $relative) {
                 $rel = ltrim((string) $relative, '/');
                 $fs = $rootDir . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $rel);

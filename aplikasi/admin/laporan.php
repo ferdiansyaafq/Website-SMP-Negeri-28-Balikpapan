@@ -1,8 +1,6 @@
 <?php
-// aplikasi/admin/laporan.php
 session_start();
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -10,16 +8,12 @@ if (!$isAdminSession) {
     exit;
 }
 
-require_once '../../config/database.php';   // Panggil database LEBIH DULU untuk eksekusi logika
+require_once '../../config/database.php';   
 
-/* ============================================================
-   LOGIKA AKSI ADMIN (BATAL / SETUJU VALIDASI PAKSA)
-   ============================================================ */
 if (isset($_GET['aksi_admin']) && isset($_GET['laporan_id'])) {
     $aksi_admin = $_GET['aksi_admin'];
     $laporan_id = (int)$_GET['laporan_id'];
     
-    // Susun URL kembali supaya filter tidak hilang setelah aksi diklik
     $back_url = "?tab=kelas&guru_id=" . urlencode($_GET['guru_id'] ?? '') . "&kelas=" . urlencode($_GET['kelas'] ?? '') . "&tanggal=" . urlencode($_GET['tanggal'] ?? '');
     
     try {
@@ -35,12 +29,8 @@ if (isset($_GET['aksi_admin']) && isset($_GET['laporan_id'])) {
     }
 }
 
-// Baru Load Header UI setelah semua logika redirect selesai
 require_once '../includes/header-kaih.php'; 
 
-/* ============================================================
-   LOGIKA BACKEND (VERSI PDO)
-   ============================================================ */
 $tab = ($_GET['tab'] ?? 'kelas') === 'siswa' ? 'siswa' : 'kelas';
 $filterGuruId   = (int)($_GET['guru_id'] ?? 0);
 $filterKelas    = trim((string)($_GET['kelas'] ?? ''));
@@ -57,7 +47,6 @@ if (!preg_match('/^\d{4}-\d{2}$/', $filterBulan)) {
     $filterBulan = date('Y-m');
 }
 
-// Load dropdown data pakai PDO
 $allGuru = $pdo->query("SELECT id, nama_guru, kelas AS wali_kelas FROM guru ORDER BY nama_guru ASC")->fetchAll(PDO::FETCH_ASSOC);
 $allKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 $allSiswa = $pdo->query("SELECT id, nama_siswa, kelas FROM siswa ORDER BY kelas ASC, nama_siswa ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -75,7 +64,6 @@ if ($filterGuruId > 0) {
     }
 }
 
-// Variabel Data Tab Kelas & Grafik
 $kelasData = [];
 $statTotal = $statTerkirim = $statBelum = $statValid = 0;
 $statBangun = $statIbadah = $statOlahraga = $statSarapan = $statMembaca = $statMembantu = $statMenabung = 0;
@@ -99,7 +87,6 @@ if ($tab === 'kelas' && $filterKelas !== '') {
         $sent = !empty($it['laporan_id']);
         if ($sent) {
             $statTerkirim++;
-            // Hitung kalkulasi untuk Grafik
             if ($it['bangun']) $statBangun++;
             if ($it['ibadah']) $statIbadah++;
             if ($it['olahraga']) $statOlahraga++;
@@ -117,7 +104,6 @@ if ($tab === 'kelas' && $filterKelas !== '') {
     }
 }
 
-// Data Tab Siswa
 $siswaInfo = null;
 $siswaLaporan = [];
 $statSiswaTotal = $statSiswaDays = 0;
@@ -148,7 +134,6 @@ if ($tab === 'siswa' && $filterSiswaId > 0) {
     }
 }
 
-// Helper Data & Fungsi UI
 $guruKelasMapJson = json_encode(array_column($allGuru, 'wali_kelas', 'id'), JSON_UNESCAPED_UNICODE);
 $bulanNames = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
 

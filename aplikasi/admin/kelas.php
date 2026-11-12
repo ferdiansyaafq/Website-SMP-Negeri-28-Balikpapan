@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/kelas.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -11,10 +9,8 @@ if (!$isAdminSession) {
     exit;
 }
 
-// Tangkap pencarian jika ada
 $search = $_GET['search'] ?? '';
 
-// --- Query Mengambil Data Kelas beserta Wali Kelasnya ---
 $query = "
     SELECT 
         k.id, 
@@ -39,7 +35,6 @@ if (!empty($search)) {
 $stmt->execute();
 $kelas_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 

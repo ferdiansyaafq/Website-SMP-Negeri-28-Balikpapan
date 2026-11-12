@@ -1,8 +1,6 @@
 <?php
-// aplikasi/admin/laporan-guru.php
 session_start();
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -12,9 +10,6 @@ if (!$isAdminSession) {
 
 require_once '../../config/database.php';
 
-/* ============================================================
-   LOGIKA AKSI ADMIN (BATAL / SETUJU VALIDASI PAKSA)
-   ============================================================ */
 if (isset($_GET['aksi_admin']) && isset($_GET['laporan_id'])) {
     $aksi_admin = $_GET['aksi_admin'];
     $laporan_id = (int)$_GET['laporan_id'];
@@ -33,7 +28,6 @@ if (isset($_GET['aksi_admin']) && isset($_GET['laporan_id'])) {
 
 require_once '../includes/header-kaih.php';
 
-// Pengaturan Default Filter
 $tab = in_array($_GET['tab'] ?? '', ['validasi', 'rekap'], true) ? (string)$_GET['tab'] : 'validasi';
 $filterGuruId  = (int)($_GET['guru_id'] ?? 0);
 $filterKelas   = trim((string)($_GET['kelas'] ?? ''));
@@ -44,7 +38,6 @@ $year        = max(2020, min(2035, (int)($_GET['year'] ?? (int)date('Y'))));
 $rawSemester = (int)($_GET['semester'] ?? $autoSem);
 $semester    = in_array($rawSemester, [1, 2], true) ? $rawSemester : $autoSem;
 
-// Load Dropdown Data
 $allGuru = $pdo->query("SELECT id, nama_guru, kelas AS wali_kelas FROM guru ORDER BY nama_guru ASC")->fetchAll(PDO::FETCH_ASSOC);
 $allKelas = $pdo->query("SELECT id, nama_kelas FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -65,9 +58,6 @@ $bulanNames = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Jun
 $labelMap = [1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'Mei',6=>'Jun',7=>'Jul',8=>'Agu',9=>'Sep',10=>'Okt',11=>'Nov',12=>'Des'];
 $semLabel = ($semester === 1 ? 'Semester 1 (Jan-Jun)' : 'Semester 2 (Jul-Des)') . ' ' . $year;
 
-/* ============================================================
-   DATA TAB 1: VALIDASI GURU (HARIAN)
-   ============================================================ */
 $validasiData = [];
 $valTotal = $valTerkirim = $valBelum = $valValid = 0;
 $valSudahKirim = [];
@@ -99,9 +89,6 @@ if ($tab === 'validasi' && $filterKelas !== '') {
     }
 }
 
-/* ============================================================
-   DATA TAB 2: REKAP SEMESTER & CETAK
-   ============================================================ */
 $students = [];
 $summary = [];
 $semAgg = [];

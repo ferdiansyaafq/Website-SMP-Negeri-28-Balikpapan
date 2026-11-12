@@ -86,9 +86,6 @@ include 'header.php';
     text-align: justify;
 }
 
-/* ========================================= */
-/* BERITA & PENGUMUMAN - GRID DENGAN GAMBAR  */
-/* ========================================= */
 .berita-list {
     display: flex;
     flex-direction: column;

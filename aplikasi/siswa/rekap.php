@@ -1,5 +1,4 @@
 <?php
-// aplikasi/siswa/rekap.php
 require_once '../includes/header-kaih.php';
 
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
@@ -18,16 +17,10 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// AMBIL BULAN YANG DIPILIH DARI GET
-// ============================================================
 $bulan_terpilih = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
 $bulan = date('m', strtotime($bulan_terpilih . '-01'));
 $tahun = date('Y', strtotime($bulan_terpilih . '-01'));
 
-// ============================================================
-// FUNGSI CEK & LENGKAPI ABSENSI BULANAN
-// ============================================================
 function lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun) {
     if ($siswa_id <= 0) return;
     
@@ -60,9 +53,6 @@ function lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// FUNGSI LENGKAPI DATA KAIH BULANAN
-// ============================================================
 function lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun) {
     if ($siswa_id <= 0) return;
     
@@ -105,9 +95,6 @@ function lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// AMBIL DATA REKAP
-// ============================================================
 $bulan_ini = $tahun . '-' . $bulan;
 $rekap_absensi = [];
 $rekap_kaih = [];
@@ -116,13 +103,10 @@ $nama_bulan = bulanIndo(date('F', strtotime($bulan_ini . '-01')));
 $tahun_display = $tahun;
 
 if ($siswa_id > 0) {
-    // LENGKAPI DATA ABSENSI BULAN INI
     lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun);
     
-    // LENGKAPI DATA KAIH BULAN INI
     lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun);
     
-    // Rekap Absensi
     try {
         $stmt = $pdo->prepare("SELECT tanggal, status, deskripsi, catatan FROM absensi 
                                WHERE siswa_id = ? AND DATE_FORMAT(tanggal, '%Y-%m') = ?
@@ -131,7 +115,6 @@ if ($siswa_id > 0) {
         $rekap_absensi = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {}
 
-    // Rekap KAIH
     try {
         $stmt = $pdo->prepare("SELECT tanggal, bangun, ibadah, olahraga, sarapan, membaca, membantu, menabung 
                                FROM laporan_harian 
@@ -142,9 +125,6 @@ if ($siswa_id > 0) {
     } catch (PDOException $e) {}
 }
 
-// ============================================================
-// HITUNG STATISTIK ABSENSI
-// ============================================================
 $total_absen = count($rekap_absensi);
 $total_hadir = 0;
 $total_alpha = 0;
@@ -164,9 +144,6 @@ foreach ($rekap_absensi as $row) {
     }
 }
 
-// ============================================================
-// HITUNG STATISTIK KAIH
-// ============================================================
 $total_kaih = count($rekap_kaih);
 $total_kebiasaan = 0;
 
@@ -177,9 +154,6 @@ foreach ($rekap_kaih as $row) {
         ($row['menabung'] ?? 0);
 }
 
-// ============================================================
-// FUNGSI UNTUK STATUS BADGE
-// ============================================================
 function getStatusBadge($status) {
     $status = strtolower($status);
     $badges = [
@@ -191,9 +165,6 @@ function getStatusBadge($status) {
     return $badges[$status] ?? '<span class="status-badge">' . ucfirst($status) . '</span>';
 }
 
-// ============================================================
-// HITUNG JUMLAH HARI SEKOLAH DI BULAN INI
-// ============================================================
 function getHariSekolahBulan($bulan, $tahun) {
     $count = 0;
     $first_day = date('Y-m-d', strtotime("$tahun-$bulan-01"));
@@ -214,13 +185,10 @@ function getHariSekolahBulan($bulan, $tahun) {
 
 $total_hari_sekolah = getHariSekolahBulan($bulan, $tahun);
 
-// ============================================================
-// FUNGSI UNTUK MENGHASILKAN OPSI BULAN (1 TAHUN TERAKHIR)
-// ============================================================
 function getBulanOptions($selected) {
     $options = '';
     $current = new DateTime();
-    $current->modify('-11 months'); // Mulai dari 11 bulan yang lalu
+    $current->modify('-11 months'); 
     
     for ($i = 0; $i < 12; $i++) {
         $value = $current->format('Y-m');

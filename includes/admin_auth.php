@@ -1,8 +1,7 @@
 <?php
-
-const ADMIN_SESSION_TIMEOUT = 28800; // 8 hours
+const ADMIN_SESSION_TIMEOUT = 28800; 
 const ADMIN_MAX_LOGIN_ATTEMPTS = 5;
-const ADMIN_LOGIN_LOCKOUT_SECONDS = 300; // 5 minutes
+const ADMIN_LOGIN_LOCKOUT_SECONDS = 300; 
 
 function startAdminSession(): void
 {

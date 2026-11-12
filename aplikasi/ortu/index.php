@@ -1,5 +1,4 @@
 <?php
-// aplikasi/ortu/index.php
 require_once '../includes/auth.php';
 
 if (($_SESSION['role'] ?? '') !== 'orang_tua') {
@@ -37,7 +36,6 @@ if ($siswa_id > 0) {
         $stmt4->execute([$siswa_id]);
         $terbaru = $stmt4->fetchAll();
     } catch (PDOException $e) {
-        // Tabel laporan_harian mungkin belum ada; biarkan angka tetap 0
     }
 }
 

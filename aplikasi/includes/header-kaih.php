@@ -1,7 +1,11 @@
 <?php
 require_once __DIR__ . '/auth.php';
 
-date_default_timezone_set('Asia/Makassar');
+if (defined('APP_TIMEZONE')) {
+    date_default_timezone_set(APP_TIMEZONE);
+} else {
+    date_default_timezone_set(PHP_OS_FAMILY === 'Windows' ? 'Asia/Jakarta' : 'Asia/Makassar');
+}
 
 function hariIndo($day) {
     $hari = [

@@ -1,9 +1,7 @@
 <?php
-// aplikasi/admin/edit_kelas.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses admin
 $isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
     || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
 if (!$isAdminSession) {
@@ -11,7 +9,6 @@ if (!$isAdminSession) {
     exit;
 }
 
-// Ambil ID kelas dari URL
 $id_kelas = $_GET['id'] ?? null;
 
 if (!$id_kelas) {
@@ -19,7 +16,6 @@ if (!$id_kelas) {
     exit;
 }
 
-// Ambil data kelas saat ini
 $stmt = $pdo->prepare("SELECT * FROM kaih_kelas WHERE id = :id");
 $stmt->execute([':id' => $id_kelas]);
 $kelas = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -28,7 +24,6 @@ if (!$kelas) {
     die("Data kelas tidak ditemukan.");
 }
 
-// Proses Update Data jika form di-submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_kelas_baru = trim($_POST['nama_kelas']);
 
@@ -51,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id' => $id_kelas
             ]);
             
-            // Redirect kembali ke halaman kelas setelah berhasil
             if ($nama_lama !== $nama_kelas_baru) {
                 $stmtS = $pdo->prepare("UPDATE siswa SET kelas = ? WHERE kelas = ?");
                 $stmtS->execute([$nama_kelas_baru, $nama_lama]);
@@ -75,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Memuat Header UI
 require_once '../includes/header-kaih.php';
 ?>
 

@@ -452,8 +452,8 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
 
 @media (max-width: 968px) {
     .hero-section { grid-template-columns: 1fr; padding: 20px; gap: 30px; }
-    .text-content h2 { font-size: 28px; white-space: normal; } /* Normal kembali saat mobile */
-    .text-content { text-align: left; } /* Teks ke tengah saat mobile */
+    .text-content h2 { font-size: 28px; white-space: normal; } 
+    .text-content { text-align: left; } 
     .image-section { order: -1; }
     .carousel img { height: auto; max-height: 400px; }
     .fasilitas-grid,
@@ -465,7 +465,7 @@ footer a[href*="wa.me"]:hover { transform: translateY(-5px); box-shadow: 0 8px 3
     .hero-section { padding: 15px; }
     .text-content h2 { font-size: 24px; }
     .tagline { font-size: 15px; }
-    .description { font-size: 14px; text-align: left; } /* Deskripsi ke tengah saat mobile */
+    .description { font-size: 14px; text-align: left; } 
     .berita-grid,
     .fasilitas-grid,
     .ekskul-grid { grid-template-columns: 1fr; padding: 0 20px; }

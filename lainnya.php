@@ -11,7 +11,6 @@ include 'header.php';
 </div>
 
 <div class="container">
-    <!-- FAQ -->
     <div class="section" id="faq">
         <h2 class="section-title">❓ Pertanyaan yang Sering Diajukan</h2>
 

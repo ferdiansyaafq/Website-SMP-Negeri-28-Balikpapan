@@ -1,24 +1,8 @@
 <?php
-// Pastikan session sudah dimulai jika menggunakan fitur login
-// session_start();
-
 require_once __DIR__ . '/config/database.php';
-/*
-$host = 'localhost';
-$dbname = 'kaih';
-$user = 'root';
-$pass = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Koneksi Gagal: " . $e->getMessage());
-} */
 if (false) {
 }
 
-// 2. Query untuk mengambil laporan yang BELUM divalidasi (Antrean Pending)
 $sql = "SELECT lh.*, s.nama_siswa 
         FROM laporan_harian lh 
         JOIN siswa s ON lh.siswa_id = s.id 
@@ -28,7 +12,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $laporan_pending = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Query untuk mengambil data yang SUDAH divalidasi (Riwayat Validasi)
 $sql_riwayat = "SELECT lh.*, s.nama_siswa 
                 FROM laporan_harian lh 
                 JOIN siswa s ON lh.siswa_id = s.id 

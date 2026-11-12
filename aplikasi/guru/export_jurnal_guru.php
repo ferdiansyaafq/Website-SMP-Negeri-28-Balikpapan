@@ -19,10 +19,8 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$guru_id, $senin, $minggu_end]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Nama file
 $filename = 'Jurnal_Guru_' . $senin . '_sd_' . $minggu_end . '.csv';
 
-// Header CSV
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Pragma: no-cache');
@@ -30,10 +28,8 @@ header('Expires: 0');
 
 $out = fopen('php://output', 'w');
 
-// BOM agar Excel baca UTF-8 dengan benar
 fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
 
-// Header kolom
 fputcsv($out, [
     'No', 'Tanggal', 'Hari', 'Jam Ke-', 'Jam Mulai', 'Jam Selesai',
     'Kelas', 'Mata Pelajaran', 'Materi', 'Uraian Materi',
@@ -42,7 +38,6 @@ fputcsv($out, [
 
 $no = 1;
 foreach ($rows as $r) {
-    // Parsing catatan
     $cat = $r['catatan'] ?? '';
     preg_match('/Jam ke:\s*(.+)/', $cat, $mJam);
     preg_match('/Kehadiran:\s*(.+)/', $cat, $mHadir);

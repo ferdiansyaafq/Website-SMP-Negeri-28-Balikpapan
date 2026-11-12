@@ -1,5 +1,4 @@
 <?php
-// aplikasi/includes/auth.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -9,7 +8,6 @@ $applicationPathPosition = strpos($scriptPath, '/aplikasi/');
 $basePath = $applicationPathPosition === false ? '' : substr($scriptPath, 0, $applicationPathPosition);
 $loginUrl = $basePath . '/login.php';
 
-// Cek login
 if (!isset($_SESSION['user_id'])) {
     header('Location: ' . $loginUrl);
     exit;
@@ -24,12 +22,9 @@ if (!in_array($role, $allowed_roles)) {
     exit;
 }
 
-// Ambil data user
 require_once __DIR__ . '/../../config/database.php';
 
-// Pastikan $pdo tersedia
 if (!isset($pdo)) {
-    // Jika menggunakan database.php dengan PDO
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=kaih;charset=utf8mb4", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -57,7 +52,6 @@ try {
     $user = ['nama_lengkap' => $_SESSION['username']];
 }
 
-// Konstanta path
 define('BASE_URL', $basePath . '/');
 define('KAIH_URL', BASE_URL . 'aplikasi/');
 ?>

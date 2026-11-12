@@ -9,6 +9,30 @@ if (($_SESSION['role'] ?? '') !== 'admin') {
 
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $perPage = 10;
+
+$flash = '';
+$flashType = 'success';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $id = (int) ($_POST['id'] ?? 0);
+
+    if ($action === 'delete' && $id > 0) {
+        $stmtDel = $pdo->prepare('DELETE FROM survei WHERE id = ?');
+        $stmtDel->execute([$id]);
+        $_SESSION['flash_msg'] = 'Data survei pelayanan berhasil dihapus.';
+        $_SESSION['flash_type'] = 'success';
+        header('Location: survei.php?page=' . $page);
+        exit;
+    }
+}
+
+if (!empty($_SESSION['flash_msg'])) {
+    $flash = $_SESSION['flash_msg'];
+    $flashType = $_SESSION['flash_type'] ?? 'success';
+    unset($_SESSION['flash_msg'], $_SESSION['flash_type']);
+}
+
 $total = (int) $pdo->query('SELECT COUNT(*) FROM survei')->fetchColumn();
 $totalPages = max(1, (int) ceil($total / $perPage));
 $page = min($page, $totalPages);
@@ -29,17 +53,51 @@ require_once '../includes/header-kaih.php';
 ?>
 
 <style>
-    .admin-page { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .admin-page { max-width: 1150px; margin: 0 auto; padding: 24px; }
     .admin-page h1 { color: #1e293b; margin-bottom: 6px; }
     .admin-page .intro { color: #64748b; margin-bottom: 20px; }
     .table-wrap { overflow-x: auto; background: white; border-radius: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); }
-    .data-table { width: 100%; min-width: 700px; border-collapse: collapse; }
-    .data-table th, .data-table td { padding: 13px 14px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+    .data-table { width: 100%; min-width: 780px; border-collapse: collapse; }
+    .data-table th, .data-table td { padding: 13px 14px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: middle; }
     .data-table th { background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; }
     .data-table td { color: #334155; font-size: 13px; }
     .data-table tr:last-child td { border-bottom: 0; }
     .rating { color: #d97706; font-size: 17px; white-space: nowrap; }
-    .review { max-width: 520px; white-space: pre-line; }
+    .review { max-width: 480px; white-space: pre-line; }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+    .btn-delete {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    .btn-delete:hover {
+        background: #dc2626;
+        color: white;
+    }
+    .alert-flash {
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .alert-flash.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-flash.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
     .pagination a, .pagination span { padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; }
     .pagination a { background: #e0f2fe; color: #0369a1; }
@@ -50,6 +108,13 @@ require_once '../includes/header-kaih.php';
 <div class="admin-page">
     <h1>📝 Survei Pelayanan</h1>
     <p class="intro">Masukan dan penilaian yang dikirim melalui formulir survei publik.</p>
+
+    <?php if ($flash): ?>
+        <div class="alert-flash <?= htmlspecialchars($flashType) ?>">
+            <span><?= ($flashType === 'success') ? '✅' : '⚠️' ?></span>
+            <div><?= htmlspecialchars($flash) ?></div>
+        </div>
+    <?php endif; ?>
 
     <div class="table-wrap">
         <?php if (!$survei): ?>
@@ -63,6 +128,7 @@ require_once '../includes/header-kaih.php';
                         <th>Agenda Kunjungan</th>
                         <th>Kepuasan</th>
                         <th>Kritik & Saran</th>
+                        <th style="text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -89,6 +155,15 @@ require_once '../includes/header-kaih.php';
                                 <span style="font-size: 12px; color: #64748b; margin-left: 4px;"><?= htmlspecialchars($ratingInfo['text']) ?></span>
                             </td>
                             <td class="review"><?= htmlspecialchars($item['ulasan']) ?></td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <form method="POST" action="" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin MENGHAPUS data survei ini?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= (int)$item['id'] ?>">
+                                    <button type="submit" class="btn-action btn-delete" title="Hapus Survei">
+                                        🗑️ Hapus
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

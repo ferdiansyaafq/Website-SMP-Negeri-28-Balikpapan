@@ -11,7 +11,7 @@ include 'header.php';
 </div>
 
 <div class="container">
-
+    <div class="quick-nav-grid">
         <a href="buku_tamu.php" class="quick-nav-card">
             <div>
                 <div class="quick-nav-icon">📖</div>
@@ -37,6 +37,15 @@ include 'header.php';
                 <p>Sampaikan penilaian, kritik, dan saran untuk peningkatan pelayanan sekolah.</p>
             </div>
             <span class="quick-nav-link">Isi Survei →</span>
+        </a>
+
+        <a href="literasi.php" class="quick-nav-card">
+            <div>
+                <div class="quick-nav-icon">📚</div>
+                <h4>Jendela Literasi</h4>
+                <p>Jelajahi dan baca koleksi buku digital, bahan bacaan, serta literasi sekolah.</p>
+            </div>
+            <span class="quick-nav-link">Buka Jendela Literasi →</span>
         </a>
     </div>
 </div>

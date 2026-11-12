@@ -1,9 +1,7 @@
 <?php
-// aplikasi/guru/absensi.php
 session_start();
 require_once '../../config/database.php';
 
-// Ambil kelas wali guru dari session
 $guru_id = $_SESSION['guru_id'] ?? $_SESSION['user_id'] ?? 0;
 $kelas_guru = '';
 

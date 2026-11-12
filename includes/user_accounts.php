@@ -1,5 +1,4 @@
 <?php
-
 function normalizeLoginIdentifier(string $value): string
 {
     return preg_replace('/\s+/', '', trim($value));
@@ -422,7 +421,6 @@ function attemptPortalLogin(mysqli $conn, string $role, string $identifier, stri
 
         $conn->begin_transaction();
         try {
-            // false = jangan reset password yang sudah ada
             syncStudentAccounts($conn, (int) $student['id'], $student['nisn'], false);
             $conn->commit();
         } catch (Throwable $e) {
@@ -453,7 +451,6 @@ function attemptPortalLogin(mysqli $conn, string $role, string $identifier, stri
 
     $conn->begin_transaction();
     try {
-        // false = jangan reset password yang sudah ada
         syncStudentAccounts($conn, (int) $student['id'], $student['nisn'], false);
         $conn->commit();
     } catch (Throwable $e) {

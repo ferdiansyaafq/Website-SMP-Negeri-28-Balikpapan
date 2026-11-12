@@ -1,9 +1,7 @@
 <?php
-// aplikasi/siswa/index.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
-// Ambil statistik dari database
 $siswa_id = $_SESSION['siswa_id'] ?? 0;
 $total_kaih = 0;
 $tervalidasi = 0;
@@ -12,25 +10,20 @@ $total_refleksi = 0;
 
 if ($siswa_id > 0) {
     try {
-        // Total KAIH
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM laporan_harian WHERE siswa_id = ?");
         $stmt->execute([$siswa_id]);
         $total_kaih = $stmt->fetchColumn();
         
-        // Tervalidasi
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM laporan_harian WHERE siswa_id = ? AND (orang_tua_validated_at IS NOT NULL OR guru_validated_at IS NOT NULL)");
         $stmt->execute([$siswa_id]);
         $tervalidasi = $stmt->fetchColumn();
         
-        // Menunggu validasi
         $menunggu = $total_kaih - $tervalidasi;
         
-        // Total Refleksi
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM refleksi WHERE siswa_id = ?");
         $stmt->execute([$siswa_id]);
         $total_refleksi = $stmt->fetchColumn();
     } catch (PDOException $e) {
-        // Jika tabel belum ada, abaikan
     }
 }
 ?>

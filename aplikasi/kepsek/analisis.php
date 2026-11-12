@@ -1,9 +1,7 @@
 <?php
-// aplikasi/kepsek/analisis.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
-// Pastikan hanya role kepsek
 if (($_SESSION['role'] ?? '') !== 'kepsek') {
     header('Location: ../../login.php');
     exit;
@@ -12,7 +10,6 @@ if (($_SESSION['role'] ?? '') !== 'kepsek') {
 $penilaian_id = (int)($_GET['id'] ?? 0);
 $is_saved = isset($_GET['saved']);
 
-// Jika tidak ada ID yang diberikan, ambil penilaian terbaru
 if ($penilaian_id <= 0) {
     $latestId = $pdo->query("SELECT id FROM supervisi_penilaian ORDER BY tanggal_observasi DESC, id DESC LIMIT 1")->fetchColumn();
     if ($latestId) {
@@ -20,7 +17,6 @@ if ($penilaian_id <= 0) {
     }
 }
 
-// Ambil seluruh daftar sesi supervisi untuk opsi dropdown pemilih
 $stmtAll = $pdo->query("
     SELECT sp.id, sp.tanggal_observasi, sp.mata_pelajaran, sp.kelas, sp.skor_akhir, sp.predikat, g.nama_guru 
     FROM supervisi_penilaian sp
@@ -36,7 +32,6 @@ $kelemahan_items = [];
 $kekuatan_items = [];
 
 if ($penilaian_id > 0) {
-    // Ambil data sesi supervisi
     $stmt = $pdo->prepare("
         SELECT sp.*, g.nama_guru, g.nip, g.alamat, g.no_hp
         FROM supervisi_penilaian sp
@@ -47,7 +42,6 @@ if ($penilaian_id > 0) {
     $penilaian = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($penilaian) {
-        // Ambil rincian penilaian per indikator
         $stmtDetail = $pdo->prepare("
             SELECT spd.*, r.aspek, r.kode_aspek, r.indikator, r.deskripsi, r.urutan
             FROM supervisi_penilaian_detail spd
@@ -58,13 +52,10 @@ if ($penilaian_id > 0) {
         $stmtDetail->execute([$penilaian_id]);
         $detail_items = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
 
-        // Agregat skor per aspek untuk Radar Chart
         $aspek_group = [];
         foreach ($detail_items as $item) {
             $aspek_group[$item['aspek']][] = (float)$item['skor_persen'];
 
-            // Klasifikasi Kelemahan vs Kekuatan
-            // Skor <= 50% adalah kelemahan signifikan, 75% adalah cukup/perlu pemantauan, >= 75% adalah kekuatan
             if ((float)$item['skor_persen'] <= 50.0) {
                 $kelemahan_items[] = [
                     'indikator' => $item['indikator'],
@@ -76,7 +67,6 @@ if ($penilaian_id > 0) {
                     'tingkat' => ((float)$item['skor_persen'] <= 25.0) ? 'Kritis' : 'Perlu Perbaikan'
                 ];
             } elseif ((float)$item['skor_persen'] == 75.0) {
-                // Kelemahan minor / ruang pengembangan jika ada
                 if (count($kelemahan_items) < 3) {
                     $kelemahan_items[] = [
                         'indikator' => $item['indikator'],
@@ -100,14 +90,12 @@ if ($penilaian_id > 0) {
             }
         }
 
-        // Hitung rata-rata per aspek
         foreach ($aspek_group as $aspek => $scores) {
             $aspek_scores[$aspek] = round(array_sum($scores) / count($scores), 1);
         }
     }
 }
 
-// Rekomendasi pembinaan otomatis berdasarkan indikator lemah
 function getRekomendasiOtomatis($indikator) {
     if (stripos($indikator, 'Modul Ajar') !== false || stripos($indikator, 'RPP') !== false) {
         return 'Pendampingan penyusunan Modul Ajar berdiferensiasi bersama Guru Penggerak / Kurikulum.';
@@ -235,10 +223,10 @@ function getRekomendasiOtomatis($indikator) {
         </div>
 
         <!-- 2 GRAFIK UTAMA: Radar Chart & Bar Chart Indikator -->
-        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin-bottom: 25px;">
+        <div class="analysis-chart-grid">
             <!-- Grafik Radar: Keseimbangan Aspek Kompetensi -->
-            <div class="kepsek-card">
-                <div class="kepsek-card-title">
+            <div class="kepsek-card analysis-chart-card">
+                <div class="kepsek-card-title analysis-chart-title">
                     <h3>🎯 Radar Keseimbangan Aspek Kompetensi</h3>
                     <span style="font-size: 12px; color: #64748b; font-weight: 600;">Skor per Dimensi</span>
                 </div>
@@ -246,21 +234,21 @@ function getRekomendasiOtomatis($indikator) {
                     <canvas id="radarGuruChart"></canvas>
                 </div>
                 <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 8px;">
-                    Cekukan ke arah dalam pada grafik jaring laba-laba menunjukkan aspek di mana guru mengalami penurunan performa.
+                    Lekukan ke arah dalam pada grafik jaring laba-laba menunjukkan aspek di mana guru mengalami penurunan performa.
                 </p>
             </div>
 
             <!-- Grafik Bar: Skor Seluruh Indikator Rinci -->
-            <div class="kepsek-card">
-                <div class="kepsek-card-title">
+            <div class="kepsek-card analysis-chart-card">
+                <div class="kepsek-card-title analysis-chart-title">
                     <h3>📊 Capaian Setiap Indikator Pembelajaran</h3>
-                    <div style="display: flex; gap: 8px; font-size: 11px;">
+                    <div class="analysis-chart-legend">
                         <span style="color: #ef4444; font-weight: 700;">● &lt;50% Kritis</span>
                         <span style="color: #f59e0b; font-weight: 700;">● &lt;75% Lemah</span>
                         <span style="color: #10b981; font-weight: 700;">● ≥75% Baik</span>
                     </div>
                 </div>
-                <div class="chart-container-box" style="height: 380px;">
+                <div class="chart-container-box analysis-bar-chart-container" style="height: <?= max(440, count($detail_items) * 48); ?>px;">
                     <canvas id="barGuruChart"></canvas>
                 </div>
             </div>
@@ -441,16 +429,13 @@ function getRekomendasiOtomatis($indikator) {
 </div>
 
 <?php if ($penilaian && !empty($aspek_scores)): 
-    // Persiapkan data JSON untuk Chart.js
     $radarLabels = array_keys($aspek_scores);
     $radarData = array_values($aspek_scores);
 
     $barLabels = [];
     $barData = [];
     foreach ($detail_items as $item) {
-        // Singkat nama indikator agar rapi di sumbu Y chart
-        $shortIndikator = (strlen($item['indikator']) > 45) ? substr($item['indikator'], 0, 42) . '...' : $item['indikator'];
-        $barLabels[] = $shortIndikator;
+        $barLabels[] = $item['indikator'];
         $barData[] = (float)$item['skor_persen'];
     }
 ?>

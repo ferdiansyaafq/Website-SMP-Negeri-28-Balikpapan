@@ -91,7 +91,7 @@ require_once '../includes/header-kaih.php';
                             </td>
                             <td class="guest-purpose"><?= htmlspecialchars($item['keperluan']) ?></td>
                             <td style="text-align: center;">
-                                <strong><?= (int)$item['jumlah_orang'] ?></strong> org
+                                <strong><?= (int)$item['jumlah_orang'] ?></strong> orang
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -2,7 +2,15 @@
 $page_title = "Profil Sekolah - SMP Negeri 28 Balikpapan";
 include 'header.php';
 
-function getTeacherPhoto($name) {
+function getTeacherPhoto($name, $photo = null) {
+    if ($photo !== null) {
+        $fsPath = __DIR__ . DIRECTORY_SEPARATOR
+            . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $photo);
+        if (is_file($fsPath)) {
+            return $photo;
+        }
+    }
+
     $slug = strtolower(str_replace([' ', '.', ',', "'", "("], '-', $name));
     $slug = preg_replace('/-+/', '-', $slug);
     $slug = trim($slug, '-');
@@ -20,22 +28,22 @@ function getTeacherPhoto($name) {
 }
 
 $teachers = [
-    ['name' => 'Aris Broto, S.Pd', 'position' => 'Kepala Sekolah', 'initials' => 'AB'],
-    ['name' => 'Angger Dalu Gede Wijaya', 'position' => 'Wakil Kepala Sekolah', 'initials' => 'AD'],
-    ['name' => 'Muh. Alief Ramadhany', 'position' => 'Waka Kurikulum', 'initials' => 'MR'],
-    ['name' => 'Angelyn May Rotua Lumban Batu', 'position' => 'Waka Kesiswaan', 'initials' => 'AL'],
-    ['name' => 'Imil Mahmudah', 'position' => 'Guru PAI', 'initials' => 'IM'],
-    ['name' => 'Cindy Milenia', 'position' => 'Guru PKN', 'initials' => 'CM'],
-    ['name' => 'Rini Yulianti', 'position' => 'Guru BK', 'initials' => 'RY'],
-    ['name' => 'Eka Rahmayanti', 'position' => 'Guru IPS', 'initials' => 'ER'],
-    ['name' => 'Jenni Roslianthi', 'position' => 'Guru Matematika', 'initials' => 'JR'],
-    ['name' => 'Nurhabibah', 'position' => 'Guru TIK', 'initials' => 'NH'],
-    ['name' => 'Apryana Wulandari', 'position' => 'Guru PAK', 'initials' => 'AW'],
-     ['name' => 'Petugas Keamanan 1', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
-    ['name' => 'Petugas Keamanan 2', 'position' => 'Petugas Keamanan', 'initials' => 'PK'],
-    ['name' => 'Petugas Kebersihan 1', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
-    ['name' => 'Petugas Kebersihan 2', 'position' => 'Petugas Kebersihan', 'initials' => 'KB'],
-    ['name' => 'Lorem Ipsum', 'position' => 'Lorem Ipsum', 'initials' => 'LI']
+    ['name' => 'Aris Broto, S.Pd', 'position' => 'Kepala Sekolah', 'photo' => 'assets/img/guru/kepala-sekolah.jpg', 'initials' => 'AB'],
+    ['name' => 'Angger Dalu Gede Wijaya', 'position' => 'Wakil Kepala Sekolah', 'photo' => 'assets/img/guru/angger-dalu-gede-wijaya.jpg', 'initials' => 'AD'],
+    ['name' => 'Muh. Alief Ramadhany', 'position' => 'Waka Kurikulum', 'photo' => 'assets/img/guru/muh-alief-ramadhany.jpg', 'initials' => 'MR'],
+    ['name' => 'Angelyn May Rotua Lumban Batu', 'position' => 'Waka Kesiswaan', 'photo' => 'assets/img/guru/angelyn-may-rotua-lumban-batu.jpg', 'initials' => 'AL'],
+    ['name' => 'Imil Mahmudah', 'position' => 'Guru PAI', 'photo' => 'assets/img/guru/imil-mahmudah.jpg', 'initials' => 'IM'],
+    ['name' => 'Cindy Milenia', 'position' => 'Guru PKN', 'photo' => 'assets/img/guru/cindy-milenia.jpg', 'initials' => 'CM'],
+    ['name' => 'Rini Yulianti', 'position' => 'Guru BK', 'photo' => 'assets/img/guru/rini-yulianti.jpg', 'initials' => 'RY'],
+    ['name' => 'Eka Rahmayanti', 'position' => 'Guru IPS', 'photo' => 'assets/img/guru/eka-rahmayanti.jpg', 'initials' => 'ER'],
+    ['name' => 'Jenni Roslianthi', 'position' => 'Guru Matematika', 'photo' => 'assets/img/guru/jenni-roslianthi.jpg', 'initials' => 'JR'],
+    ['name' => 'Nurhabibah', 'position' => 'Guru TIK', 'photo' => 'assets/img/guru/nurhabibah.jpg', 'initials' => 'NH'],
+    ['name' => 'Apryana Wulandari', 'position' => 'Guru PAK', 'photo' => 'assets/img/guru/apryana-wulandari.jpg', 'initials' => 'AW'],
+    ['name' => 'Petugas Keamanan 1', 'position' => 'Petugas Keamanan', 'photo' => 'assets/img/guru/petugas-keamanan-1.jpg', 'initials' => 'PK'],
+    ['name' => 'Petugas Keamanan 2', 'position' => 'Petugas Keamanan', 'photo' => 'assets/img/guru/petugas-keamanan-2.jpg', 'initials' => 'PK'],
+    ['name' => 'Petugas Kebersihan 1', 'position' => 'Petugas Kebersihan', 'photo' => 'assets/img/guru/petugas-kebersihan-1.jpg', 'initials' => 'KB'],
+    ['name' => 'Petugas Kebersihan 2', 'position' => 'Petugas Kebersihan', 'photo' => 'assets/img/guru/petugas-kebersihan-2.jpg', 'initials' => 'KB'],
+    ['name' => 'Petugas Kebersihan 3', 'position' => 'Petugas Kebersihan', 'photo' => 'assets/img/guru/petugas-kebersihan-3.jpg', 'initials' => 'KB']
 ];
 
 $ekskulData = [
@@ -918,19 +926,19 @@ $ekskulData = [
     <p class="text-content">SMP Negeri 28 Balikpapan memiliki fondasi SDM yang didominasi oleh tenaga pendidik muda dengan kualifikasi akademik S1 yang telah memenuhi standar minimal.</p>
     
     <div class="teacher-grid">
-        <?php foreach ($teachers as $teacher): 
-            $photo = getTeacherPhoto($teacher['name']);
+        <?php foreach ($teachers as $teacher):
+            $photo = getTeacherPhoto($teacher['name'], $teacher['photo'] ?? null);
         ?>
         <div class="teacher-card">
             <div class="teacher-avatar">
-                <?php if ($photo): ?>
-                    <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($teacher['name']); ?>">
+                <?php if ($photo !== null): ?>
+                    <img src="<?php echo htmlspecialchars($photo, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($teacher['name'], ENT_QUOTES, 'UTF-8'); ?>">
                 <?php else: ?>
-                    <span><?php echo $teacher['initials']; ?></span>
+                    <span><?php echo htmlspecialchars($teacher['initials'], ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php endif; ?>
             </div>
-            <div class="name"><?php echo $teacher['name']; ?></div>
-            <div class="position"><?php echo $teacher['position']; ?></div>
+            <div class="name"><?php echo htmlspecialchars($teacher['name'], ENT_QUOTES, 'UTF-8'); ?></div>
+            <div class="position"><?php echo htmlspecialchars($teacher['position'], ENT_QUOTES, 'UTF-8'); ?></div>
         </div>
         <?php endforeach; ?>
     </div>

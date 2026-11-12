@@ -1,11 +1,8 @@
 <?php
-// 1. Panggil file database yang ada di dalam folder config
 include 'config/database.php';
 
-// 2. Cek apakah ada data yang dikirim dari form
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // 3. Tangkap data dari form
     $nama_siswa     = trim($_POST['nama_siswa'] ?? '');
     $kelas          = trim($_POST['kelas'] ?? '');
     $mata_pelajaran = trim($_POST['mata_pelajaran'] ?? '');
@@ -15,7 +12,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $cleanKelas = trim(preg_replace('/^kelas\s+/i', '', $kelas));
         $fullKelas = 'Kelas ' . $cleanKelas;
 
-        // Cari siswa dengan penyesuaian format kelas
         $studentStmt = $pdo->prepare(
             'SELECT id FROM siswa 
              WHERE LOWER(TRIM(nama_siswa)) = LOWER(TRIM(:nama_siswa)) 
@@ -31,7 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
         $student = $studentStmt->fetch(PDO::FETCH_ASSOC);
 
-        // Fallback jika format kelas berbeda tipis tapi nama persis cocok
         if (!$student) {
             $fallbackStmt = $pdo->prepare('SELECT id FROM siswa WHERE LOWER(TRIM(nama_siswa)) = LOWER(TRIM(:nama_siswa)) LIMIT 1');
             $fallbackStmt->execute([':nama_siswa' => $nama_siswa]);
@@ -56,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $stmt = $pdo->prepare($sql);
         
-        // 5. Eksekusi query
         $stmt->execute([
             ':siswa_id'            => $student['id'],
             ':tahun_ajaran'        => date('Y') . '/' . (date('Y') + 1),
@@ -64,7 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ':pengalaman_berkesan' => $isi_refleksi
         ]);
 
-        // 6. Jika berhasil, beri notifikasi dan kembalikan ke halaman refleksi
         echo "<script>
                 alert('Refleksi pembelajaran berhasil dikirim! Tetap semangat belajarnya.');
                 window.location.href = 'refleksi.php';
@@ -80,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 } else {
-    // Keamanan: Tolak akses langsung ke file ini
     header("Location: refleksi.php");
     exit();
 }

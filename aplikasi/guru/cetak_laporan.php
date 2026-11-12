@@ -1,9 +1,7 @@
 <?php
-// aplikasi/guru/cetak_laporan.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses guru
 $role = strtolower($_SESSION['portal_role'] ?? $_SESSION['role'] ?? '');
 if ($role !== 'guru') {
     die("Akses ditolak. Hanya Guru yang dapat mencetak laporan.");
@@ -23,7 +21,6 @@ function fmtDate($ymd) {
     return $d ? (int)$d->format('j') . ' ' . $bulanNames[(int)$d->format('n')] . ' ' . $d->format('Y') : $ymd;
 }
 
-// Ambil Nama & NIP Guru untuk kolom Tanda Tangan
 $guru_id = $_SESSION['guru_id'] ?? $_SESSION['user_id'] ?? 0;
 $nama_guru = "........................................";
 $nip_guru = "........................................";
@@ -38,12 +35,10 @@ if ($guru_id > 0) {
     }
 }
 
-// Ambil Data Laporan Kelas
 $stmt = $pdo->prepare('SELECT s.nisn, s.nama_siswa, lh.id AS laporan_id, lh.bangun, lh.ibadah, lh.olahraga, lh.sarapan, lh.membaca, lh.membantu, lh.menabung FROM siswa s LEFT JOIN laporan_harian lh ON lh.siswa_id = s.id AND lh.tanggal = ? WHERE s.kelas = ? ORDER BY s.nama_siswa ASC');
 $stmt->execute([$filterTanggal, $filterKelas]);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Logo Kop Surat
 $pathPemkot = __DIR__ . '/../../assets/img/logopemkot.png';
 $pathSekolah = __DIR__ . '/../../assets/img/logosekolah.png';
 

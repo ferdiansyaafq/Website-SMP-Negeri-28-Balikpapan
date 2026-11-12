@@ -3,22 +3,13 @@ $page_title = "Jurnal Guru - SMP Negeri 28 Balikpapan";
 include 'header.php';
 include 'config/database.php';
 
-// ============================================================
-// 1. DATA MASTER
-// ============================================================
 $guru_list = $pdo->query("SELECT * FROM guru ORDER BY nama_guru ASC")->fetchAll();
 $kelas_list = $pdo->query("SELECT * FROM kaih_kelas WHERE nama_kelas != 'Belum Ada Kelas' ORDER BY tingkat ASC, nama_kelas ASC")->fetchAll();
 
-// ============================================================
-// 2. FILTER
-// ============================================================
 $filter_guru = $_GET['guru'] ?? '';
 $filter_kelas = $_GET['kelas'] ?? '';
 $filter_tanggal = $_GET['tanggal'] ?? date('Y-m-d');
 
-// ============================================================
-// 3. QUERY JURNAL
-// ============================================================
 $sql = "SELECT jg.*, 
                g.nama_guru, g.nip,
                k.nama_kelas
@@ -47,9 +38,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $jurnal = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ============================================================
-// 4. STATISTIK
-// ============================================================
 $total_guru = count($guru_list);
 $total_jurnal = count($jurnal);
 $total_kelas = count($kelas_list);
@@ -62,13 +50,11 @@ foreach ($jurnal as $j) {
 }
 $total_siswa = $total_hadir + $total_tidak_hadir;
 
-// Jadwal hari ini (untuk ringkasan)
 $hari_ini = date('Y-m-d');
 $jadwal_hari_ini = array_filter($jurnal, function($j) use ($hari_ini) {
     return $j['tanggal'] === $hari_ini;
 });
 
-// Map nama hari
 function getHariIndo($tanggal) {
     $hari = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
              'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];

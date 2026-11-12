@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['guru_id'] = $user['guru_id'];
                 $_SESSION['siswa_id'] = $user['siswa_id'];
                 
-                // Redirect berdasarkan role
                 switch ($user['role']) {
                     case 'admin':
                         header('Location: aplikasi/admin/index.php');
@@ -146,6 +145,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #94a3b8;
         }
 
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: #0284c7;
+            background: #f1f5f9;
+        }
+
+        .toggle-password:focus {
+            outline: none;
+            color: #0284c7;
+        }
+
+        .eye-icon {
+            display: block;
+            pointer-events: none;
+        }
+
         .btn-login {
             width: 100%;
             padding: 14px;
@@ -247,7 +286,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Lihat atau sembunyikan password" title="Lihat password">
+                        <svg id="eyeIcon" class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn-login">Masuk</button>
@@ -261,5 +308,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Copyright &copy; <?php echo date('Y'); ?> <span>SMP Negeri 28 Balikpapan x Vastaruna ITK.</span>
         </div>
     </div>
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        const eyeOpenSvg = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        `;
+
+        const eyeSlashSvg = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        `;
+
+        if (togglePassword && passwordInput && eyeIcon) {
+            togglePassword.addEventListener('click', function () {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                if (isPassword) {
+                    passwordInput.setAttribute('type', 'text');
+                    eyeIcon.innerHTML = eyeSlashSvg;
+                    this.setAttribute('title', 'Sembunyikan password');
+                } else {
+                    passwordInput.setAttribute('type', 'password');
+                    eyeIcon.innerHTML = eyeOpenSvg;
+                    this.setAttribute('title', 'Lihat password');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

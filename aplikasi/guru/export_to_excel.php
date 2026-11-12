@@ -1,9 +1,7 @@
 <?php
-// aplikasi/guru/export_excel.php
 session_start();
 require_once '../../config/database.php';
 
-// Cek hak akses guru
 $role = strtolower($_SESSION['portal_role'] ?? $_SESSION['role'] ?? '');
 if ($role !== 'guru') {
     die("Akses ditolak. Hanya Guru yang dapat mengekspor laporan.");
@@ -16,12 +14,10 @@ if (empty($filterKelas)) {
     die("Silakan pilih kelas terlebih dahulu sebelum mengekspor.");
 }
 
-// Ambil Data Laporan Kelas
 $stmt = $pdo->prepare('SELECT s.nisn, s.nama_siswa, lh.id AS laporan_id, lh.bangun, lh.ibadah, lh.olahraga, lh.sarapan, lh.membaca, lh.membantu, lh.menabung FROM siswa s LEFT JOIN laporan_harian lh ON lh.siswa_id = s.id AND lh.tanggal = ? WHERE s.kelas = ? ORDER BY s.nama_siswa ASC');
 $stmt->execute([$filterTanggal, $filterKelas]);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Header untuk memaksa browser mengunduh file sebagai Excel
 header("Content-Type: application/vnd-ms-excel");
 header("Content-Disposition: attachment; filename=Rekap_KAIH_Kelas_" . $filterKelas . "_" . $filterTanggal . ".xls");
 header("Pragma: no-cache");

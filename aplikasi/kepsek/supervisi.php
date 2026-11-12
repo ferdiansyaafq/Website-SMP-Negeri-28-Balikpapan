@@ -1,9 +1,7 @@
 <?php
-// aplikasi/kepsek/supervisi.php
 require_once '../includes/header-kaih.php';
 require_once '../../config/database.php';
 
-// Pastikan hanya role kepsek
 if (($_SESSION['role'] ?? '') !== 'kepsek') {
     header('Location: ../../login.php');
     exit;
@@ -12,7 +10,6 @@ if (($_SESSION['role'] ?? '') !== 'kepsek') {
 $message = '';
 $message_type = '';
 
-// Proses Hapus Sesi Supervisi jika diminta
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $delId = (int)$_GET['id'];
     try {
@@ -26,7 +23,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     }
 }
 
-// Filter Pencarian
 $filterGuru = (int)($_GET['guru_id'] ?? 0);
 $filterSemester = trim($_GET['semester'] ?? '');
 $filterTahun = trim($_GET['tahun'] ?? '');
@@ -68,10 +64,8 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $daftar_supervisi = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Ambil daftar guru untuk dropdown filter
 $daftar_guru = $pdo->query("SELECT id, nama_guru, jabatan FROM guru WHERE jabatan NOT LIKE '%Kepala Sekolah%' ORDER BY nama_guru ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// Ambil daftar tahun ajaran unik
 $daftar_tahun = $pdo->query("SELECT DISTINCT tahun_ajaran FROM supervisi_penilaian ORDER BY tahun_ajaran DESC")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 

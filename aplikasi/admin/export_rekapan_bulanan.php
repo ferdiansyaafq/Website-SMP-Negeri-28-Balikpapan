@@ -1,12 +1,9 @@
 <?php
-// 1. Panggil koneksi database
 include '../../config/database.php'; 
 
-// 2. Tangkap parameter bulan dan tahun dari URL
 $bulan_pilih = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
 $tahun_pilih = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 
-// 3. Set header untuk mendownload file Excel
 $nama_file = "Rekap_Kegiatan_Bulanan_Siswa_" . $bulan_pilih . "_" . $tahun_pilih . ".xls";
 header("Content-type: application/vnd-ms-excel");
 header("Content-Disposition: attachment; filename=$nama_file");
@@ -27,7 +24,6 @@ header("Content-Disposition: attachment; filename=$nama_file");
     </thead>
     <tbody>
         <?php
-        // 5. Query Database menggunakan PDO berdasarkan tabel asli KAIH
         $query = "SELECT s.nama_siswa, s.kelas, lh.tanggal, 
                          (lh.bangun + lh.ibadah + lh.olahraga + lh.sarapan + lh.membaca + lh.membantu + lh.menabung) as skor,
                          lh.orang_tua_validated_at, lh.guru_validated_at
@@ -39,11 +35,9 @@ header("Content-Disposition: attachment; filename=$nama_file");
         $stmt = $pdo->prepare($query);
         $stmt->execute([$bulan_pilih, $tahun_pilih]);
         
-        // Ambil semua data
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $no = 1;
-        // 6. Looping data untuk dimasukkan ke baris Excel
         if (count($result) > 0) {
             foreach ($result as $row) {
                 echo "<tr>";
@@ -53,7 +47,6 @@ header("Content-Disposition: attachment; filename=$nama_file");
                 echo "<td>" . htmlspecialchars($row['kelas']) . "</td>";
                 echo "<td style='text-align: center;'>" . $row['skor'] . " / 7</td>";
                 
-                // Cek status validasi
                 $val_ortu = !empty($row['orang_tua_validated_at']) ? 'Sudah Val (' . date('H:i', strtotime($row['orang_tua_validated_at'])) . ')' : 'Belum';
                 $val_guru = !empty($row['guru_validated_at']) ? 'Sudah Val (' . date('H:i', strtotime($row['guru_validated_at'])) . ')' : 'Belum';
                 

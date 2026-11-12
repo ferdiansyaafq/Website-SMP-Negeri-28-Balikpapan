@@ -137,6 +137,28 @@ function initRubrikCalculator() {
 }
 
 /**
+ * Pecah label grafik yang panjang menjadi beberapa baris agar tidak terpotong.
+ */
+function wrapChartLabel(label, maxLength) {
+    const words = String(label).split(/\s+/);
+    const lines = [];
+    let line = '';
+
+    words.forEach(word => {
+        const candidate = line ? `${line} ${word}` : word;
+        if (line && candidate.length > maxLength) {
+            lines.push(line);
+            line = word;
+        } else {
+            line = candidate;
+        }
+    });
+
+    if (line) lines.push(line);
+    return lines;
+}
+
+/**
  * Render Grafik Radar Kompetensi Guru (Aspek Supervisi)
  * Menampilkan keseimbangan kompetensi guru di setiap dimensi
  */
@@ -173,9 +195,12 @@ function renderRadarKompetensi(canvasId, labels, dataScores) {
                         color: 'rgba(0, 0, 0, 0.08)'
                     },
                     pointLabels: {
+                        callback: function (label) {
+                            return wrapChartLabel(label, 20);
+                        },
                         font: {
                             family: "'Segoe UI', sans-serif",
-                            size: 12,
+                            size: 11,
                             weight: '600'
                         },
                         color: '#334155'
@@ -259,9 +284,13 @@ function renderBarIndikator(canvasId, labels, dataScores) {
                         display: false
                     },
                     ticks: {
+                        callback: function (value) {
+                            const label = this.getLabelForValue(value);
+                            return wrapChartLabel(label, 28);
+                        },
                         font: {
                             family: "'Segoe UI', sans-serif",
-                            size: 11
+                            size: 10
                         },
                         color: '#1e293b'
                     }
