@@ -103,9 +103,15 @@ $nama_bulan = bulanIndo(date('F', strtotime($bulan_ini . '-01')));
 $tahun_display = $tahun;
 
 if ($siswa_id > 0) {
-    lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun);
+    $rekapCacheKey = '_rekap_sync_' . $siswa_id . '_' . $bulan_ini . '_' . date('Y-m-d');
+    if (empty($_SESSION[$rekapCacheKey])) {
+        lengkapiAbsensiBulanan($pdo, $siswa_id, $bulan, $tahun);
+        lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun);
+        // lengkapiKAIHBulanan sudah dipanggil di blok cache di atas
+        $_SESSION[$rekapCacheKey] = true;
+    }
     
-    lengkapiKAIHBulanan($pdo, $siswa_id, $bulan, $tahun);
+    // lengkapiKAIHBulanan sudah dipanggil di blok cache di atas
     
     try {
         $stmt = $pdo->prepare("SELECT tanggal, status, deskripsi, catatan FROM absensi 

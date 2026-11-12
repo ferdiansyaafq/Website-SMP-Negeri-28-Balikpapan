@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../config/database.php';
+require_once __DIR__ . '/init_supervisi.php';
 
 if (($_SESSION['role'] ?? '') !== 'kepsek') {
     header('Location: ../../login.php');

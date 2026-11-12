@@ -100,7 +100,7 @@ function ensureLaporanHarianTableOrtu(PDO $pdo): void
     } catch (PDOException $e) {
     }
 }
-ensureLaporanHarianTableOrtu($pdo);
+if (empty($_SESSION['_ortu_lh_schema_ok'])) { ensureLaporanHarianTableOrtu($pdo); $_SESSION['_ortu_lh_schema_ok'] = true; }
 
 $siswa_id = (int) ($_SESSION['siswa_id'] ?? 0);
 $anak = null;

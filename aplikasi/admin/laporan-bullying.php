@@ -46,7 +46,32 @@ if (!empty($_SESSION['flash_msg'])) {
     unset($_SESSION['flash_msg'], $_SESSION['flash_type']);
 }
 
-$total = (int) $pdo->query('SELECT COUNT(*) FROM laporan_bullying')->fetchColumn();
+try {
+    $total = (int) $pdo->query('SELECT COUNT(*) FROM laporan_bullying')->fetchColumn();
+} catch (PDOException $e) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `laporan_bullying` (
+          `id` int NOT NULL AUTO_INCREMENT,
+          `nama_pelapor` varchar(100) NOT NULL,
+          `kontak` varchar(50) NOT NULL,
+          `status_pelapor` varchar(50) NOT NULL,
+          `nama_korban` varchar(100) NOT NULL,
+          `kelas_korban` varchar(50) NOT NULL,
+          `jenis_bullying` varchar(100) NOT NULL,
+          `tanggal_kejadian` date NOT NULL,
+          `deskripsi` text NOT NULL,
+          `lokasi` varchar(150) NOT NULL,
+          `saksi` varchar(150) DEFAULT NULL,
+          `status` enum('baru','diproses','selesai') NOT NULL DEFAULT 'baru',
+          `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        $total = (int) $pdo->query('SELECT COUNT(*) FROM laporan_bullying')->fetchColumn();
+    } catch (Exception $ex) {
+        $total = 0;
+    }
+}
 $totalPages = max(1, (int) ceil($total / $perPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $perPage;

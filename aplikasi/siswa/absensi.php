@@ -64,7 +64,7 @@ function ensureAbsensiColumns($pdo) {
         return false;
     }
 }
-ensureAbsensiColumns($pdo);
+if (empty($_SESSION['_absensi_schema_ok'])) { ensureAbsensiColumns($pdo); $_SESSION['_absensi_schema_ok'] = true; }
 
 function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
     if ($siswa_id <= 0) return;
@@ -103,7 +103,7 @@ function cekDanCatatAbsenTerlewat($pdo, $siswa_id) {
     }
 }
 
-cekDanCatatAbsenTerlewat($pdo, $siswa_id);
+if (($_SESSION['_absen_missed_chk'] ?? '') !== date('Y-m-d')) { cekDanCatatAbsenTerlewat($pdo, $siswa_id); $_SESSION['_absen_missed_chk'] = date('Y-m-d'); }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['absen'])) {
     

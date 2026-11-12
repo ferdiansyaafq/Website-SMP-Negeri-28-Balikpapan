@@ -104,7 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $gagal = 0;
 
             if (($handle = fopen($fileTmpPath, "r")) !== FALSE) {
-                fgetcsv($handle, 1000, ","); 
+                fgetcsv($handle, 1000, ",");
+                $defaultPassHash = password_hash('smpn28bpp', PASSWORD_DEFAULT);
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                     $nisn = trim($data[0] ?? '');
                     $nama_siswa = trim($data[1] ?? '');
@@ -117,12 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt->execute([$nisn, $nama_siswa, $kelas]);
                             $siswa_id = $pdo->lastInsertId();
 
-                            $pass_siswa = password_hash('smpn28bpp', PASSWORD_DEFAULT);
+                            $pass_siswa = $defaultPassHash ?? password_hash('smpn28bpp', PASSWORD_DEFAULT);
                             $stmtUsr = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'siswa', ?, NOW(), NOW())");
                             $stmtUsr->execute([$nisn, $pass_siswa, $siswa_id]);
 
                             $username_ortu = 'ORT' . $nisn;
-                            $pass_ortu = password_hash('smpn28bpp', PASSWORD_DEFAULT);
+                            $pass_ortu = $defaultPassHash ?? password_hash('smpn28bpp', PASSWORD_DEFAULT);
                             $stmtOrtu = $pdo->prepare("INSERT INTO users (username, password, role, siswa_id, created_at, updated_at) VALUES (?, ?, 'orang_tua', ?, NOW(), NOW())");
                             $stmtOrtu->execute([$username_ortu, $pass_ortu, $siswa_id]);
 

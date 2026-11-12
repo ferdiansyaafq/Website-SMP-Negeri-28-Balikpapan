@@ -102,8 +102,12 @@ function ensureKeteranganColumns(PDO $pdo): void
 
 $databaseReady = false;
 try {
-    ensureLaporanHarianTable($pdo);
-    ensureKeteranganColumns($pdo);
+    if (empty($_SESSION['_kaih_schema_ok'])) {
+        ensureLaporanHarianTable($pdo);
+        if (empty($_SESSION['_kaih_schema_ok'])) { ensureKeteranganColumns($pdo); }
+        $_SESSION['_kaih_schema_ok'] = true;
+    }
+    if (empty($_SESSION['_kaih_schema_ok'])) { ensureKeteranganColumns($pdo); }
     $databaseReady = true;
 } catch (PDOException $e) {
     error_log('KAIH schema initialization failed: ' . $e->getMessage());

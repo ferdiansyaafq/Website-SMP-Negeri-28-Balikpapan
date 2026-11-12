@@ -52,7 +52,7 @@ function ensureRefleksiTable($pdo) {
         return false;
     }
 }
-ensureRefleksiTable($pdo);
+if (empty($_SESSION['_refleksi_schema_ok'])) { ensureRefleksiTable($pdo); $_SESSION['_refleksi_schema_ok'] = true; }
 
 $bulan_list = [
     '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',

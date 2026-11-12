@@ -33,7 +33,24 @@ if (!empty($_SESSION['flash_msg'])) {
     unset($_SESSION['flash_msg'], $_SESSION['flash_type']);
 }
 
-$total = (int) $pdo->query('SELECT COUNT(*) FROM survei')->fetchColumn();
+try {
+    $total = (int) $pdo->query('SELECT COUNT(*) FROM survei')->fetchColumn();
+} catch (PDOException $e) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `survei` (
+          `id` int NOT NULL AUTO_INCREMENT,
+          `nama_pengisi` varchar(100) NOT NULL,
+          `peran` varchar(50) DEFAULT NULL,
+          `rating` int NOT NULL,
+          `ulasan` text,
+          `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        $total = (int) $pdo->query('SELECT COUNT(*) FROM survei')->fetchColumn();
+    } catch (Exception $ex) {
+        $total = 0;
+    }
+}
 $totalPages = max(1, (int) ceil($total / $perPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $perPage;
