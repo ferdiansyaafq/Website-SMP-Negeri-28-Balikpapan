@@ -1,6 +1,15 @@
 <?php
+// aplikasi/admin/export_rekapan_bulanan.php
+session_start();
+$isAdminSession = (isset($_SESSION['user_id']) && (string)($_SESSION['role'] ?? $_SESSION['portal_role'] ?? '') === 'admin')
+    || (isset($_SESSION['admin_id']) && (string)($_SESSION['admin_role'] ?? '') === 'admin');
+if (!$isAdminSession) {
+    header('Location: ../../login.php');
+    exit;
+}
+
 // 1. Panggil koneksi database
-include '../../config/database.php'; 
+require_once '../../config/database.php'; 
 
 // 2. Tangkap parameter bulan dan tahun dari URL
 $bulan_pilih = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
@@ -28,41 +37,35 @@ header("Content-Disposition: attachment; filename=$nama_file");
     <tbody>
         <?php
         // 5. Query Database menggunakan PDO berdasarkan tabel asli KAIH
-        $query = "SELECT s.nama_siswa, s.kelas, lh.tanggal, 
-                         (lh.bangun + lh.ibadah + lh.olahraga + lh.sarapan + lh.membaca + lh.membantu + lh.menabung) as skor,
+        $query = "SELECT lh.tanggal, s.nama_siswa, s.kelas, 
+                         (lh.bangun + lh.ibadah + lh.olahraga + lh.sarapan + lh.membaca + lh.membantu + lh.menabung) as total_skor,
                          lh.orang_tua_validated_at, lh.guru_validated_at
                   FROM laporan_harian lh
                   JOIN siswa s ON lh.siswa_id = s.id
-                  WHERE MONTH(lh.tanggal) = ? AND YEAR(lh.tanggal) = ?
-                  ORDER BY lh.tanggal ASC, s.kelas ASC, s.nama_siswa ASC";
-
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$bulan_pilih, $tahun_pilih]);
+                  WHERE MONTH(lh.tanggal) = :bulan AND YEAR(lh.tanggal) = :tahun
+                  ORDER BY lh.tanggal ASC, s.nama_siswa ASC";
         
-        // Ambil semua data
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['bulan' => $bulan_pilih, 'tahun' => $tahun_pilih]);
         $no = 1;
-        // 6. Looping data untuk dimasukkan ke baris Excel
-        if (count($result) > 0) {
-            foreach ($result as $row) {
+
+        if ($stmt->rowCount() > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $status_ortu = $row['orang_tua_validated_at'] ? "Sudah (" . $row['orang_tua_validated_at'] . ")" : "Belum";
+                $status_guru = $row['guru_validated_at'] ? "Sudah (" . $row['guru_validated_at'] . ")" : "Belum";
+                
                 echo "<tr>";
                 echo "<td>" . $no++ . "</td>";
-                echo "<td>" . date('d-m-Y', strtotime($row['tanggal'])) . "</td>";
+                echo "<td>" . $row['tanggal'] . "</td>";
                 echo "<td>" . htmlspecialchars($row['nama_siswa']) . "</td>";
                 echo "<td>" . htmlspecialchars($row['kelas']) . "</td>";
-                echo "<td style='text-align: center;'>" . $row['skor'] . " / 7</td>";
-                
-                // Cek status validasi
-                $val_ortu = !empty($row['orang_tua_validated_at']) ? 'Sudah Val (' . date('H:i', strtotime($row['orang_tua_validated_at'])) . ')' : 'Belum';
-                $val_guru = !empty($row['guru_validated_at']) ? 'Sudah Val (' . date('H:i', strtotime($row['guru_validated_at'])) . ')' : 'Belum';
-                
-                echo "<td>" . $val_ortu . "</td>";
-                echo "<td>" . $val_guru . "</td>";
+                echo "<td>" . $row['total_skor'] . " / 7</td>";
+                echo "<td>" . $status_ortu . "</td>";
+                echo "<td>" . $status_guru . "</td>";
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='7' style='text-align: center;'>Tidak ada data laporan di bulan dan tahun tersebut.</td></tr>";
+            echo "<tr><td colspan='7' style='text-align:center;'>Data tidak ditemukan untuk periode ini.</td></tr>";
         }
         ?>
     </tbody>
